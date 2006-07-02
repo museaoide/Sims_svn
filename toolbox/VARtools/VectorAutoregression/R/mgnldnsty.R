@@ -1,0 +1,78 @@
+"mgnldnsty" <-
+function(ydata,lags,xdata,breaks=NULL,lambda=5,mu=1,mnprior=list(tight=3,decay=.5),
+                      vprior=list(sig=NULL,w=1),train=0,flat=FALSE,nonorm=FALSE,ic=NULL)
+### ydata:        endogenous variable data matrix, including initial condition dates.
+### xdata:        exogenous variable data matrix, including initial condition dates.
+### breaks:       breaks in the data.  The first lags data points after a break are used
+###               as new initial conditions, not data points for the fit.
+### lambda:       weight on the co-persistence prior dummy observation.  (5 is reasonable)
+###               lambda>0 => x variables included; lambda<0 => x variables excluded;
+### mu:           weight on variable-by-variable sum of coeffs dummy obs. (1 is reasonable)
+### mnprior$tight:weight on the Minnesota prior dummies.  Prior std dev on first lag is
+###               1/mnprior.tight
+### mnprior$decay:prior std dev on lag j is 1/j^decay
+### vprior$sig:   vector of nv prior std dev''s of equation shocks.  vprior.sig is needed
+###               to scale other components of the prior, even if vprior.w=0.
+### vprior$w:     weight on vcv dummies.  (1 is reasonable; higher values tighten up.)
+### train:        If non-zero, this is the point in the sample at which the
+###               "training sample" ends.  Prior x likelihood to this point is weighted to
+###               integrate to 1, and therefore is treated as if it were itself the prior.
+###               To do a pure training sample prior, set lambda=mu=0, mnprior=[], vprior.w=0,
+###               train>lags.  
+### flat:         Even with lambda=mu=vprior.w=0, mnprior=[], det(Sigma)^(-(nv+1)/2) is used
+###               as a "prior", unless flat=1.  flat, if present, must be 1 or 0.
+###               flat=1 is likely not to work unless train is reasonably large.
+### nonorm:       If true, use dummy observations but do not normalize posterior to make them a
+###               proper prior.  Useful to duplicate results obtained by others or to use
+###               dummy observations that do not imply a proper prior.
+### ic:           Initial conditions matrix for use in forming the sums of coefficients dummy observations.
+###               If ic=NULL, the means of the first lags observations in ydata are used.  If !is.null(ic),
+###               ic should be a single "observation" on the y's and x's that will be used as the persistent
+###               values entering the sums of coefficients dummies.
+###
+###               Note that to enter a prior directly as dummy observations, one can treat the
+###               Dummy observations as a training sample.
+###
+{
+###-------debug--------
+### browser()
+###
+T <- dim(ydata)[1]
+nv <- dim(ydata)[2]
+Tx <- dim(xdata)[1]
+nx <- dim(xdata)[2]
+if (Tx != T) {cat("ydata and xdata length mismatch\n");return}
+vp <- varprior(nv,nx,lags,mnprior,vprior) # vp$: ydum,xdum,pbreaks
+var=rfvar3(rbind(ydata,vp$ydum),lags,rbind(xdata,vp$xdum),matrix(c(breaks,T,T+vp$pbreaks),ncol=1),
+  lambda,mu)
+Tu <- dim(var$u)[1]
+w <- matrictint(crossprod(var$u),var$xxi,Tu-flat*(nv+1))-flat*.5*nv*(nv+1)*log(2*pi);
+if(train!=0)
+  {
+    if(train <= lags)
+      {
+        cat("end of training sample <=  # of lags\n")
+          return
+      }
+    Tp <- train
+    tbreaks <- c(breaks[breaks<train],Tp)
+  }else
+  {
+    Tp <- lags
+    ## because need initial conditions to form lambda/mu prior dummy obs
+    tbreaks <- Tp
+  }
+    ytrain <- ydata[1:Tp,,drop=FALSE]
+    xtrain <- xdata[1:Tp,,drop=FALSE]
+if (!nonorm)
+  {
+    varp <- rfvar3(rbind(ytrain,vp$ydum),lags,rbind(xtrain,vp$xdum),c(tbreaks,Tp+vp$pbreaks),lambda,mu)
+    Tup <- dim(varp$u)[1]
+    ##--------debug-------
+    browser()
+    ##-------------------
+    wp <- matrictint(crossprod(varp$u),varp$xxi,Tup-flat*(nv+1)/2)-flat*.5*nv*(nv+1)*log(2*pi)
+    w=w-wp
+  }
+return(list(w=w,var=var,varp=varp))
+}

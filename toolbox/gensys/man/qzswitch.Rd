@@ -1,4 +1,45 @@
-qzswitch <- function(i=1,a=as.complex(1),b=as.complex(1),q=as.complex(1),z=as.complex(1))
+\name{qzswitch}
+\alias{qzswitch}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{ ~~function to do ... ~~ }
+\description{
+  ~~ A concise (1-5 lines) description of what the function does. ~~
+}
+\usage{
+qzswitch(i = 1, a = as.complex(1), b = as.complex(1), q = as.complex(1), z = as.complex(1))
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{i}{ ~~Describe \code{i} here~~ }
+  \item{a}{ ~~Describe \code{a} here~~ }
+  \item{b}{ ~~Describe \code{b} here~~ }
+  \item{q}{ ~~Describe \code{q} here~~ }
+  \item{z}{ ~~Describe \code{z} here~~ }
+}
+\details{
+  ~~ If necessary, more details than the description above ~~
+}
+\value{
+  ~Describe the value returned
+  If it is a LIST, use
+  \item{comp1 }{Description of 'comp1'}
+  \item{comp2 }{Description of 'comp2'}
+  ...
+}
+\references{ ~put references to the literature/web site here ~ }
+\author{ ~~who you are~~ }
+\note{ ~~further notes~~ 
+
+ ~Make other sections like Warning with \section{Warning }{....} ~
+}
+\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\examples{
+##---- Should be DIRECTLY executable !! ----
+##-- ==>  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function(i=1,a=as.complex(1),b=as.complex(1),q=as.complex(1),z=as.complex(1))
   {
     ## Takes U.T. matrices a, b, orthonormal matrices q,z, interchanges 
     ## diagonal elements i and i+1 of both a and b, while maintaining 
@@ -51,8 +92,8 @@ qzswitch <- function(i=1,a=as.complex(1),b=as.complex(1),q=as.complex(1),z=as.co
         ## usual case
         wz <- c(c*e-f*B, Conj(c*d-f*A))
         xy <- c(Conj(B*d-e*A), Conj(c*d-f*A))
-        n <- sqrt(wz %*% Conj(wz))
-        m <- sqrt(xy %*% Conj(xy));
+        n <- sqrt(wz \%*\% Conj(wz))
+        m <- sqrt(xy \%*\% Conj(xy));
         if (Re(m)<1e-12*100)
           {
             ## all elements of a and b proportional
@@ -64,12 +105,15 @@ qzswitch <- function(i=1,a=as.complex(1),b=as.complex(1),q=as.complex(1),z=as.co
         xy <- matrix(c(xy,-Conj(xy[2]), Conj(xy[1])),byrow=TRUE,ncol=2,nrow=2)
       }
     }
-    a[i:(i+1),] <- xy %*% a[i:(i+1),]
-    b[i:(i+1),] <- xy %*% b[i:(i+1),]
-    a[,i:(i+1)] <- a[,i:(i+1)] %*% wz
-    b[,i:(i+1)] <- b[,i:(i+1)] %*% wz
-    z[,i:(i+1)] <- z[,i:(i+1)] %*% wz
-    q[i:(i+1),] <- xy %*% q[i:(i+1),]
+    a[i:(i+1),] <- xy \%*\% a[i:(i+1),]
+    b[i:(i+1),] <- xy \%*\% b[i:(i+1),]
+    a[,i:(i+1)] <- a[,i:(i+1)] \%*\% wz
+    b[,i:(i+1)] <- b[,i:(i+1)] \%*\% wz
+    z[,i:(i+1)] <- z[,i:(i+1)] \%*\% wz
+    q[i:(i+1),] <- xy \%*\% q[i:(i+1),]
     q <- t(Conj(q))
     return(list(a=a,b=b,q=q,z=z))
   }
+}
+\keyword{ ~kwd1 }% at least one, from doc/KEYWORDS
+\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

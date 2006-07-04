@@ -1,4 +1,4 @@
-qzdiv <- function (stake,a,b,q,z)  {
+qzdiv <- function (stake,qzlist)  {
   ##
   ## Takes U.T. matrices a, b, orthonormal matrices q,z, rearranges them
   ## so that all cases of abs(b(i,i)/a(i,i))>stake are in lower right 
@@ -7,6 +7,10 @@ qzdiv <- function (stake,a,b,q,z)  {
   ##
   ## by Christopher A. Sims, 2/22/2004, based on earlier matlab code finished
   ## 7/27/00
+  a <- qzlist$a
+  b <- qzlist$b
+  q <- qzlist$q
+  z <- qzlist$z
   n  <- dim(a)[1]
   root <- abs(cbind(diag(a), diag(b)))
   root[,1] <- root[,1]-(root[,1]<1.e-13)*(root[,1]+root[,2])
@@ -24,8 +28,7 @@ qzdiv <- function (stake,a,b,q,z)  {
     } else {
       if (m<i) {
         for (k in m:(i-1)) {
-          qzs <- qzswitch(k,a,b,q,z)
-          a<-qzs$a; b<-qzs$b; q<-qzs$q; z<-qzs$z
+          qzlist <- qzswitch(k,qzlist)
           tmp <- root[k,2]
           root[k,2] <- root[k+1,2]
           root[k+1,2] <- tmp
@@ -33,5 +36,5 @@ qzdiv <- function (stake,a,b,q,z)  {
       }         
     }
   }
-  return(list(a=a,b=b,q=q,z=z))
+  return(qzlist)
 }

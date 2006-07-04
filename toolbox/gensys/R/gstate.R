@@ -1,4 +1,5 @@
-gstate <- function(G1,impact,pick=NULL) {
+"gstate" <-
+function(G1,impact,pickS=NULL,pickC=NULL) {
 ### G1:    the coefficient on  lagged y from the output of gensys.m.  
 ### impact:the coefficient on exogenous shocks from the output of gensys.m
 ### pick:  an optional guess at a matrix of coefficients that extracts 
@@ -11,10 +12,9 @@ gstate <- function(G1,impact,pick=NULL) {
 ###         5 if pick matrix is     usable forward, summarizes past, but is redundant
 ###         6 if pick matrix summarizes past and is not redundant, but is not usable forward
 ###         7 if pick matrix is perfect, both forward and as history summary
-### pickn: a matrix of coefficients that extracts the state vector from y.  Equal
-###        to pick if pick is supplied and ok=1; otherwise, an ok-maximizing pick matrix that
-###        is somewhat similar to pick.             
-### GS:    the matrix of coefficients on the lagged state variable
+### pickSn: a matrix of coefficients that extracts the state vector from y.  Equal
+###        to pick if pick is supplied and ok is odd; otherwise a matrix similar to pick that generates an odd ok.
+### GS:    the matrix of coefficients on the lagged state variable.
 ### uis,vs: If uis'*vs is full rank, ok=7 is possible, otherwise not.  If ok<2, an ok>2 can be found by trying
 ###        a pick in the row space of vs'.  Any pick with pick*uis full column rank will provide a foward state 
 ###        (i.e. ok an odd number).  {<- seems not}
@@ -96,3 +96,4 @@ gstate <- function(G1,impact,pick=NULL) {
   ok <- oknow+2*pinv+4*vinp
   return(list(GS=GS,pickn=pickn,ok=ok,uis=uis,vs=vs))
 }
+

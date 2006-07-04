@@ -1,6 +1,8 @@
-qz <- function(a=array(1,dim=1,1),b=array(1,dim=1,1),div=1+1e-14){
+qz <- function(a=array(1,dim=1,1),b=array(1,dim=1,1)){
+  ## R does not load all of lapack in its own lapack.so library.  The routine
+  ## needed here, zgges, therefore has to be loaded directly.  
   if(!is.loaded(symbol.For("zgges"))){
-    dyn.load("/usr/lib/liblapack.so")}
+    dyn.load("/usr/lib/liblapack.so", now=FALSE)}
   N<-dim(a)[1]
   SDIM<-as.integer(1);
   ALPHA<-vector("complex",N)
@@ -19,7 +21,7 @@ qz <- function(a=array(1,dim=1,1),b=array(1,dim=1,1),div=1+1e-14){
   ##
   ## rc=0 indicates return without problems.
   ## rc=-18 indicates not enough work space
-  ## was allocated.  The curren code attempts to be overgenerous in allocating workspace
+  ## was allocated.  The current code attempts to be overgenerous in allocating workspace
   ## based on empirical testing of the lapack code with random matrices.  If rc=-18 ever now
   ## occurs in practice, the code could be modified to first test for required space.
   ## Also, if the current version's space requirements are a problem, the code can surely
@@ -27,7 +29,7 @@ qz <- function(a=array(1,dim=1,1),b=array(1,dim=1,1),div=1+1e-14){
   ## rc=-j indicates an illegal argument type for the j'th argument to the lapack routine.  This should
   ## not occur.
   ## -------------------------------------
-  ## The call to dyn.load works on a SuSE 9.0 system with the distribution's installation
+  ## The call to dyn.load works on  SuSE 9 and 10 systems with the distribution's installation
   ## of lapack.  If your lapack is at a different location, modify accordingly.
   ## -------------------------------------
   ## The first two V's indicate that we want q and z computed.  The quoted
@@ -48,7 +50,9 @@ qz <- function(a=array(1,dim=1,1),b=array(1,dim=1,1),div=1+1e-14){
   out<-.Fortran("zgges","V","V","N","dum",N,as.complex(a),N,as.complex(b),N,
                 SDIM,ALPHA,BETA,q,N,z,N,WORK,LWORK,RWORK,"dum",INFO)
   gev<-matrix(c(out[[11]],out[[12]]),nrow=N,ncol=2)
-  cat("workspace needed:",out[[17]][1],"\n")
+  ## if you run into problems with workspace, uncomment the line below and use the
+  ## message it produces to modify the setting of LWORK above.
+  ## cat("workspace needed:",out[[17]][1],"\n")
   return(list(a=matrix(out[[6]],nrow=N,ncol=N),
               b=matrix(out[[8]],nrow=N,ncol=N),
               q=matrix(out[[13]],nrow=N,ncol=N),

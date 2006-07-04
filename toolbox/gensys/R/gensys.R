@@ -1,5 +1,4 @@
-"gensys" <-
-  function(g0,g1,c0,psi,pi,div=-1)
+gensys <- function(g0,g1,c0,psi,pi,div=-1)
   {
     ##System given as
     ##        g0*y(t)=g1*y(t-1)+c0+psi*z(t)+pi*eta(t),
@@ -20,9 +19,9 @@
     qzl <- qz(g0,g1)
     zxz <- any((abs(diag(qzl$a))<realsmall) & (abs(diag(qzl$b))<realsmall))
     if (zxz) {
-      warning("Coincident zeros.  Indeterminacy and/or nonexistence.\n")
+      "Coincident zeros.  Indeterminacy and/or nonexistence.\n"
       eu <- c(-2,-2)
-      gev <- cbind(diag(qzl$a),diag(qzl$b))
+      gev <- qzl$gev
       return(list(eu=eu,gev=gev))
     }
     zeroax <- abs(diag(qzl$a)) < realsmall
@@ -38,9 +37,12 @@
     }
     unstabx <- div*abs(diag(qzl$a))<= abs(diag(qzl$b))
     nunstab <- sum(unstabx)
-    qzl <- qzdiv(div,qzl$a,qzl$b,qzl$q,qzl$z)
+    qzl <- qzdiv(div,qzl)
     qq <- t(Conj(qzl$q))                # to match matlab convention 
-    gev <- cbind(diag(qzl$a), diag(qzl$b))
+    gev <- qzl$gev
+    ## note that this means that gev is not simply the diagonals of a nd b.  qzdiv
+    ## changes the numbers on the diagonals (though not their ratios), but merely reorders
+    ## the original gev.  
     if (nunstab==n){
       six <- NULL
       uix <- 1:n
@@ -61,6 +63,8 @@
     z2 <- t(Conj(qzl$z[,uix,drop=FALSE]))
     a2 <- qzl$a[uix,uix,drop=FALSE]
     b2 <- qzl$b[uix,uix,drop=FALSE]
+    ## debug
+    ## browser()
     etawt <- q2 %*% pi
     neta <- if (is.matrix(pi)) dim(pi)[2] else if (is.null(pi)) 0 else 1
     ndeta <- min(nunstab,neta)
@@ -97,7 +101,7 @@
       veta1 <- sd$v
       bigev1 <- deta1 > realsmall
     }
-    if (any(bigev1)) {                  #needed because empty dimensions are dropped after select
+    if (any(bigev1)) { #needed because empty dimensions are dropped after select
       ueta1 <- ueta1[,bigev1,drop=FALSE]
       veta1 <- veta1[,bigev1,drop=FALSE]
       deta1 <- deta1[bigev1]
@@ -109,7 +113,7 @@
       ueta1 <- matrix(1,n-nunstab,0)
       veta1 <- matrix(1,neta,0)
       deta1 <- vector("complex",0)
-      unq <- 1
+      unq <- TRUE
     }
     if (unq) {
       eu[2] <- 1
@@ -121,7 +125,7 @@
     ## v*m==diag(v)%*%m, m/v==solve(diag(v),m)==diag(v)\m (matlab notation)
     ##
     tmat <- cbind(diag(n-nunstab),
-                  -t(Conj(ueta %*% ((1/deta)*t(Conj(veta))) %*% veta1 %*% (deta1 * t(Conj(ueta1)))))  )  
+                  -t(Conj((ueta %*% (t(Conj(veta))/deta)) %*% veta1 %*% (deta1 * t(Conj(ueta1)))))  )  
     G0<- rbind( tmat %*% qzl$a, cbind(matrix(0,nunstab,n-nunstab), diag(nunstab)))
     G1<- rbind(tmat %*% qzl$b, matrix(0,nunstab,n))
     ##----------------------

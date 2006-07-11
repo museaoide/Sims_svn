@@ -22,20 +22,16 @@ optDist <- function(x,F,g,dh,dm) {
   m <- exp(pm %*% cm)
   ph <- poly(1:nh,degree=dh)
   h <- exp(ph %*% ch)
-  h <-t(t(h)/apply(h,2,sum))
-  em <- 1-F %*% m
+  h <-t(t(h)/apply(h,2,sum,drop=FALSE))
+  eh <- 1-(F %*% m) #nh rows
   ##browser()
-  eh <- g/m - crossprod(F,h)
+  ehs <- apply(eh,2,sum)
+  dim(ehs) <- c(1,nx)
+  eh <- cbind(t(ehs),crossprod(eh,ph))
+  em <- g - m * crossprod(F,h) #nm rows
   em <- crossprod(em , pm)
-  eh <- crossprod(eh,ph)
+  ##browser()
   if(all(is.finite(c(em,eh)))) {
-    return(t(cbind(eh,em)))
-  }else {
-    return(matrix(1e20,dm+dh+1,nx))
-  }
-}
-  
-(is.finite(c(em,eh)))) {
     return(t(cbind(eh,em[,1:dm,drop=FALSE])))
   }else {
     return(matrix(1e20,dm+dh+1,nx))

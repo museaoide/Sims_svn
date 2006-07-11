@@ -1,93 +1,92 @@
-%  [w, err, hump] = mexpv( t, A, v, tol, m )
-%  MEXPV computes an approximation of w = exp(t*A)*v using Krylov
-%  subspace projection techniques. This is a customised version for
-%  Markov Chains. This means that a check is done within this code to
-%  ensure that the resulting vector w is a probability vector, i.e.,
-%  w must have all its components in [0,1], with sum equal to 1.
-%  This check is done at some expense and the user may try EXPV
-%  which is cheaper since it ignores probability constraints.
-%
-%  IMPORTANT: The check assumes that the transition rate matrix Q 
-%             satisfies Qe = 0, where e = (1,...,1)'. Don't use MEXPV
-%             if this condition does not hold. Use EXPV instead.
-%             MEXPV/EXPV require A = Q', i.e., the TRANSPOSE of Q. 
-%             Failure to remember this leads to wrong results.
-%             
-%
-%  MEXPV does not compute the matrix exponential in isolation but
-%  instead, it computes directly the action of the exponential operator
-%  on the operand vector. This way of doing so allows for addressing
-%  large sparse problems. The matrix under consideration interacts only
-%  via matrix-vector products (matrix-free method).
-%
-%  w = mexpv( t, A, v )
-%  computes w = exp(t*A)*v using a default tol = 1.0e-7 and m = 30.
-%
-%  [w, err] = mexpv( t, A, v )
-%  renders an estimate of the error on the approximation.
-%
-%  [w, err] = mexpv( t, A, v, tol )
-%  overrides default tolerance.
-%
-%  [w, err] = mexpv( t, A, v, tol, m )
-%  overrides default tolerance and dimension of the Krylov subspace.
-%
-%  [w, err, hump] = expv( t, A, v, tol, m )
-%  overrides default tolerance and dimension of the Krylov subspace,
-%  and renders an approximation of the `hump'.
-%
-%  The hump is defined as:
-%          hump = max||exp(sA)||, s in [0,t]  (or s in [t,0] if t < 0).
-%  It is used as a measure of the conditioning of the matrix exponential
-%  problem. The matrix exponential is well-conditioned if hump = 1,
-%  whereas it is poorly-conditioned if hump >> 1.  However the solution
-%  can still be relatively fairly accurate even when the hump is large
-%  (the hump is an upper bound), especially when the hump and
-%  ||w(t)||/||v|| are of the same order of magnitude (further details in
-%  reference below). Markov chains are usually well-conditioned problems.
-%
-%  Example:
-%  --------
-%    % generate a transition rate matrix
-%    n = 100;
-%    A = rand(n);
-%    for j = 1:n
-%	 sumj = 0;
-%        for i = 1:n
-%            if rand < 0.5, A(i,j) = 0; end;
-%            sumj = sumj + A(i,j);
-%        end;
-%	 A(j,j) = A(j,j)-sumj;
-%    end;
-%    v = eye(n,1);
-%    A = sparse(A); % invaluable for a large and sparse matrix.
-%
-%    tic
-%    [w,err] = expv(1,A,v);
-%    toc
-%
-%    disp('w(1:10) ='); disp(w(1:10));
-%    disp('err =');     disp(err);
-%
-%    tic
-%    w_matlab = expm(full(A))*v;
-%    toc
-%
-%    disp('w_matlab(1:10) ='); disp(w_matlab(1:10));
-%    gap = norm(w-w_matlab)/norm(w_matlab);
-%    disp('||w-w_matlab|| / ||w_matlab|| ='); disp(gap);
-%
-%  In the above example, n could have been set to a larger value,
-%  but the computation of w_matlab will be too long (feel free to
-%  discard this computation).
-%
-%  See also EXPV, EXPOKIT.
+mexpv <- function( t, A, v, tol, m )
+##  MEXPV computes an approximation of w = exp(t*A)*v using Krylov
+##  subspace projection techniques. This is a customised version for
+##  Markov Chains. This means that a check is done within this code to
+##  ensure that the resulting vector w is a probability vector, i.e.,
+##  w must have all its components in [0,1], with sum equal to 1.
+##  This check is done at some expense and the user may try EXPV
+##  which is cheaper since it ignores probability constraints.
+##
+##  IMPORTANT: The check assumes that the transition rate matrix Q 
+##             satisfies Qe = 0, where e = (1,...,1)'. Don't use MEXPV
+##             if this condition does not hold. Use EXPV instead.
+##             MEXPV/EXPV require A = Q', i.e., the TRANSPOSE of Q. 
+##             Failure to remember this leads to wrong results.
+##             
+##
+##  MEXPV does not compute the matrix exponential in isolation but
+##  instead, it computes directly the action of the exponential operator
+##  on the operand vector. This way of doing so allows for addressing
+##  large sparse problems. The matrix under consideration interacts only
+##  via matrix-vector products (matrix-free method).
+##
+##  w = mexpv( t, A, v )
+##  computes w = exp(t*A)*v using a default tol = 1.0e-7 and m = 30.
+##
+##  [w, err] = mexpv( t, A, v )
+##  renders an estimate of the error on the approximation.
+##
+##  [w, err] = mexpv( t, A, v, tol )
+##  overrides default tolerance.
+##
+##  [w, err] = mexpv( t, A, v, tol, m )
+##  overrides default tolerance and dimension of the Krylov subspace.
+##
+##  [w, err, hump] = expv( t, A, v, tol, m )
+##  overrides default tolerance and dimension of the Krylov subspace,
+##  and renders an approximation of the `hump'.
+##
+##  The hump is defined as:
+##          hump = max||exp(sA)||, s in [0,t]  (or s in [t,0] if t < 0).
+##  It is used as a measure of the conditioning of the matrix exponential
+##  problem. The matrix exponential is well-conditioned if hump = 1,
+##  whereas it is poorly-conditioned if hump >> 1.  However the solution
+##  can still be relatively fairly accurate even when the hump is large
+##  (the hump is an upper bound), especially when the hump and
+##  ||w(t)||/||v|| are of the same order of magnitude (further details in
+##  reference below). Markov chains are usually well-conditioned problems.
+##
+##  Example:
+##  --------
+##    ## generate a transition rate matrix
+##    n = 100;
+##    A = rand(n);
+##    for j = 1:n
+##	 sumj = 0;
+##        for i = 1:n
+##            if rand < 0.5, A(i,j) = 0; end;
+##            sumj = sumj + A(i,j);
+##        end;
+##	 A(j,j) = A(j,j)-sumj;
+##    end;
+##    v = eye(n,1);
+##    A = sparse(A); ## invaluable for a large and sparse matrix.
+##
+##    tic
+##    [w,err] = expv(1,A,v);
+##    toc
+##
+##    disp('w(1:10) ='); disp(w(1:10));
+##    disp('err =');     disp(err);
+##
+##    tic
+##    w_matlab = expm(full(A))*v;
+##    toc
+##
+##    disp('w_matlab(1:10) ='); disp(w_matlab(1:10));
+##    gap = norm(w-w_matlab)/norm(w_matlab);
+##    disp('||w-w_matlab|| / ||w_matlab|| ='); disp(gap);
+##
+##  In the above example, n could have been set to a larger value,
+##  but the computation of w_matlab will be too long (feel free to
+##  discard this computation).
+##
+##  See also EXPV, EXPOKIT.
 
-%  Roger B. Sidje (rbs@maths.uq.edu.au)
-%  EXPOKIT: Software Package for Computing Matrix Exponentials. 
-%  ACM - Transactions On Mathematical Software, 24(1):130-156, 1998
+##  Roger B. Sidje (rbs@maths.uq.edu.au)
+##  EXPOKIT: Software Package for Computing Matrix Exponentials. 
+##  ACM - Transactions On Mathematical Software, 24(1):130-156, 1998
 
-function [w, err, hump] = mexpv( t, A, v, tol, m )
 
 [n,n] = size(A);
 if nargin == 3,
@@ -201,3 +200,5 @@ while t_now < t_out
 end;
 err = s_error;
 hump = hump / normv;
+return(list(w, err, hump))
+}

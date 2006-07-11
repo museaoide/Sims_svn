@@ -1,5 +1,6 @@
 numgrad <- function(fcn,x,...){
-  delta <- 1e-6
+  ## delta <- 1e-6
+  delta <- 1e-8
   n <- length(x)
 ### we tolerate x's that may be n x 1, 1 x n, or R vectors (with no dim)
 ### but note that g comes out as n x 1 vector regardless

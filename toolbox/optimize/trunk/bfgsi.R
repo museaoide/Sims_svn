@@ -12,12 +12,14 @@ bfgsi <- function(H0,dg,dx) {
   dxHdg <- drop(dx %o% Hdg) # drops are needed to get rid of redundant unit-dimensions
   x1 <- as.numeric(1+crossprod(dg,Hdg)/dgdx)*drop(dx %o% dx)
   x2 <- dxHdg+t(dxHdg)
-  if ( max(abs(x1-x2)/(abs(x1)+abs(x2))) <= 1e-12 ) {
-    cat("bfgs update failed.\n")
-    cat("x1, x2 = ",x1,x2,"\n")
-    H=H0
-    return(H)
-  }
+  ## code below causes problems when x1 and x2 have matching zeros, and I can't now (2005-12-22)
+  ## figure out why I thought it was a good idea
+##   if ( max(abs(x1-x2)/(abs(x1)+abs(x2))) <= 1e-12 ) {
+##     cat("bfgs update failed.\n")
+##     cat("x1, x2 = ",x1,x2,"\n")
+##     H=H0
+##     return(H)
+##   }
   if (abs(dgdx) <= 1e-12)   {
     cat("bfgs update failed.\n")
     cat("|dg| =", sqrt(sum(dg^2)), "|dx| = ", sqrt(sum(dx^2)),"\n")

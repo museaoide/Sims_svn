@@ -44,33 +44,35 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NA,breaks=NULL,lambda=5,mu=2,ic=NULL)
     ##
     T<-dim(ydata)[1];
     nvar<-dim(ydata)[2];
-                                        #nox=isempty(xdata);
+    ##nox=isempty(xdata);
     nox <- identical(xdata,NULL)
-    {if(!nox)
-       {T2 <- dim(xdata)[1]
-        nx <- dim(xdata)[2]
-                                        #[T2,nx]=size(xdata);
-      }
-    else
-      {T2 <- T; nx <- 0; xdata<- matrix(0,T2,0)
-     }
-     }
+    if(!nox){
+      if (is.null(dim(xdata)) ) xdata <- matrix(xdata,ncol=1)
+      T2 <- dim(xdata)[1]
+      nx <- dim(xdata)[2]
+      ##[T2,nx]=size(xdata);
+    }
+    else {
+      T2 <- T; nx <- 0; xdata<- matrix(0,T2,0)
+    }
+     
     ## note that x must be same length as y, even though first part of x will not be used.
     ## This is so that the lags parameter can be changed without reshaping the xdata matrix.
     ## ------------------------
 
-    if (!identical(T2,T))
-      {print('Mismatch of x and y data lengths');return()}
-    {if (identical(breaks,NULL))
-       nbreaks <- 0
+    if (!identical(T2,T)) {
+      print('Mismatch of x and y data lengths')
+      return()
+    }
+    if (identical(breaks,NULL))
+      nbreaks <- 0
     else
       nbreaks<-length(breaks)
-     }
     breaks <- c(0,breaks,T)
     if(any(breaks[2:length(breaks)]<=breaks[1:(length(breaks)-1)]))
       stop("list of breaks must be in strictly increasing order\n")
-### initialize smpl as null if initial observations are only there for lambda/mu prior.
-### matlab code uses the fact that in matlab a:b is null if b<a, which is not true for R.
+## initialize smpl as null if initial observations are only there for lambda/mu prior.
+## matlab code uses the fact that in matlab a:b is null if b<a, which is not true for R.
     if(breaks[2]>lags)
       smpl <- (lags+1):breaks[2]
     else

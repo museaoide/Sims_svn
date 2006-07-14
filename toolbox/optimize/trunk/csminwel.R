@@ -1,4 +1,4 @@
-csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE) {
+csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=FALSE) {
 ### fcn:   the objective function to be minimized
 ### x0:    initial value of the parameter vector
 ### H0:    initial value for the inverse Hessian.  Must be positive definite.
@@ -57,8 +57,7 @@ csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE) {
     cat('-----------------\n')
     cat('-----------------\n')
     cat(sprintf('f at the beginning of new iteration, %20.10f',f),"\n")
-    ##-----------Comment out next two lines if the x vector is long----------------
-    if (Verbose) {
+    if (!Long && Verbose) {             # set Long=TRUE if parameter vector printouts too long
       cat("x =\n")
       print(x,digits=12)
     }

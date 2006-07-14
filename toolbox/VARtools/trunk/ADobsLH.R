@@ -20,7 +20,7 @@ ADobsLH <- function(Ay, Ax, ywt, xwt, rhs, ywti, rhsi ) {
     hrz <- dim(ywti)[3]
     stopifnot( ndoi==length(rhsi) )
     screpi <- rep(0,ndoi)
-    Ayi <- impulsdt(Ay,hrz)
+    Ayi <- impulsdt(Ay,hrz-1)
     for (i in 1:ndoi) {
       screpi[i] <- sum(Ayi * ywti[,,,i]) - rhsi[i]
     }

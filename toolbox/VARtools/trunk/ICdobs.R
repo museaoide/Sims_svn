@@ -1,33 +1,41 @@
-ICdobs <- function(y0, x0, horizon, Ay, Ax, filter, ywt, target ) {
+ICdobs <- function(y0, Ay, Ax, xdata, horizon, filter, ywt, target ) {
   ## dummy observation component of log likelihood, asserting prior beliefs about forecasts from initial
   ## conditions.  If yhat are forecasts from IC's, this function returns the sum of squares of
-  ## convolve(filter, yhat-target)*ywt.  E.g. filter is first difference, ywt is t^2*W, where W is a nvar
+  ## filter(yhat-target, filter, sides=1), with each sequence weighted by ywt.  E.g. filter is first difference, ywt is t^2*W, where W is a nvar
   ## by nvar matrix, target=0,  which would tend to flatten forecasts, especially at distant horizons.
-  ## With the filter a second difference, forecasts just get pushed toward linear trend.
+  ## With the filter a second difference, forecasts get pushed toward linear trend.
+  ## There can be multiple filter-target-ywt triples.
+  ## Note that target must be dimensioned to match the dimension of the return value from fcast, which includes initial conditions
+  ## as well as forecast values.
+  ## Note that if there are multiple filters, they must all be the same length, though they can be padded with zeros.
   ##
-  ny <- dim(Ay)[1]; nx <- dim(Ax)[2]; lag <- dim(Ay)[3]
+  ny <- dim(Ay)[1]
+  nx <- dim(Ax)[2]
+  lags <- dim(Ay)[3]-1
+  filtlen <- if (is.null(dim(filter))) length(filter) else dim(filter)[1]
   stopifnot(dim(Ay)[2] == ny, dim(Ax)[1] == ny)
-  if (!is.null(ywt)) {
-    screp <- rep(0,ndo)
-    ndo <- dim(ywt)[4]
-    stopifnot( identical(dim(Ay),dim(ywt)[1:3]),  ndo==length(rhs),  identical(dim(xwt)[1:2], dim(Ax)))
-    for (i in 1:ndo) {
-      screp[i] <- sum(Ay * ywt[,,,i]) + sum(Ax * xwt[,,i]) - rhs[i]
-    }
-  }else {
-    screp <- 0
-  }
-  if (!is.null(ywti)) {
-    ndoi <- dim(ywti)[4]
-    hrz <- dim(ywti)[3]
-    stopifnot( ndoi==length(rhsi) )
-    screpi <- rep(0,ndoi)
-    Ayi <- impulsdt(Ay,hrz)
-    for (i in 1:ndoi) {
-      screpi[i] <- sum(Ayi * ywti[,,,i]) - rhsi[i]
-    }
+  stopifnot(dim(xdata)[1] == horizon + lags)
+  stopifnot(dim(xdata)[1] == dim(target)[1])
+  ntarget <- dim(filter)[2]
+  stopifnot(ntarget == dim(target)[3], ntarget == dim(ywt)[3])
+  A0 <- matrix(Ay[,,1],nrow=ny)
+  By <- matrix(Ay[,,-1],nrow=ny)
+  By <- solve(A0,By)
+  Bx <- solve(A0,Bx)
+  yhat <- fcast(y0=y0, By=By, Bx=Bx, xdata=xdata, horizon=horizon)
+  if (ntarget ==1) {                    #avoid all the loops
+    yhat <- yhat - target
+    yhat <- filter(yhat, filter, sides=1)
+    yhat <- ywt * yhat
+    yhat[1:(filtlen-1),] <- 0           #get rid of NA's from filter()
+    return( sum(yhat^2) )
   } else {
-    screpi <- 0
+    yhatA <- array(yhat, c(dim(yhat), ntarget)) - target
+    for (it in 1:ntarget) {
+      yhatA[,,it] <- filter(ts(yhatA[,,it]), filter[,it], sides=1)
+      yhatA[,,it] <- ywt[,,it] * yhatA[,,it]
+    }
+    yhatA[1:(filtlen-1), , ] <- 0
+    return( sum(yhatA^2) )
   }
-  return(-.5 * sum(screp^2,screpi^2))
 }

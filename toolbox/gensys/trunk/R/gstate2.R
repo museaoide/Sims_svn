@@ -60,6 +60,7 @@ function(G1, impact, pickS=NULL,pickC=NULL, allowRedundant=FALSE) {
       pickn <- t(us)     
     }
   }
+  pickn <- pickn / pickn[which.max(abs(pickn))] # so get positive 1's when it's possible to have all unit weights.
   if ( is.null(pickC) ) {
     picknC <- t(uu)
     if (dim(picknC)[1] > 0) {
@@ -84,6 +85,7 @@ function(G1, impact, pickS=NULL,pickC=NULL, allowRedundant=FALSE) {
       }
     }
   }
+  picknC <- picknC / picknC[which.max(abs(pickn))] # so get positive 1's when it's possible to have all unit weights.
   ## Check whether pickS summarizes the past
   svdG <- svd(G1)
   topG <- svdG$d > REALSMALL
@@ -104,6 +106,7 @@ function(G1, impact, pickS=NULL,pickC=NULL, allowRedundant=FALSE) {
       pickP[, qrvsG$pivot] <- qr.R(qrvsG)
     }
   }
+  pickP <- pickP / pickP[which.max(abs(pickP))]
   tmat <- rbind(picknC,pickn) 
   GS <- tmat %*% G1 %*% solve(tmat)
   PsiS <- tmat %*% impact
@@ -112,5 +115,6 @@ function(G1, impact, pickS=NULL,pickC=NULL, allowRedundant=FALSE) {
   nh <- dim(picknC)[1]
   if (nh > 0) HS <- solve(HS[1:nh, 1:nh],HS[1:nh, , drop=FALSE])
   HS <- -HS[, -(1:nh)]
+  if (max(abs(HS)) > REALSMALL) HS <- HS / HS[which.max(abs(HS))]
   return(list(pickS=pickn, pickC=picknC, GS=GS, HS=HS, PsiS=PsiS, pickP=pickP,  okS=ok, okC=okc,  redundant=redundant, okPast=vinp))
 }

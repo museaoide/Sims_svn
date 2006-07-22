@@ -33,8 +33,8 @@ ICdobs <- function(y0, Ay, Ax, xdata, horizon, filter, ywt, target ) {
     yhatA <- array(yhat, c(dim(yhat), ntarget)) - target
     for (it in 1:ntarget) {
       yhatA[,,it] <- filter(ts(yhatA[,,it]), filter[,it], sides=1)
-      yhatA[,,it] <- ywt[,,it] * yhatA[,,it]
     }
+    yhatA <- ywt * yhatA
     yhatA[1:(filtlen-1), , ] <- 0
     return( sum(yhatA^2) )
   }

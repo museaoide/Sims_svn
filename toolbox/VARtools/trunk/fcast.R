@@ -7,7 +7,11 @@ fcast <- function(y0,By,Bx,xdata,horiz){
 ### Value is:
 ### yhat: (horiz+lags) x nvar
   lags <- dim(y0)[1]
+  stopifnot( lags == dim(By)[3] )
+  if (is.null(dim(y0))) y0 <- matrix(y0,ncol=1)
   nvar <- dim(y0)[2]
+  if (is.null(dim(xdata))) xdata <- matrix(xdata,ncol=1)
+  if (is.null(dim(Bx))) Bx <- matrix(Bx,ncol=1)
   nx <- dim(Bx)[2]
   yhat <- matrix(0,horiz+lags,nvar)
   yhat[1:lags,] <- y0

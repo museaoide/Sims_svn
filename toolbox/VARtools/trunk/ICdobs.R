@@ -19,10 +19,11 @@ ICdobs <- function(y0, Ay, Ax, xdata, horizon, filter, ywt, target ) {
   ntarget <- dim(filter)[2]
   stopifnot(ntarget == dim(target)[3], ntarget == dim(ywt)[3])
   A0 <- matrix(Ay[,,1],nrow=ny)
-  By <- matrix(Ay[,,-1],nrow=ny)
-  By <- solve(A0,By)
-  Bx <- solve(A0,Bx)
-  yhat <- fcast(y0=y0, By=By, Bx=Bx, xdata=xdata, horizon=horizon)
+  A0 <- solve(A0)
+  By <- tensor(A0, Ay[, ,-1],2,1)
+  Bx <- A0 %*% Ax
+  yhat <- fcast(y0=y0, By=By, Bx=Bx, xdata=xdata, horiz=horizon)
+  browser()
   if (ntarget ==1) {                    #avoid all the loops
     yhat <- yhat - target
     yhat <- filter(yhat, filter, sides=1)
@@ -36,6 +37,7 @@ ICdobs <- function(y0, Ay, Ax, xdata, horizon, filter, ywt, target ) {
     }
     yhatA <- ywt * yhatA
     yhatA[1:(filtlen-1), , ] <- 0
+    
     return( sum(yhatA^2) )
   }
 }

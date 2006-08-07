@@ -1,4 +1,4 @@
-fcast <- function(y0,By,Bx,xdata,horiz){
+fcast <- function(y0, By, Bx, xdata=NULL, const=TRUE, horiz){
 ### By: equations x variables x lags
 ### Bx: equations x nx
 ### xdata: (lags+horiz) x nx
@@ -8,6 +8,8 @@ fcast <- function(y0,By,Bx,xdata,horiz){
 ### yhat: (horiz+lags) x nvar
   lags <- dim(y0)[1]
   stopifnot( lags == dim(By)[3] )
+  stopifnot( is.null(xdata) ||  horiz+lags == dim(xdata)[1] )
+  if (const) xdata <- cbind(xdata, matrix(1, horiz+lags, 1))
   if (is.null(dim(y0))) y0 <- matrix(y0,ncol=1)
   nvar <- dim(y0)[2]
   if (is.null(dim(xdata))) xdata <- matrix(xdata,ncol=1)

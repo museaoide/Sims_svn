@@ -1,7 +1,8 @@
-mgnldnsty <- function(ydata,lags,xdata,breaks=NULL,lambda=5,mu=1,mnprior=list(tight=3,decay=.5),
+mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu=1,mnprior=list(tight=3,decay=.5),
                       vprior=list(sig=NULL,w=1),train=0,flat=FALSE,nonorm=FALSE,ic=NULL)
 ### ydata:        endogenous variable data matrix, including initial condition dates.
-### xdata:        exogenous variable data matrix, including initial condition dates.
+### xdata:        exogenous variable data matrix, including initial condition dates.  
+### const:        Constant term is added automatically if const=TRUE.
 ### breaks:       breaks in the data.  The first lags data points after a break are used
 ###               as new initial conditions, not data points for the fit.
 ### lambda:       weight on the co-persistence prior dummy observation.  (5 is reasonable)
@@ -39,9 +40,11 @@ mgnldnsty <- function(ydata,lags,xdata,breaks=NULL,lambda=5,mu=1,mnprior=list(ti
 ###
   T <- dim(ydata)[1]
   nv <- dim(ydata)[2]
+  if (const) {
+    xdata <- cbind(xdata, matrix(1,T,1))
+  }
   Tx <- dim(xdata)[1]
   nx <- dim(xdata)[2]
-  if (Tx != T) {cat("ydata and xdata length mismatch\n");return}
   vp <- varprior(nv,nx,lags,mnprior,vprior) # vp$: ydum,xdum,pbreaks
   var=rfvar3(rbind(ydata,vp$ydum),lags,rbind(xdata,vp$xdum),matrix(c(breaks,T,T+vp$pbreaks),ncol=1),
     lambda,mu,ic)

@@ -1,4 +1,4 @@
-rfvar3 <- function(ydata=NA,lags=6,xdata=NA,breaks=NULL,lambda=5,mu=2,ic=NULL)
+rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu=2,ic=NULL)
   {
     ## This algorithm goes for accuracy without worrying about memory requirements.
     ## ydata:   T x nvar dependent variable data matrix
@@ -6,6 +6,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NA,breaks=NULL,lambda=5,mu=2,ic=NULL)
     ##          Note that if either ydata or xdata has only one column, it must still have a dim vector.  In
     ##          other words it must be a Tx1 array, not a vector of length T.
     ##------------------
+    ## const:   If TRUE, a column of ones is added to (or becomes, if xdata is NULL) the xdata matrix.
     ## lags:    number of lags
     ## breaks:  rows in ydata and xdata after which there is a break.  This allows for
     ##          discontinuities in the data (e.g. war years) and for the possibility of
@@ -42,24 +43,23 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NA,breaks=NULL,lambda=5,mu=2,ic=NULL)
     ## Code written by Christopher Sims.  This version 8/13/04.
     ## 12/18/05:  added ts properties for u, better comments.
     ##
-    T<-dim(ydata)[1];
-    nvar<-dim(ydata)[2];
-    ##nox=isempty(xdata);
+    T<-dim(ydata)[1]
+    nvar<-dim(ydata)[2]
+    ##nox=isempty(xdata)
+    if (const) {
+      xdata <- cbind(xdata,matrix(1,T,1))
+    }
     nox <- identical(xdata,NULL)
     if(!nox){
-      if (is.null(dim(xdata)) ) xdata <- matrix(xdata,ncol=1)
       T2 <- dim(xdata)[1]
       nx <- dim(xdata)[2]
-      ##[T2,nx]=size(xdata);
     }
     else {
       T2 <- T; nx <- 0; xdata<- matrix(0,T2,0)
-    }
-     
+    } 
     ## note that x must be same length as y, even though first part of x will not be used.
     ## This is so that the lags parameter can be changed without reshaping the xdata matrix.
     ## ------------------------
-
     if (!identical(T2,T)) {
       print('Mismatch of x and y data lengths')
       return()

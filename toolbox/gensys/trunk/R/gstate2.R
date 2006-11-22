@@ -20,8 +20,8 @@ function(G1, impact, pickS=NULL,pickC=NULL, allowRedundant=FALSE) {
 ### okC:   input pickC works with output pickS as "control" vector
 ### okPast: output pickS also summarizes past (but may still be redundant as a summary of the past).
 ### redundant: input pickS is bigger than necessary, even though okS.  Output pickS will be smaller, unless allowReduntant.
-### The solution was in the form y(t)=G1 %*% y(t-1)+impact %*% z(t).  Now it's in the form pick %*% y(t)=GS %*% pick %*% y(t-1)+ HS %*% z(t),
-### where pick=rbind(pickC,pickS).  So in the new system, control is stacked above state.
+### The solution was in the form y(t)=G1 %*% y(t-1)+impact %*% z(t).  Now it's in the form pick %*% y(t)=GS %*% pick %*% y(t-1)+ PsiS %*% z(t),
+### where pick=rbind(pickC,pickS).  So in the new system, control is stacked above state.  Also, new C is HS %*% new S in solution.
   REALSMALL <- 1e-9
   nr <- dim(G1)[1]
   if(dim(G1)[1]!=dim(G1)[2]) stop("G1 must be square")
@@ -85,7 +85,7 @@ function(G1, impact, pickS=NULL,pickC=NULL, allowRedundant=FALSE) {
       }
     }
   }
-  picknC <- picknC / picknC[which.max(abs(pickn))] # so get positive 1's when it's possible to have all unit weights.
+  picknC <- picknC / picknC[which.max(abs(picknC))] # so get positive 1's when it's possible to have all unit weights.
   ## Check whether pickS summarizes the past
   svdG <- svd(G1)
   topG <- svdG$d > REALSMALL

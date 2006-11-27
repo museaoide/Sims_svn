@@ -9,18 +9,18 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
 ###               lambda>0 => x variables included; lambda<0 => x variables excluded;
 ### mu:           weight on variable-by-variable sum of coeffs dummy obs. (1 is reasonable)
 ### mnprior$tight:weight on the Minnesota prior dummies.  Prior std dev on first lag is
-###               1/mnprior.tight
+###               1/mnprior$tight
 ### mnprior$decay:prior std dev on own lag j is 1/j^decay
 ### vprior$sig:   vector of nv prior std dev''s of equation shocks.  vprior.sig is needed
-###               to scale other components of the prior, even if vprior.w=0. Not needed for a pure training
+###               to scale other components of the prior, even if vprior$w=0. Not needed for a pure training
 ###               sample prior.
 ### vprior$w:     weight on vcv dummies.  (1 is reasonable; higher values tighten up.)
 ### train:        If non-zero, this is the point in the sample at which the
 ###               "training sample" ends.  Prior x likelihood to this point is weighted to
 ###               integrate to 1, and therefore is treated as if it were itself the prior.
-###               To do a pure training sample prior, set lambda=mu=0, mnprior=NULL, vprior.w=0,
+###               To do a pure training sample prior, set lambda=mu=0, mnprior=NULL, vprior$w=0,
 ###               train>lags.  
-### flat:         Even with lambda=mu=vprior.w=0, mnprior=NULL, det(Sigma)^(-(nv+1)/2) is used
+### flat:         Even with lambda=mu=vprior$w=0, mnprior=NULL, det(Sigma)^(-(nv+1)/2) is used
 ###               as a "prior", unless flat=TRUE. flat=TRUE is likely not to work unless train is reasonably large.
 ### nonorm:       If true, use dummy observations but do not normalize posterior to make them a
 ###               proper prior.  Useful to duplicate results obtained by others, to use
@@ -38,16 +38,18 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
 ###-------debug--------
 ### browser()
 ###
+  if (is.null(dim(ydata)))  ydata <- matrix(ydata, ncol=1)
   T <- dim(ydata)[1]
   nv <- dim(ydata)[2]
   if (const) {
     xdata <- cbind(xdata, matrix(1,T,1))
   }
+  if (!is.null(xdata) ) stopifnot( dim(xdata)[1] == T)
   Tx <- dim(xdata)[1]
   nx <- dim(xdata)[2]
   vp <- varprior(nv,nx,lags,mnprior,vprior) # vp$: ydum,xdum,pbreaks
-  var=rfvar3(rbind(ydata,vp$ydum),lags,rbind(xdata,vp$xdum),matrix(c(breaks,T,T+vp$pbreaks),ncol=1),
-    lambda,mu,ic)
+  var=rfvar3(ydata=rbind(ydata, vp$ydum), lags=lags, xdata=rbind(xdata,vp$xdum), breaks=matrix(c(breaks, T, T+vp$pbreaks), ncol=1),
+    const=FALSE, lambda=lambda, mu=mu, ic=ic) # const is FALSE in this call because ones alread put into xdata
   Tu <- dim(var$u)[1]
   w <- matrictint(crossprod(var$u),var$xxi,Tu-flat*(nv+1))-flat*.5*nv*(nv+1)*log(2*pi);
   if(train!=0)
@@ -69,7 +71,8 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   xtrain <- xdata[1:Tp,,drop=FALSE]
   if (!nonorm)
     {
-      varp <- rfvar3(rbind(ytrain,vp$ydum),lags,rbind(xtrain,vp$xdum),c(tbreaks,Tp+vp$pbreaks),lambda,mu,ic)
+      varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum), breaks=c(tbreaks, Tp+vp$pbreaks),
+                     lambda=lambda, mu=mu, const=FALSE, ic=ic)  #const is FALSE here because xdata already has a column of ones.
       Tup <- dim(varp$u)[1]
       ##--------debug-------
       ## browser()

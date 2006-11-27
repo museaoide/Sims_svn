@@ -33,9 +33,9 @@ if (!is.null(mnprior))
         ##-----debug---------
         ## browser()
         ##------------------
-        ydum[il+1,,il,] <- il^mnprior$decay*diag(vprior$sig)
+        ydum[il+1,,il,] <- il^mnprior$decay*diag(vprior$sig,nv)
       }
-    ydum[1,,1,] <- diag(vprior$sig)
+    ydum[1,,1,] <- diag(vprior$sig,nv)
     ydum <- mnprior$tight * ydum
     dim(ydum) <- c(lags+1,nv,lags*nv)
     ydum <- ydum[seq(lags+1,1,by=-1),,]
@@ -55,7 +55,7 @@ if (!is.null(vprior) && vprior$w>0)
   {
     ydum2 <- array(0,dim=c(lags+1,nv,nv))
     xdum2 <- array(0,dim=c(lags+1,nx,nv))
-    ydum2[lags+1,,] <- diag(vprior$sig)
+    ydum2[lags+1,,] <- diag(vprior$sig,nv)
     dim(ydum2) <- c((lags+1)*nv,nv)
     dim(ydum) <- c((lags+1)*nv,lags*nv)
     ydum <- cbind(ydum,ydum2)

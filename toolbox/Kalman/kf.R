@@ -25,20 +25,22 @@ kf <- function(y,H,shat,sig,G,M) {
       signew <- omega
       fcsterr <- y                      # y had better be 0
       if (!all.equal(y,0) ) warning("Uninformative H but non-zero y")
+    } else {
+      first0 <- match(TRUE, svdhud$d < 1e-7)
+      if (is.na(first0)) first0 <- if(is.null(dim(H))) 2 else min(dim(H))+1
+      u <- svdhud$u[ , 1:(first0-1), drop=FALSE]
+      v <- svdhud$v[ , 1:(first0-1), drop=FALSE]
+      d <- svdhud$d[1:(first0-1), drop=FALSE]
+      fac <- t(t(svdo$v) * sqrt(svdo$d)) 
+      fcsterr <- y-H %*% G %*% shat
+      ferr <- t(t(v) * 1/d) %*% t(u) %*% fcsterr
+      lh <- c(0,0)
+      lh[1] <- -.5 * crossprod(ferr)
+      lh[2] <- -sum( log(d) )
+      shatnew <- fac %*% ferr + G %*% shat
+      signew <- fac %*% (diag(dim(v)[1]) - v %*% t(v) ) %*% t(fac)
     }
-    first0 <- match(TRUE, svdhud$d < 1e-7)
-    if (is.na(first0)) first0 <- if(is.null(dim(H))) 2 else min(dim(H))+1
-    u <- svdhud$u[ , 1:(first0-1), drop=FALSE]
-    v <- svdhud$v[ , 1:(first0-1), drop=FALSE]
-    d <- svdhud$d[1:(first0-1), drop=FALSE]
-    fac <- t(t(svdo$v) * sqrt(svdo$d)) 
-    yhat <- y-H %*% G %*% shat
-    ferr <- t(t(v) * 1/d) %*% t(u) %*% yhat
-    lh <- c(0,0)
-    lh[1] <- -.5 * crossprod(ferr)
-    lh[2] <- -sum( log(d) )
-    shatnew <- fac %*% ferr + G %*% shat
-    signew <- fac %*% (diag(dim(v)[1]) - v %*% t(v) ) %*% t(fac)
   }
-  return(list(shatnew=shatnew, signew=signew, lh=lh, fcsterr=yhat))
+  return(list(shatnew=shatnew, signew=signew, lh=lh, fcsterr=fcsterr))
 }
+=

@@ -55,7 +55,7 @@ if (!is.null(vprior) && vprior$w>0)
   {
     ydum2 <- array(0,dim=c(lags+1,nv,nv))
     xdum2 <- array(0,dim=c(lags+1,nx,nv))
-    ydum2[lags+1,,] <- diag(vprior$sig,nv)
+    ydum2[lags+1,,] <- diag(vprior$sig,nv)*vprior$w  #The vprior$w factor was missing until 11/29/06
     dim(ydum2) <- c((lags+1)*nv,nv)
     dim(ydum) <- c((lags+1)*nv,lags*nv)
     ydum <- cbind(ydum,ydum2)

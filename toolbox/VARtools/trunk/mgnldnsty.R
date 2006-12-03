@@ -35,9 +35,6 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
 ###               Dummy observations as a training sample.
 ###
 {
-###-------debug--------
-### browser()
-###
   if (is.null(dim(ydata)))  ydata <- matrix(ydata, ncol=1)
   T <- dim(ydata)[1]
   nv <- dim(ydata)[2]
@@ -74,9 +71,6 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
       varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum), breaks=c(tbreaks, Tp+vp$pbreaks),
                      lambda=lambda, mu=mu, const=FALSE, ic=ic)  #const is FALSE here because xdata already has a column of ones.
       Tup <- dim(varp$u)[1]
-      ##--------debug-------
-      ## browser()
-      ##-------------------
       wp <- matrictint(crossprod(varp$u),varp$xxi,Tup-flat*(nv+1)/2)-flat*.5*nv*(nv+1)*log(2*pi)
       w=w-wp
     }

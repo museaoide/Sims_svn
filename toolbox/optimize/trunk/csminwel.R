@@ -118,8 +118,8 @@ csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=FAL
           if( normdx < 1e-13 ) {        # two trial x's too close, can't traverse
             f3 <- f; x3 <- x; badg3 <- 1;retcode3 <- 101
           } else {
-            ## x's on the left below for robustness against f's being 1x1 arrays
-            gcliff <- (x2 - x1) * ((f2 - f1)/(normdx^2))
+            ## as.numeric below for robustness against f's being 1x1 arrays
+            gcliff <- (x2 - x1) * (as.numeric(f2 - f1)/(normdx^2))
             dim(gcliff) <- c(nx,1)
             itout <- csminit(fcn,x,f,gcliff,0,diag(nx),...)
             f3 <- itout$fhat

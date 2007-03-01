@@ -54,9 +54,10 @@ padm <- function( A, p=6 ){
   }
 
   ## Squaring
-
-  for (k in 1:s) {
-    E  <-  E %*% E
+  if( s>1) {
+    for (k in 1:s) {
+      E  <-  E %*% E
+    }
   }
   return(E)
 }

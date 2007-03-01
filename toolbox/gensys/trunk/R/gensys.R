@@ -1,4 +1,4 @@
-gensys <- function(g0,g1,c0,psi,pi,div=-1)
+gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
   {
     ##System given as
     ##        g0*y(t)=g1*y(t-1)+c0+psi*z(t)+pi*eta(t),

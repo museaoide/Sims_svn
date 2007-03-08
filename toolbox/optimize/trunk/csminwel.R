@@ -84,9 +84,9 @@ csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=FAL
       ## g1
       save(file="g1", g1, x1, f1, dots)
       ## }
-      if( wall1 ) {
+      if( wall1 && dim(H)[1] > 1) {
         ## Bad gradient or back and forth on step length.  Possibly at
-        ## cliff edge.  Try perturbing search direction.
+        ## cliff edge.  Try perturbing search direction, if problem is not unidimensional
         ##
         Hcliff <- H+diag(diag(H) * rnorm(nx))
         cat("Cliff.  Perturbing search direction. \n")
@@ -149,7 +149,7 @@ csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=FAL
           badg3 <- 1
           retcode3 <- 101
         }
-      } else {                          # no walls
+      } else {                          # no walls, or one-dimensional, so no perturbations
         f3 <- f
         x3 <- x
         badg3 <- TRUE

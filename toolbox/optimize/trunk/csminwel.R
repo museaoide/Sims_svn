@@ -6,10 +6,8 @@ csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=FAL
 ###        vector.  If it's not a function, numerical gradients are used.  If it's numerical, the
 ###        first iteration uses the numerical vector as the initial gradient.  This is useful when the algorithm
 ###        is restarted and the gradient calculation is slow, since the program stores the final gradient when it quits.
-###---------probably the sentence below is false. It is true for csolve, not csminwel -------------------
-###        In this case fcn must
-###        be written so that it can take a matrix argument and produce a row vector of values.
-###--------------------------------------------------
+###        If it's a function, it must return a list, with elements named g and badg.  g is the gradient and badg
+###        is logical, TRUE if the gradient routine ran into trouble so its return value should not be used.
 ### crit:  Convergence criterion.  Iteration will cease when it proves impossible to improve the
 ###        function value by more than crit.
 ### nit:   Maximum number of iterations.
@@ -45,6 +43,8 @@ csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=FAL
     }
   } else {
     gbadg <- grad(x0,...)
+    badg <-gbadg$badg
+    g <- gbadg$g
   }
   retcode3 <- 101
   x <- x0
@@ -76,7 +76,7 @@ csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=FAL
       if( NumGrad ) {
         gbadg <- numgrad(fcn, x1,...)
       } else {
-        gbadg <- feval(grad,x1,...)
+        gbadg <- grad(x1,...)
       }
       g1 <- gbadg$g
       badg1 <- gbadg$badg
@@ -104,7 +104,7 @@ csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=FAL
         if( NumGrad ){
           gbadg <- numgrad(fcn, x2,...)
         }else{
-          gbadg <- feval(grad,x2,...)
+          gbadg <- grad(x2,...)
         }
         g2 <- gbadg$g
         badg2 <- gbadg$badg

@@ -43,7 +43,8 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ## Code written by Christopher Sims.  This version 8/13/04.
     ## 12/18/05:  added ts properties for u, better comments.
     ##
-    T<-dim(ydata)[1]
+    if (is.null(dim(ydata))) dim(ydata) <- c(length(ydata),1)
+    T <-dim(ydata)[1]
     nvar<-dim(ydata)[2]
     ##nox=isempty(xdata)
     if (const) {

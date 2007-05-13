@@ -1,0 +1,86 @@
+setUpScrep <- function(crange=c(0.,0.5), pw, ww, U=function(x,y) {log(ifelse(x>0,x,1e-100)) + log(ifelse(y > x, y - x, 1e-100))}, lambda=1,
+                     DxU=function(x,y) {1/x - 1/(y-x)}, lbp=1e-7, PNLTY=1) {
+  ## ww,pw: Points of support and marginal probabilities for w distribution.  dw:wrange::dc:crange
+  ## U:     objective function U(x,w). 
+  ## DxU:   derivative of U w.r.t. its first argument. If this is NULL, numerical gradient is used.
+  ## crange: range of values for x 
+  ## wrange: range of values for w 
+  ## lambda: multiplier on the information constraint, utility cost of capacity
+  ## lbp:    lower bound on elements of dc, pc, dw, pw and 1 - upper bound on their sums.
+  ## PNLTY:  weight on penalty function keeping solution away from boundary.
+  if (any(diff(ww) <= 0) ) stop("ww must be increasing")
+  if (any(pw < 0) || sum(pw) >1) stop("pw must be a probability vector")
+  nw <- length(ww)
+  cderiv <- !is.null(DxU)
+  screpDC <- function(dc=rep(.1,9), pc=rep(.111,8)) {
+    ## computes objective function E[U] minus lambda * (information constraint) - penalty for closeness to boundaries
+    ## dc:    determines the points in crange that form the support of the c distribution.  The entries are all positive and
+    ##        sum to one.  Support point i is at (sum_1^i c_i) * crange.
+    ## pc:    Marginal probabilities on the points in c's support, with last one omitted (=1 - sum of others).
+    ##
+    cc <- cumsum(dc)
+    nc <- length(cc)
+    pc <- c(pc, 1 - sum(pc))
+    cc <- cc * (crange[2] - crange[1]) + crange[1]
+    cltw <- outer(cc, ww, function(a,b){a<b} )
+    Umat <- outer(cc,ww, FUN=U)
+    pdf <- exp(Umat)
+    pdf <- pc * pdf
+    h <- rep(1,nc) %*% pdf
+    h <- pw / h
+    pdf <- t(c(h) * t(pdf ))
+    EU <- sum(pdf * Umat)
+    k <- sum(pdf * log(ifelse(pdf>0,pdf,1))) - sum(pc * log(ifelse(pc>0,pc,1))) - sum(pw * log(ifelse(pw > 0, pw, 1)))
+    ## obf <- EU - lambda * k
+    ## two lines below apply a penalty for pdf values near zero.  This prevents the search from wandering over large
+    ## changes in large negative values of log p's, and may speed convergence.
+    ##---------------------------------
+    zerop <- pdf[cltw & (pdf < lbp)]
+    zerodc <- dc[dc < lbp]
+    obf <- EU - lambda *k - PNLTY * (sum((lbp / zerop - 1)^4 ) + sum((lbp / zerodc -1)^4))
+    ##---------------------------------
+    return(list(obf=obf, EU=EU, cc=cc, pc=pc, pdf=pdf, info=k/log(2)))
+  }
+
+  dobjdpdc <- function(dc=rep(.1,9), pc=rep(.111,8)) {
+    ## returns derivative and function value
+    cc <- cumsum(dc)
+    nc <- length(cc)
+    pc <- c(pc, 1 - sum(pc))
+    cc <- cc * (crange[2] - crange[1]) + crange[1]
+    cltw <- outer(cc, ww, function(a,b){a<b} )
+    Umat <- outer(cc,ww, U)
+    eU <- exp(Umat)
+    peU <- pc %*% eU
+    h <- pw/peU
+    dhdp <- -t(eU %*% diag(c(h/peU)))
+    eUU <- eU * Umat
+    pdf <- diag(c(pc)) %*% eU
+    h <- rep(1,nc) %*% pdf
+    h <- c(pw / h)
+    pdf <- t(c(h) * t(pdf ))
+    EU <- sum(pdf * Umat)
+    k <- sum(pdf * log(ifelse(pdf>0,pdf,1))) - sum(pc * log(ifelse(pc>0,pc,1))) - sum(pw * log(ifelse(pw > 0, pw, 1)))
+    ## obf <- EU - lambda * k
+    ## two lines below apply a penalty for pdf values near zero.  This prevents the search from wandering over large
+    ## changes in large negative values of log p's, and may speed convergence.
+    ##---------------------------------
+    zerop <- pdf[cltw & (pdf < lbp)]
+    zerodc <- dc[dc < lbp]
+    obf <- EU - lambda *k - PNLTY * (sum((lbp / zerop - 1)^4 ) + sum((lbp / zerodc -1)^4))  
+    dobjdpv <- eUU %*% h + t(pc %*% eUU %*% dhdp)
+    dobjdpv <-  dobjdpv - lambda * (diag(log(pc)) %*% eU %*% h + eUU %*% h + eU %*% (h * log(h)) + eU %*% h
+                                    + t((pc * log(pc)) %*% eU %*% dhdp + pc %*% eUU %*% dhdp + pc %*% eU %*% diag(log(h)) %*% dhdp)
+                                    + t(pc %*% eU %*% dhdp) -1 - log(pc))
+    if (cderiv) {                     #Get deriv w.r.t. cc points also
+      DcU <- outer(cc,ww,DxU)
+      pdeuh <- diag(pc) %*% (DcU * eU) %*% diag(h)
+      peuh <- diag(pc) %*% eU %*% diag(h)
+      dobjdcv <- diag(pc) %*% DcU %*% h - lambda * ( apply(log(peuh) * pdeuh, 1, sum)  - pdeuh %*% log(apply(peuh,2,sum)) )
+      return(list(dp=dobjdpv, dc=dobjdcv, obf=obf, EU=EU, cc=cc, pc=pc, pdf=pdf, info=k/log(2)))
+    } else {
+      return(list(dp=dobjdpv,obf=obf, EU=EU, cc=cc, pc=pc, pdf=pdf, info=k/log(2)))
+    }
+  }
+  return(list(fcn=screpDC, drv=dobjdpdc))
+}

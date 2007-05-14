@@ -15,7 +15,7 @@ setUpScrep <- function(crange=c(0.,0.5), pw, ww, U=function(x,y) {log(ifelse(x>0
   screpDC <- function(dc=rep(.1,9), pc=rep(.111,8)) {
     ## computes objective function E[U] minus lambda * (information constraint) - penalty for closeness to boundaries
     ## dc:    determines the points in crange that form the support of the c distribution.  The entries are all positive and
-    ##        sum to one.  Support point i is at (sum_1^i c_i) * crange.
+    ##        sum to one.  Support point i is at (sum_1^i dc_i) * crange.
     ## pc:    Marginal probabilities on the points in c's support, with last one omitted (=1 - sum of others).
     ##
     cc <- cumsum(dc)
@@ -37,6 +37,7 @@ setUpScrep <- function(crange=c(0.,0.5), pw, ww, U=function(x,y) {log(ifelse(x>0
     ##---------------------------------
     zerop <- pdf[cltw & (pdf < lbp)]
     zerodc <- dc[dc < lbp]
+    if (sum(dc) > 1 - lbp ) zerodc <- c(zerodc, 1-sum(dc)) 
     obf <- EU - lambda *k - PNLTY * (sum((lbp / zerop - 1)^4 ) + sum((lbp / zerodc -1)^4))
     ##---------------------------------
     return(list(obf=obf, EU=EU, cc=cc, pc=pc, pdf=pdf, info=k/log(2)))
@@ -50,10 +51,10 @@ setUpScrep <- function(crange=c(0.,0.5), pw, ww, U=function(x,y) {log(ifelse(x>0
     cc <- cc * (crange[2] - crange[1]) + crange[1]
     cltw <- outer(cc, ww, function(a,b){a<b} )
     Umat <- outer(cc,ww, U)
-    eU <- exp(Umat)
+    eU <- exp(Umat) * cltw              # basically redundant, since U=1e-100 where cltw==0
     peU <- pc %*% eU
     h <- pw/peU
-    dhdp <- -t(eU %*% diag(c(h/peU)))
+    dhdp <- -t(eU %*% diag(c(h/peU)))   #so w indexes rows, c indexes columns on this
     eUU <- eU * Umat
     pdf <- diag(c(pc)) %*% eU
     h <- rep(1,nc) %*% pdf

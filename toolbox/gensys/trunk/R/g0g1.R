@@ -14,7 +14,7 @@ g0g1 <- function(ex,x,xl,shock,experr,param){
     g0[[ix]] <- deriv(ex[ix],x,function.arg=c(x,xl,shock,experr,param) )
     g1[[ix]] <- deriv(ex[ix],xl,function.arg=c(x,xl,shock,experr,param))
     Phi[[ix]] <- deriv(ex[ix],shock,function.arg=c(x,xl,shock,experr,param))
-    Pi[[ix]] <- deriv(ex,experr,function.arg=c(x,xl,shock,experr,param))
+    Pi[[ix]] <- deriv(ex[ix],experr,function.arg=c(x,xl,shock,experr,param))
   }
   names(g0) <- names(ex)
   names(g1) <- names(ex)

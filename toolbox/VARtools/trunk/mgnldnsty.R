@@ -53,7 +53,7 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
     {
       if(train <= lags)
         {
-          cat("end of training sample <=  # of lags\n")  #
+          cat("end of training sample <=  # of lags\n") #
             return
         }
       Tp <- train
@@ -66,13 +66,18 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   }
   ytrain <- ydata[1:Tp,,drop=FALSE]
   xtrain <- xdata[1:Tp,,drop=FALSE]
+  varp <- NULL
   if (!nonorm)
     {
-      varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum), breaks=c(tbreaks, Tp+vp$pbreaks),
-                     lambda=lambda, mu=mu, const=FALSE, ic=ic)  #const is FALSE here because xdata already has a column of ones.
-      Tup <- dim(varp$u)[1]
-      wp <- matrictint(crossprod(varp$u),varp$xxi,Tup-flat*(nv+1)/2)-flat*.5*nv*(nv+1)*log(2*pi)
-      w=w-wp
+      if (Tp < nv * lags + nx +1) {
+      	warning("Improper prior! Proceeding as if nonorm=TRUE.  Results may be nonsense.")
+      } else {
+        varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum), breaks=c(tbreaks, Tp+vp$pbreaks),
+                       lambda=lambda, mu=mu, const=FALSE, ic=ic) #const is FALSE here because xdata already has a column of ones.
+        Tup <- dim(varp$u)[1]
+        wp <- matrictint(crossprod(varp$u),varp$xxi,Tup-flat*(nv+1)/2)-flat*.5*nv*(nv+1)*log(2*pi)
+        w=w-wp
+      }
     }
   return(list(w=w,var=var,varp=varp,prior=list(lambda=lambda,mu=mu,vprior=vprior,mnprior=mnprior)))
 }

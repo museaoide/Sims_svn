@@ -43,4 +43,3 @@ kf <- function(y,H,shat,sig,G,M) {
   }
   return(list(shatnew=shatnew, signew=signew, lh=lh, fcsterr=fcsterr))
 }
-=

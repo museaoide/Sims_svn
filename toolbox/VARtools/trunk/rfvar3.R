@@ -21,11 +21,13 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ##          without cointegration.  With lambda < 0 , the 
     ##          constant term is not included in the dummy observation, so that stationary models
     ##          with means equal to initial ybar do not fit the prior mean.  With lambda>0, the prior
-    ##          implies that large constants are unlikely if unit roots are present.
+    ##          implies that large constants are unlikely if unit roots are present.  To omit this type of
+    ##          dummy observation, use lambda=NULL.
     ## mu:      weight on "own persistence" prior dummy observation.  Expresses belief
     ##          that when y_i has been stable at its initial level, it will tend to persist
     ##          at that level, regardless of the values of other variables.  There is
     ##          one of these for each variable.  A reasonable first guess is mu=2.
+    ##          To omit this type of dummy observation, use mu=NULL
     ## ic:      for direct input of the initial conditions mean that is used in the persistence dummy observations,
     ##          as ic$ybar and ic$xbar. 
     ##          If is.null(ic), the mean of the first lags observations in ydata, xdata are used.
@@ -40,6 +42,8 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ## u:       (T-6+ (number of dummy obs)) x nvar matrix of residuals.  If ydata is a ts object, u will be also, and will
     ##          be correctly dated.  u observations dated after end(ydata) are dummy observations.
     ## xxi:     X'X inverse, same for all equations.  kronecker(cov(u),xxi) is the full covariance matrix of the regression coefficients.
+    ## snglty:  Usually 0.  If the rhs variable matrix is not full column rank, this is the gap between the number of columns and the
+    ##          number of non-zero singular values.
     ## Code written by Christopher Sims.  This version 8/13/04.
     ## 12/18/05:  added ts properties for u, better comments.
     ##
@@ -91,7 +95,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     y <- ydata[smpl,,drop=FALSE]
     ## Everything now set up with input data for y=Xb+e 
     ## ------------------Form persistence dummies-------------------
-    if (!identical(lambda,0) | mu>0)
+    if (! (is.null(lambda) & is.null(mu) )
       {
         if(is.null(ic))
           {
@@ -109,7 +113,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
           ybar <- ic$ybar
           xbar <- ic$xbar
         }
-        if (!identical(lambda,0)){
+        if (!is.null(lambda)){
           if (lambda<0){
             lambda <- -lambda
             xbar <- array(0,c(1,dim(xdata)[2]))
@@ -120,7 +124,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
           y <- rbind(y,ydum)
           X <- rbind(X,xdum)
         }
-        if (mu>0)
+        if (!is.null(mu))
           {
             xdum <- cbind( array(rep(diag(as.vector(ybar),nrow=length(ybar)),lags),dim=c(dim(ybar)[2],dim(ybar)[2]*lags)),
                           array(0,dim=c(nvar,dim(xdata)[2])))*mu;
@@ -131,12 +135,17 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
       }
     vldvr <- svd(X)
     di <- 1./vldvr$d
+    dfx <- sum(vldvr$d > 100*.Machine$double.eps)
+    di <- di[1:dfx]
+    vldvr$u <- vldvr$u[, 1:dfx]
+    vldvr$v <- vldvr$v[, 1:dfx]
+    snglty <- dim(X)[2] - dfx
     ##B <- vldvr$v %*% diag(di,nrow=length(di)) %*% t(vldvr$u) %*% y (line below is just more efficient)
     B <- vldvr$v %*% (di * (t(vldvr$u) %*% y))
     u <-  y-X %*% B;
     if (!is.null(tsp(ydata))) u <- ts(u, start=start(ydata)+c(0,lags),freq=frequency(ydata))
     nX <- dim(X)[2]
-    xxi <-  matrix(di,nX,nX) * t(vldvr$v)
+    xxi <-  di * t(vldvr$v)
     xxi <-  crossprod(xxi)
     ## dim(B) <-  c(nvar*lags+nx,nvar) # rhs variables, equations (this was redundant)
     By <-  B[1:(nvar*lags),]
@@ -172,5 +181,5 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
       }
 ### logintlh <-  matrictint(u'*u,xxi,size(X,1)-nvar-1)-.5*nvar*(nvar+1)*log(2*pi);
 ### Might want to create a version without the dimnames if using this in a program.
-    return(list(By=By,Bx=Bx,u=u,xxi= xxi)) #var.logintlh <-  logintlh
+    return(list(By=By, Bx=Bx, u=u, xxi= xxi, snglty=snglty)) #var.logintlh <-  logintlh
   }

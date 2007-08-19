@@ -6,9 +6,9 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
 ### nv,nx,lags: VAR dimensions
 ### mnprior$tight:Overall tightness of Minnesota prior
 ### mnprior$decay:Standard deviations of lags shrink as lag^(-decay)
-### vprior$sig:   Vector of prior modes for diagonal elements of r.f. covariance matrix
+### vprior$sig:   Vector of prior modes for square roots of diagonal elements of r.f. covariance matrix
 ### vprior$w:     Weight on prior on vcv.  1 corresponds to "one dummy observation" weight
-###                   Should be an integer, and will be rounded if not.  vprior.sig is needed
+###                   vprior.sig is needed
 ###                   to scale the Minnesota prior, even if the prior on sigma is not used itself.
 ###                   Set vprior$w=0 to achieve this.
 ###                   mnprior and vprior.w can each be set to NULL, thereby eliminating the corresponding

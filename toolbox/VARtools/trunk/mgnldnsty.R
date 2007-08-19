@@ -48,12 +48,13 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   var=rfvar3(ydata=rbind(ydata, vp$ydum), lags=lags, xdata=rbind(xdata,vp$xdum), breaks=matrix(c(breaks, T, T+vp$pbreaks), ncol=1),
     const=FALSE, lambda=lambda, mu=mu, ic=ic) # const is FALSE in this call because ones alread put into xdata
   Tu <- dim(var$u)[1]
+  if ( var$snglty > 0 ) error( var$snglty, " redundant columns in rhs matrix")
   w <- matrictint(crossprod(var$u),var$xxi,Tu-flat*(nv+1))-flat*.5*nv*(nv+1)*log(2*pi);
   if(train!=0)
     {
       if(train <= lags)
         {
-          cat("end of training sample <=  # of lags\n") #
+          cat("end of training sample <=  # of lags\n")  #
             return
         }
       Tp <- train
@@ -66,14 +67,13 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   }
   ytrain <- ydata[1:Tp,,drop=FALSE]
   xtrain <- xdata[1:Tp,,drop=FALSE]
-  varp <- NULL
   if (!nonorm)
-    {
-      if (Tp < nv * lags + nx +1) {
-      	warning("Improper prior! Proceeding as if nonorm=TRUE.  Results may be nonsense.")
+    { 
+      varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum), breaks=c(tbreaks, Tp+vp$pbreaks),
+                     lambda=lambda, mu=mu, const=FALSE, ic=ic)  #const is FALSE here because xdata already has a column of ones.
+      if (varp$snglty > 0) {
+        warning("Prior improper, short ", varp$snglty, " df.  Results likely nonsense.")
       } else {
-        varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum), breaks=c(tbreaks, Tp+vp$pbreaks),
-                       lambda=lambda, mu=mu, const=FALSE, ic=ic) #const is FALSE here because xdata already has a column of ones.
         Tup <- dim(varp$u)[1]
         wp <- matrictint(crossprod(varp$u),varp$xxi,Tup-flat*(nv+1)/2)-flat*.5*nv*(nv+1)*log(2*pi)
         w=w-wp

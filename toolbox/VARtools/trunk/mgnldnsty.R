@@ -78,6 +78,8 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
         wp <- matrictint(crossprod(varp$u),varp$xxi,Tup-flat*(nv+1)/2)-flat*.5*nv*(nv+1)*log(2*pi)
         w=w-wp
       }
+    } else {
+      varp <- NULL
     }
   return(list(w=w,var=var,varp=varp,prior=list(lambda=lambda,mu=mu,vprior=vprior,mnprior=mnprior)))
 }

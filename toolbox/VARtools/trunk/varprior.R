@@ -45,8 +45,7 @@ if (!is.null(mnprior))
     breaks <- (lags+1)*matrix(1:(nv*lags),nv*lags,1)
     lbreak <- breaks[length(breaks)]
     breaks <- breaks[-lbreak]           #end of sample is not a "break".  Note this makes breaks NULL if nv==lags==1.
-  } else
-  {
+  } else {
     ydum <- NULL;
     xdum <- NULL;
     breaks <- NULL;

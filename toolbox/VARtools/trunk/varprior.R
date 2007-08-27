@@ -44,6 +44,7 @@ if (!is.null(mnprior))
     xdum <- xdum[seq(lags+1,1,by=-1),,]
     breaks <- (lags+1)*matrix(1:(nv*lags),nv*lags,1)
     lbreak <- breaks[length(breaks)]
+    breaks <- breaks[-lbreak]           #end of sample is not a "break".  Note this makes breaks NULL if nv==lags==1.
   } else
   {
     ydum <- NULL;
@@ -56,6 +57,8 @@ if (!is.null(vprior) && vprior$w>0)
     ydum2 <- array(0,dim=c(lags+1,nv,nv))
     xdum2 <- array(0,dim=c(lags+1,nx,nv))
     ydum2[lags+1,,] <- diag(vprior$sig,nv)*vprior$w  #The vprior$w factor was missing until 11/29/06
+                                        #Original idea, not implemented, was probably that w be an integer repetition count
+                                        #for variance dobs.  Now it's just a scale factor for sig.
     dim(ydum2) <- c((lags+1)*nv,nv)
     dim(ydum) <- c((lags+1)*nv,lags*nv)
     ydum <- cbind(ydum,ydum2)
@@ -69,8 +72,13 @@ if (!is.null(vprior) && vprior$w>0)
     xdum <- aperm(xdum,c(1,3,2))
     dim(xdum) <- c(dim(xdum)[1]*dim(xdum)[2],nx)
     if(nv>1){
-      breaks <- c(breaks,(lags+1)*(1:(nv-1))+lbreak)
+      breaks <- c(breaks, lbreak, (lags+1)*(1:(nv-1))+lbreak)
     }
   }
 return(list(ydum=ydum,xdum=xdum,pbreaks=breaks))
+## data here in the form of T by nv y, and T x nx x.  Lagged y's not put in to a rhs regression matrix, so a "breaks" vector
+## is needed.
+## rfvar3 adds persistence and sum of coeffs dummy observations to data in lhs and rhs regression matrix form.
+## The panel VAR programs, to accommodate the connection of cs to y0's, must reorganize lhs to (T*nv) by 1 form and construct
+## corresponding much larger (but sparse) rhs X matrix.
 }

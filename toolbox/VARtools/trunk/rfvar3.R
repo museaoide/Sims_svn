@@ -74,7 +74,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     else
       nbreaks<-length(breaks)
     breaks <- c(0,breaks,T)
-    if(any(breaks[2:length(breaks)]<=breaks[1:(length(breaks)-1)]))
+    if(any(breaks[2:length(breaks)] <= breaks[1:(length(breaks)-1)]))
       stop("list of breaks must be in strictly increasing order\n")
 ## initialize smpl as null if initial observations are only there for lambda/mu prior.
 ## matlab code uses the fact that in matlab a:b is null if b<a, which is not true for R.

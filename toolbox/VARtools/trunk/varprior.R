@@ -26,7 +26,11 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
 {
 if (!is.null(mnprior))
   {
-    xdum <- array(0,dim=c(lags+1,nx,lags,nv),dimnames=list(obsno=1:(lags+1),xvbl=1:nx,lag=1:lags,lhsy=1:nv))
+    xdum <- if(nx > 0) {
+               array(0, dim=c(lags + 1, nx, lags, nv), dimnames=list(obsno=1:(lags + 1), xvbl=1:nx, lag=1:lags, lhsy=1:nv))
+             } else {
+               NULL
+             }
     ydum <- array(0,dim=c(lags+1,nv,lags,nv),dimnames=list(obsno=1:(lags+1),rhsy=1:nv,lag=1:lags,lhsy=1:nv))
     for (il in 1:lags)
       {
@@ -44,7 +48,7 @@ if (!is.null(mnprior))
     xdum <- xdum[seq(lags+1,1,by=-1),,]
     breaks <- (lags+1)*matrix(1:(nv*lags),nv*lags,1)
     lbreak <- breaks[length(breaks)]
-    breaks <- breaks[-lbreak]           #end of sample is not a "break".  Note this makes breaks NULL if nv==lags==1.
+    breaks <- breaks[-length(breaks)]           #end of sample is not a "break".  Note this makes breaks NULL if nv==lags==1.
   } else {
     ydum <- NULL;
     xdum <- NULL;
@@ -71,7 +75,7 @@ if (!is.null(vprior) && vprior$w>0)
     xdum <- aperm(xdum,c(1,3,2))
     dim(xdum) <- c(dim(xdum)[1]*dim(xdum)[2],nx)
     if(nv>1){
-      breaks <- c(breaks, lbreak, (lags+1)*(1:(nv-1))+lbreak)
+      breaks <- c(breaks, (lags+1)*(0:(nv-1))+lbreak)
     }
   }
 return(list(ydum=ydum,xdum=xdum,pbreaks=breaks))

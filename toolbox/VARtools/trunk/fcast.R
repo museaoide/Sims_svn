@@ -25,12 +25,12 @@ fcast <- function(y0, By, Bx, xdata=NULL, const=TRUE, horiz) {
   nx <- dim(Bx)[2]
   yhat <- matrix(0,horiz+lags,nvar)
   yhat[1:lags,] <- y0
-  Bmat <- aperm(By,c(3,2,1))
-  Bmat <- Bmat[seq(lags,1,by=-1),,]
+  Bmat <- aperm(By,c(3,2,1))            #lags by vbls by eqns
+  Bmat <- Bmat[seq(lags,1,by=-1),,]     #reverse time index
   dim(Bmat) <- c(lags*nvar,nvar)
   for (it in 1:horiz){
     ydata <- yhat[it:(it+lags-1),,drop=FALSE]
-    yhat[lags+it,] <- apply(Bmat*matrix(ydata,dim(Bmat)[1],dim(Bmat)[2]),2,sum)+xdata[lags+it,]%*%t(Bx)
+    yhat[lags+it,] <- apply(Bmat*matrix(ydata,dim(Bmat)[1],dim(Bmat)[2]),2,sum)+xdata[lags+it,] %*% t(Bx)
   }
   if(!is.null(dimnames(y0))){
     dimnames(yhat) <- list(NULL,dimnames(y0)[[2]])

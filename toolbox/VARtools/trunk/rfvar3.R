@@ -1,6 +1,11 @@
 rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu=2,ic=NULL)
   {
     ## This algorithm goes for accuracy without worrying about memory requirements.
+   ## ---------------------------------------------------------------------------
+    ## The standard prior it implements is NOT APPROPRIATE for seasonally unadjusted data, even
+    ## if seasonal dummies are included in xdata.  The prior shrinks toward simple persistence, so it
+    ## will tend to prevent the dummies from picking up all the seasonality.
+    ## ---------------------------------------------------------------------------
     ## ydata:   T x nvar dependent variable data matrix
     ## xdata:   T x nx exogenous variable data matrix
     ##          Note that if either ydata or xdata has only one column, it must still have a dim vector.  In

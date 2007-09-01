@@ -45,20 +45,20 @@ mleBC <- function(ydata, lags, SigFacs, mnprior=list(tight=.2,decay=.5),vprior=l
   ## Now add rows that connect constants to y0's
   y0 <- Matrix(ydata[1:lags, , ], ncol=1) - Matrix(Mu, lags * nv * nc, ncol=1) #subtracts out the mu from y0=Lambda*cs+mu
   x0 <- Matrix(0, lags*nv*nc, dim(X)[2])
-  x0[ , lags * nv *nv + 1:(nc * nv)] <- kronecker(Diagonal(nc), Lambda)
+  x0[1:(lags * nv * nc) , lags * nv *nv + 1:(nc * nv)] <- kronecker(Diagonal(nc), Lambda)
   X <- rBind(X, x0)
   y <- rBind(y,y0)
   ## prior on country-variable constants
   if (!is.null(csigFac)) {
     y <- rBind(y, cbar)
     xc <- Matrix(0, nv*nc, dim(X)[2])
-    xc[ , dim(X)[2] - nv * nc + 1:(nv * nc)] <- Diagonal(nv*nc)
+    xc[ 1:(nv * nc), dim(X)[2] - nv * nc + 1:(nv * nc)] <- Diagonal(nv*nc)
   }
   ## Set up residual covariance matrix
   BigFac <- Matrix(0, length(y), length(y))
   for (ic in 1:nc) {
     icndx <- (ic - 1) * nv * (nT-lags) + 1:(nv * (nT-lags))
-    BigFac[icndx, icndx] <- kronecker(SigFac[ , , ic], Diagonal(nT-lags))
+    BigFac[icndx, icndx] <- kronecker(SigFacs[ , , ic], Diagonal(nT-lags))
   }
   OmNdx <- (nT - lags) * nv * ic + 1:(nv * lags * nc)
   BigFac[OmNdx, OmNdx] <- kronecker(Diagonal(nc), OmFac)

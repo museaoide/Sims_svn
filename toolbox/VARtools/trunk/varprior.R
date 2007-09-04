@@ -24,64 +24,71 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
 ###-----------------------
 ###
 {
-if (!is.null(mnprior))
-  {
-    xdum <- if(nx > 0) {
-               array(0, dim=c(lags + 1, nx, lags, nv), dimnames=list(obsno=1:(lags + 1), xvbl=1:nx, lag=1:lags, lhsy=1:nv))
-             } else {
-               NULL
-             }
-    ydum <- array(0,dim=c(lags+1,nv,lags,nv),dimnames=list(obsno=1:(lags+1),rhsy=1:nv,lag=1:lags,lhsy=1:nv))
-    for (il in 1:lags)
-      {
-        ##-----debug---------
-        ## browser()
-        ##------------------
-        ydum[il+1,,il,] <- il^mnprior$decay*diag(vprior$sig,nv)
+  if (!is.null(mnprior))
+    {
+      xdum <- if(nx > 0) {
+        array(0, dim=c(lags + 1, nx, lags, nv), dimnames=list(obsno=1:(lags + 1), xvbl=1:nx, lag=1:lags, lhsy=1:nv))
+      } else {
+        NULL
       }
-    ydum[1,,1,] <- diag(vprior$sig,nv)
-    ydum <- mnprior$tight * ydum
-    dim(ydum) <- c(lags+1,nv,lags*nv)
-    ydum <- ydum[seq(lags+1,1,by=-1),,]
-    xdum <- mnprior$tight*xdum
-    dim(xdum) <- c(lags+1,nx,lags*nv)
-    xdum <- xdum[seq(lags+1,1,by=-1),,]
-    breaks <- (lags+1)*matrix(1:(nv*lags),nv*lags,1)
-    lbreak <- breaks[length(breaks)]
-    breaks <- breaks[-length(breaks)]           #end of sample is not a "break".  Note this makes breaks NULL if nv==lags==1.
-  } else {
-    ydum <- NULL;
-    xdum <- NULL;
-    breaks <- NULL;
-    lbreak <- 0;
-  }
-if (!is.null(vprior) && vprior$w>0)
-  {
-    ydum2 <- array(0,dim=c(lags+1,nv,nv))
-    xdum2 <- array(0,dim=c(lags+1,nx,nv))
-    ydum2[lags+1,,] <- diag(vprior$sig,nv)*vprior$w  #The vprior$w factor was missing until 11/29/06
+      ydum <- array(0,dim=c(lags+1,nv,lags,nv),dimnames=list(obsno=1:(lags+1),rhsy=1:nv,lag=1:lags,lhsy=1:nv))
+      for (il in 1:lags)
+        {
+          ##-----debug---------
+          ## browser()
+          ##------------------
+          ydum[il+1,,il,] <- il^mnprior$decay*diag(vprior$sig,nv)
+        }
+      ydum[1,,1,] <- diag(vprior$sig,nv)
+      ydum <- mnprior$tight * ydum
+      dim(ydum) <- c(lags+1,nv,lags*nv)
+      ydum <- ydum[seq(lags+1,1,by=-1),,]
+      xdum <- mnprior$tight*xdum
+      dim(xdum) <- c(lags+1,nx,lags*nv)
+      xdum <- xdum[seq(lags+1,1,by=-1),,]
+      breaks <- (lags+1)*matrix(1:(nv*lags),nv*lags,1)
+      lbreak <- breaks[length(breaks)]
+      breaks <- breaks[-length(breaks)] #end of sample is not a "break".  Note this makes breaks NULL if nv==lags==1.
+    } else {
+      ydum <- NULL;
+      xdum <- NULL;
+      breaks <- NULL;
+      lbreak <- 0;
+    }
+  if (!is.null(vprior) && vprior$w>0)
+    {
+      ydum2 <- array(0,dim=c(lags+1,nv,nv))
+      xdum2 <- array(0,dim=c(lags+1,nx,nv))
+      ydum2[lags+1,,] <- diag(vprior$sig,nv)*vprior$w #The vprior$w factor was missing until 11/29/06
                                         #Original idea, not implemented, was probably that w be an integer repetition count
                                         #for variance dobs.  Now it's just a scale factor for sig.
-    dim(ydum2) <- c((lags+1)*nv,nv)
-    dim(ydum) <- c((lags+1)*nv,lags*nv)
-    ydum <- cbind(ydum,ydum2)
-    dim(xdum2) <- c((lags+1)*nx,nv)
-    dim(xdum) <- c((lags +1)*nx,lags*nv)
-    xdum <- cbind(xdum,xdum2)
-    dim(ydum) <- c(lags+1,nv,dim(ydum)[2])
-    ydum <- aperm(ydum,c(1,3,2))
-    dim(ydum) <- c(dim(ydum)[1]*dim(ydum)[2],nv)
-    dim(xdum) <- c(lags+1,nx,dim(xdum)[2])
-    xdum <- aperm(xdum,c(1,3,2))
-    dim(xdum) <- c(dim(xdum)[1]*dim(xdum)[2],nx)
-    if(nv>1){
-      breaks <- c(breaks, (lags+1)*(0:(nv-1))+lbreak)
+      dim(ydum2) <- c((lags+1)*nv,nv)
+      dim(ydum) <- c((lags+1)*nv,lags*nv)
+      ydum <- cbind(ydum,ydum2)
+      dim(xdum2) <- c((lags+1)*nx,nv)
+      dim(xdum) <- c((lags +1)*nx,lags*nv)
+      xdum <- cbind(xdum,xdum2)
+      dim(ydum) <- c(lags+1,nv,dim(ydum)[2])
+      ydum <- aperm(ydum,c(1,3,2))
+      dim(ydum) <- c(dim(ydum)[1]*dim(ydum)[2],nv)
+      dim(xdum) <- c(lags+1,nx,dim(xdum)[2])
+      xdum <- aperm(xdum,c(1,3,2))
+      dim(xdum) <- c(dim(xdum)[1]*dim(xdum)[2],nx)
+      if(nv>1){
+        breaks <- c(breaks, (lags+1)*(0:(nv-1))+lbreak)
+      }
+    } else {
+      if (!is.null(ydum)) { # case with mnprior non-null, but vprior null
+        ydum <- aperm(ydum, c(1, 3, 2))
+        dim(ydum) <- c(prod(dim(ydum)[1:2]), dim(ydum)[3])
+        xdum <- aperm(xdum, c(1,3,2))
+        dim(xdum) <- c(prod(dim(xdum)[1:2]), dim(xdum)[3])
+      }
     }
-  }
-return(list(ydum=ydum,xdum=xdum,pbreaks=breaks))
-## data here in the form of T by nv y, and T x nx x.  Lagged y's not put in to a rhs regression matrix, so a "breaks" vector
-## is needed.
-## rfvar3 adds persistence and sum of coeffs dummy observations to data in lhs and rhs regression matrix form.
-## The panel VAR programs, to accommodate the connection of cs to y0's, must reorganize lhs to (T*nv) by 1 form and construct
-## corresponding much larger (but sparse) rhs X matrix.
+  return(list(ydum=ydum,xdum=xdum,pbreaks=breaks))
+  ## data here in the form of T by nv y, and T x nx x.  Lagged y's not put in to a rhs regression matrix, so a "breaks" vector
+  ## is needed.  
+  ## rfvar3 adds persistence and sum of coeffs dummy observations to data in lhs and rhs regression matrix form.
+  ## The panel VAR programs, to accommodate the connection of cs to y0's, must reorganize lhs to (T*nv) by 1 form and construct
+  ## corresponding much larger (but sparse) rhs X matrix.
 }

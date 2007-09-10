@@ -100,7 +100,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     y <- ydata[smpl,,drop=FALSE]
     ## Everything now set up with input data for y=Xb+e 
     ## ------------------Form persistence dummies-------------------
-    if (! (is.null(lambda) & is.null(mu) )
+    if (! (is.null(lambda) & is.null(mu) ) )
       {
         if(is.null(ic))
           {

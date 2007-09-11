@@ -1,6 +1,6 @@
 numgrad <- function(fcn, x, ...) {
   ## fcn can return a vector, in which case numgrad returns a matrix.
-  delta <- 1e-3
+  delta <- 1e-4
   ## delta <- 1e-8
   n <- length(x)
   ## we tolerate x's that may be n x 1, 1 x n, or R vectors (with no dim),

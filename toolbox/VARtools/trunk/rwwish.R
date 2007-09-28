@@ -16,10 +16,10 @@ rwwish <- function (v, S,n) {
   if (!is.matrix(S)) 
     S <- matrix(S)
   if (nrow(S) != ncol(S)) {
-    stop(message = "S not square in rwish().\n")
+    stop(message = "S not square.\n")
   }
   if (v < nrow(S)) {
-    stop(message = "v is less than the dimension of S in rwwish().\n")
+    stop(message = "v is less than the dimension of S.\n")
   }
   p <- nrow(S)
   CC <- chol(S)

@@ -19,10 +19,11 @@ postdraw <- function(vout,n,nosigprior=FALSE){
   for (ir in 1:n){
     nmat[,,ir] <- crossprod(xxi,nmat[,,ir]) %*% wmat[,,ir]+cfmat
   }
-  By <- aperm(nmat,c(2,1,3))[,1:(neq*lags),]
+  Byx <- aperm(nmat, c(2,1,3))
+  By <- Byx[ , 1:(neq*lags), ]
   dim(By) <- c(neq,neq,lags,n)
   ## Bx <- as.vector(vout$Bx)+aperm(nmat,c(2,1,3))[,(neq*lags+1):ncf,]  # Bx added in both here and in cfmat. Bug caught by A.Zawadwoski
-  Bx <- aperm(nmat,c(2,1,3))[,(neq*lags+1):ncf,]
+  Bx <- Byx[,(neq*lags+1):ncf,]
   ## Note that wmat[,,i] is ready for use as input to impulsdtrf
   return(list(By=By,Bx=Bx,smat=wmat))
 }

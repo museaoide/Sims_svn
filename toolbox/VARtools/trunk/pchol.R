@@ -1,3 +1,4 @@
 pchol <- function(sig, porder) {
-  chol(sig(porder,porder))[porder,porder]
+  invporder <- match(1:length(porder), porder)
+  chol(sig[porder, porder])[invporder, invporder]
 }

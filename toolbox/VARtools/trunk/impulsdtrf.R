@@ -23,7 +23,7 @@ impulsdtrf <- function(B,smat,nstep)
     lags <- dim(B)[3]
     dimnB <- dimnames(B)
     if(dim(smat)[2] != dim(B)[2]) stop("B and smat conflict on # of variables")
-    response <- array(0,dim=c(neq,nvar,nstep+lags));
+    response <- array(0,dim=c(neq,nvar,nstep+lags-1));
     response[ , , lags] <- smat
     response <- aperm(response, c(1,3,2))
     irhs <- 1:(lags*nvar)
@@ -31,7 +31,7 @@ impulsdtrf <- function(B,smat,nstep)
     response <- matrix(response, ncol=neq)
     B <- B[, , seq(from=lags, to=1, by=-1)]  #reverse time index to allow matrix mult instead of loop
     B <- matrix(B,nrow=nvar)
-    for (it in 1:nstep) {
+    for (it in 1:(nstep-1)) {
       #browser()
       response[ilhs, ] <- B %*% response[irhs, ]
       irhs <- irhs + nvar
@@ -42,7 +42,7 @@ impulsdtrf <- function(B,smat,nstep)
 ##         for (ilag in 1:min(lags,it-1))
 ##           response[,,it] <- response[,,it]+B[,,ilag] %*% response[,,it-ilag]
 ##       }
-    dim(response) <- c(nvar, nstep + lags, nvar)
+    dim(response) <- c(nvar, nstep + lags - 1, nvar)
     response <- aperm(response[ , -(1:(lags-1)), ], c(1, 3, 2)) #drop the zero initial conditions; array in usual format
     dimnames(response) <- list(dimnB[[2]], dimnames(smat)[[1]], NULL)
     ## dimnames(response)[2] <- dimnames(smat)[1]

@@ -15,13 +15,13 @@ rwwish <- function (v, S,n) {
   ## every R installation.
   if (!is.matrix(S)) 
     S <- matrix(S)
-  if (nrow(S) != ncol(S)) {
+  p <- nrow(S)
+  if (  p != ncol(S)) {
     stop(message = "S not square.\n")
   }
-  if (v < nrow(S)) {
-    stop(message = "v is less than the dimension of S.\n")
+  if (v < p) {
+    stop(message = "df v is less than the dimension of S.\n")
   }
-  p <- nrow(S)
   CC <- chol(S)
   Z <- matrix(0, n, p^2)
   dseq <- (0:(p-1))*p+(1:p)
@@ -29,8 +29,8 @@ rwwish <- function (v, S,n) {
   Z[ , dseq] <- sqrt(rchisq(nch, v:(v - p + 1)))
   if (p > 1) {
     pseq <- 1:(p - 1)
-    Z[ , rep(p * pseq, pseq) + unlist(lapply(pseq, seq))] <- rnorm(n * p * 
-                                                                   (p - 1)/2)
+    Z[ , rep(p * pseq, pseq) + unlist(lapply(pseq, seq))] <-
+      rnorm(n * p * (p - 1)/2)
   }
   dim(Z) <- c(n*p,p)
   Z <- Z %*% CC

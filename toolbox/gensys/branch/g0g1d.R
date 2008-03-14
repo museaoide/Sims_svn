@@ -1,11 +1,11 @@
-g0g1d <- function(ex,x,xl=paste(x,"l",sep=""),shock,experr,param){
+g0g1d <- function(ex,x,xl=paste(x,"l",sep=""),shock,experr){
   ## ex:     vector of expressions defining equilibrium
   ## x:      names (character) of current value variables 
   ## xl:     lagged value names. By default, just x names with "l" appended.
-  ## shock: exogenous disturbance variable names
-  ## experr: equation numbers (or names, if equations are named) with expectational errors
+  ## shock:  exogenous disturbance variable names
+  ## experr: numbers (or names, if equations are named) of equations with expectational errors
   nf <- length(ex)
-  g0g1out <- list(0)
+  g0g1out <- vector(expression,length(ex))
   for(ix in 1:nf){
     g0g1out[[ix]] <- deriv(ex[ix],c(x,xl,shock))
   }

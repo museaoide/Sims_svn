@@ -9,7 +9,7 @@ makessfct <- function(eq, xnames, dxnames=paste(xnames,"dot",sep=""), shocknames
   ssf <- function(xv) {
     fval <- vector("numeric",length(eq))
     eqev[xnames] <- xv
-    eqev[xdotnames] <- 0
+    eqev[dxnames] <- 0
     for (iq in 1:length(eq)) {
       fval[iq] <- eval(eq[iq],eqev)
     }

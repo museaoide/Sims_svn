@@ -14,7 +14,7 @@ g0g1eval <- function(dexpr, x, xl, nshock, experr, param) {
   Psi <- matrix(0, nex, nshock)
   Pi <- matrix(0, nex, length(experr))
   for ( i in 1:nex ) {
-    dvec <- attr(eval(dexpr[i], as.list(c(x=x,xl=xl,shock=rep(0,nshock),param=param))),"gradient")
+    dvec <- attr(eval(dexpr[i], as.list(c(xd=xd,x=x,shock=rep(0,nshock),param=param))),"gradient")
     loc <- 0
     g0[i,] <- dvec[1:nx]
     loc <- nx
@@ -23,5 +23,5 @@ g0g1eval <- function(dexpr, x, xl, nshock, experr, param) {
     Psi[i,] <- dvec[loc:(loc+nshock)]
   }
   Pi[experr,] <- diag(length(experr))
-  return(list(g0=g0, g1=g1, Psi=Psi, Pi=Pi))
+  return(list(g0=g0, g1=-g1, Psi=-Psi, Pi=-Pi))
 }

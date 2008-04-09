@@ -1,4 +1,4 @@
-                  qzdivct <- function(stake,qzout) {
+qzdivct <- function(stake,qzout) {
   ## Takes qz decomp output, rearranges a and b
   ## so that all cases of real(b(i,i)/a(i,i))>stake are in lower right
   ## corner, while preserving U.T. and orthonormal properties and q'az' and
@@ -26,7 +26,7 @@
         break
       }
     }
-    if ( m == 0) break               #This means we're done with zeros
+    if ( m == 0) break                  #This means we're done with zeros
     if (i > m) {
       for ( k in m:(i-1) ) {
         qzout  <-  qzswitch(k,qzout)
@@ -65,5 +65,5 @@
       }
     }
   }
-return(qzout)
+  return(qzout)
 }

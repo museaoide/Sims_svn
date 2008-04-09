@@ -29,5 +29,5 @@ g0g1evalc <- function(dexpr, xd=vector("numeric",length(x)), x, shock, experr, p
     Psi[i,] <- dvec[(loc+1):(loc+nshock)]
   }
   Pi[experr,] <- diag(length(experr))
-  return(list(g0=g0, g1=-g1, Psi=-Psi, Pi=-Pi))
+  return(list(g0=g0, g1=-g1, Psi=-Psi, Pi=Pi))
 }

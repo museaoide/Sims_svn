@@ -1,9 +1,8 @@
-g0g1dc <- function(ex,x,xd=paste(x,"dot",sep=""),shock,experr){
+g0g1dc <- function(ex,x,xd=paste(x,"dot",sep=""),shock){
   ## ex:     vector of expressions defining equilibrium
   ## x:      names (character) of current value variables 
   ## xd:     time-derivative  names. By default, just x names with "dot" appended.
   ## shock:  exogenous disturbance variable names
-  ## experr: numbers (or names, if equations are named) of equations with expectational errors
   nf <- length(ex)
   g0g1out <- vector("expression",length(ex))
   for(ix in 1:nf){

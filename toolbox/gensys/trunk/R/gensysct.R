@@ -19,7 +19,10 @@ gensysct <- function(g0, g1, c0=rep(0,dim(g0)[1]), psi, pi, div=-1) {
   ## in the equation system.
   ## derivs:  If >=0, the forward part of the solution involves delta functions (derivs=0) or derivatives
   ## up to order derivs, of the expected future path of the exogenous process epsilon.  The paper cited above
-  ## explains how to derive the forward solution from this function's return values. 
+  ## explains how to derive the forward solution from this function's return values.
+  vnames <- dimnames(g0)[[2]]
+  shocknames <- dimnames(psi)[[2]]
+  experrnames <- dimnames(pi)[[2]]
   realsmall <- 1e-7
   eu <- c(0,0)
   fixdiv <- (div > 0)
@@ -181,5 +184,9 @@ gensysct <- function(g0, g1, c0=rep(0,dim(g0)[1]), psi, pi, div=-1) {
       ordera <- ordera+1
     }
   }
+  dimnames(G1) <- list(vnames,vnames)
+  dimnames(C) <- list(vnames, "const")
+  dimnames(impact) <- list(vnames,shocknames)
+  dimnames(loose) <- list(vnames,NULL)
   return(list(G1=G1, C=C, impact=impact, qzdec=qzout, eu=eu, loose=loose, derivs=ordera))
 }

@@ -11,6 +11,7 @@ impulsct <- function(impact, G1, interval, span) {
   A <- padm(G1 * interval)
   resp[ , , 1] <- impact
   for (it in 2:nrsp) resp[ , , it] <- A %*% resp[ , , it-1]
+  dimnames(resp) <- list(dimnames(impact)[[1]], dimnames(impact)[[2]], NULL)
   return(resp)
 }
   

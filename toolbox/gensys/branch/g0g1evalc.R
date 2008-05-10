@@ -2,7 +2,7 @@ g0g1evalc <- function(dexpr, xd=vector("numeric",length(x)), x, shock, experr, p
   ##  dexpr:     derivative expression vector, as produced by g0g1dc
   ##      x:     nx by 1 matrix of values of x, names in dimnames(x)[[1]]
   ##     xd:     nx by 1 matrix of values of xdot, names in dimnames(x)[[1]]
-  ## nshock:     number of exogenous shocks (all assumed centered at 0)
+  ##  shock:     exogenous shocks (all assumed centered at 0)
   ## experr:     vector of numbers or names of equations with expectational errors
   ##  param:     vector of values of parameters (all other symbols) in the expressions
   ## NB x, xd, and param must all be vectors with named components, or lists.
@@ -29,5 +29,10 @@ g0g1evalc <- function(dexpr, xd=vector("numeric",length(x)), x, shock, experr, p
     Psi[i,] <- dvec[(loc+1):(loc+nshock)]
   }
   Pi[experr,] <- diag(length(experr))
-  return(list(g0=g0, g1=-g1, Psi=-Psi, Pi=Pi))
+  dimnames(g0) <- list(names(dexpr),names(x))
+  dimnames(g1) <- dimnames(g0)
+  if(is.numeric(experr)) experr <- names(dexpr)[experr]
+  dimnames(Psi) <- list(names(dexpr),names(shock))
+  dimnames(Pi) <- list(names(dexpr), experr)
+  return(list(g0=g0, g1=-g1, Psi=-Psi, Pi=-Pi))
 }

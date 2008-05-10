@@ -4,7 +4,7 @@ g0g1d <- function(ex,x,xl=paste(x,"l",sep=""),shock) {
   ## xl:     lagged value names. By default, just x names with "l" appended.
   ## shock:  exogenous disturbance variable names
   nf <- length(ex)
-  g0g1out <- vector(expression,length(ex))
+  g0g1out <- vector("expression",length(ex))
   for(ix in 1:nf){
     g0g1out[[ix]] <- deriv(ex[ix],c(x,xl,shock))
   }

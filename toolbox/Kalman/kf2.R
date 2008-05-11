@@ -37,7 +37,7 @@ kf2 <- function(y,H,shat,sig,G,M) {
       d <- svdhoh$d[1:(first0-1), drop=FALSE]
       fcsterr <- y-H %*% G %*% shat
       ho <- H %*% omega
-      hohifac <-diag(1/sqrt(d)) %*% t(u)
+      hohifac <- (1/sqrt(d)) * t(u) #diag(1/sqrt(d)) %*% t(u)
       ferr <- hohifac %*% fcsterr
       lh <- c(0,0)
       lh[1] <- -.5 * crossprod(ferr)

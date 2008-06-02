@@ -1,7 +1,7 @@
 windowA <- function(x, start=NULL, end=NULL, frequency=NULL, deltat=NULL, agg=c("average", "sum")) {
   xx <- window(x, start, end)
   tspxx <- tsp(xx)
-  oldfreq <- tspxx[[3]]
+  oldfreq <- tspxx[3]
   if (abs(oldfreq - frequency) < .01 || (is.null(frequency) && is.null(deltat)) ) {
     ## warning("No time aggregation performed")
     ## return(xx)
@@ -16,11 +16,17 @@ windowA <- function(x, start=NULL, end=NULL, frequency=NULL, deltat=NULL, agg=c(
     } else {
       tdim <- if (!is.null(dim(xx))) dim(xx)[1] else length(xx)
       vdim <- if (!is.null(dim(xx))) dim(xx)[2] else 1
+      ## make sure lengths are multiples of nagg, so variables don't spill over
+      leftover <- tdim %% nagg
+      if (leftover != 0) {
+        xx <- window(xx, end=tsp(xx)[2] + (1 - leftover / nagg) / nagg, extend=TRUE)
+        tdim <- tdim + nagg - leftover
+      }
       xxa <- array(as.vector(xx), c(nagg, tdim %/% nagg, vdim))
       xxa <- apply(xxa, c(2,3), sum)
       if (agg[1] == "average") xxa <- xxa/nagg
-      if (dim(xx)[1] %% frequency > 1e-6) warning("last obs incomplete")
-      xx <- ts(xxa, start=start(xx), freq= frequency)
+      if (leftover != 0) warning("last obs incomplete")
+      xx <- ts(xxa, start=tsp(xx)[1], freq= frequency)
       noagg <- FALSE
     }
   }

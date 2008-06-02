@@ -44,7 +44,7 @@ impulsdtrf <- function(B,smat,nstep)
 ##       }
     dim(response) <- c(nvar, nstep + lags - 1, nvar)
     response <- aperm(response[ , -(1:(lags-1)), ], c(1, 3, 2)) #drop the zero initial conditions; array in usual format
-    dimnames(response) <- list(dimnB[[2]], dimnames(smat)[[1]], NULL)
+    dimnames(response) <- list(dimnB[[1]], dimnames(smat)[[2]], NULL)
     ## dimnames(response)[2] <- dimnames(smat)[1]
     ## dimnames(response)[1] <- dimnames(B)[2]
     return(response)

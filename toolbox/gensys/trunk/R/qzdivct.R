@@ -26,17 +26,13 @@ qzdivct <- function(stake,qzout) {
         break
       }
     }
-    if ( m == 0) break                  #This means we're done with zeros
+    if ( m == 0) break               #This means we're done with zeros
     if (i > m) {
       for ( k in m:(i-1) ) {
         qzout  <-  qzswitch(k,qzout)
         root <- cbind(diag(qzout$a), diag(qzout$b))
         xdown0[k:(k+1)] <- xdown0[(k+1):k]
         xdown[k:(k+1)] <- xdown[(k+1):k]
-        if (any(xdown[k:(k+1)] != (xdown0[k:(k+1)] | (Re(root[k:(k+1),2] / (xdown0[k:(k+1)] + root[k:(k+1),1]))) > stake))) {
-          browser()
-          cat("xdown shift during 0 pack at i,k:", i, k,"\nThis indicates numerical inaccuracy\n")
-        }
       }
     }
   }
@@ -57,13 +53,15 @@ qzdivct <- function(stake,qzout) {
         root <- cbind(diag(qzout$a), diag(qzout$b))
         xdown0[k:(k+1)] <- xdown0[(k+1):k]
         xdown[k:(k+1)] <- xdown[(k+1):k]
-        if (any(xdown[k:(k+1)] != (xdown[k:(k+1)] |  ( Re(root[k:(k+1),2] / (xdown[k:(k+1)] + root[k:(k+1),1])) ) > stake))) {
-          cat("xdown shift during pos pack at i,k:", i, k, "\nThis indicates numerical inaccuracy")
-          gev <- root[k:(k+1), ]
-          print(rbind(cbind(gevOld, gevOld[ , 2]/gevOld[, 1]), cbind(gev, gev[, 2]/gev[, 1])))
-        }
+        gev <- root[k:(k+1), ]
+        print(rbind(cbind(gevOld, gevOld[ , 2]/gevOld[, 1]), cbind(gev, gev[, 2]/gev[, 1])))
       }
     }
   }
+  xdown0f <- abs(root[,1]) < realsmall
+  xdownf <- xdown0f | (Re(root[ , 2] / (xdown0f + root[ , 1])) > stake)
+  d0 <- which(xor(xdown0f, xdown0))
+  d <- which(xor(xdownf, xdown))
+  if (length(d0) + length(d) > 0 ) warning(paste("root classification shifted with sort: d0 = ", d0, "d1 = ",d1))
   return(qzout)
 }

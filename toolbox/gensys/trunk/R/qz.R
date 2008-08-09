@@ -2,7 +2,11 @@ qz <- function(a=array(1,dim=1,1),b=array(1,dim=1,1)){
   ## R does not load all of lapack in its own lapack.so library.  The routine
   ## needed here, zgges, therefore has to be loaded directly.  
   if(!is.loaded("zgges_")){
-    dyn.load("/usr/lib/liblapack.so", now=FALSE)}
+    filename <- "/usr/lib/liblapack.so"
+    if (file.access(filename)) 
+      filename <- "/usr/lib/liblapack-3.so"
+    dyn.load(filename, now=FALSE)
+    }
   N<-dim(a)[1]
   SDIM<-as.integer(1);
   ALPHA<-vector("complex",N)

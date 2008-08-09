@@ -1,6 +1,4 @@
 print.eqsys <- function(x) {
-  xout <- noquote(as.character(x))
-  names(xout) <- names(x)
-  print(xout)
+  print(noquote(paste(names(x),":   ", as.character(as.vector(x)),sep="" )))
   invisible(x)
 }

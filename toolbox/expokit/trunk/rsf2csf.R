@@ -2,6 +2,7 @@ rsf2csf <- function(sf) {
   T <- sf$T
   Q <- sf$Q
   n <- dim(T)[1]
+  if (n==1) return(sf)
   ld <- diag(T[2:n, 1:(n-1), drop=FALSE])
   cd <- diag(T)
   icx <- which(abs(ld) > sqrt(abs(cd[1:(n-1)] * cd[2:n])) * 100*.Machine$double.eps)

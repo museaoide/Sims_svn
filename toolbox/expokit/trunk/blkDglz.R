@@ -14,7 +14,7 @@ blkDglz <- function(A, div=c(.99, 1-100*.Machine$double.eps), ctOrder=FALSE) {
     comp <- function(a){abs(a) < div[1]}
   }
   sf <- schdiv(sf, comp=comp)
-  ulndx <- comp(diag(sf$T))
+  ulndx <- comp(diag(as.matrix(sf$T)))
   nlow <- sum(ulndx)
   P <- matrix(sf$Q[ , ulndx], n, nlow)
   if (ctOrder) {
@@ -23,7 +23,7 @@ blkDglz <- function(A, div=c(.99, 1-100*.Machine$double.eps), ctOrder=FALSE) {
     comp <- function(a) { abs(a) >= div[1] & abs(a) <= div[2] }
   }
   sf <- schdiv(sf, comp=comp)
-  ulndx <- comp(diag(sf$T))
+  ulndx <- comp(diag(as.matrix(sf$T)))
   P <- cbind(P, sf$Q[ , ulndx])
   nmid <- sum(ulndx)
   if (ctOrder) {
@@ -32,7 +32,7 @@ blkDglz <- function(A, div=c(.99, 1-100*.Machine$double.eps), ctOrder=FALSE) {
     comp <- function(a) { abs(a) > div[2] }
   }
   sf <- schdiv(sf, comp=comp)
-  ulndx <- comp(diag(sf$T))
+  ulndx <- comp(diag(as.matrix(sf$T)))
   P <- cbind(P, sf$Q[ , ulndx])
   nhi <- sum(ulndx)
   Pinv <- solve(P)

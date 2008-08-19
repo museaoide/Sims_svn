@@ -19,7 +19,7 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
   ## ct:    Is this a continuous time model (so Re() rather than abs() ranks roots)?
   ##
   if (!is.loaded("zhseqr")) dyn.load("usr/lib/liblapack.so")
-  wtfcn <- function(x) 1 - x + sin(2*pi*x)/(2*pi)
+  wtfcn <- function(x) max(1 - x + sin(2*pi*x)/(2*pi),0)
   if (ct) {
     div <- c(-1/(Tfac*T), -1000*.Machine$double.eps) # might need to adjust div[2]
   } else {
@@ -53,9 +53,9 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
     ## mf2s <- solve( diag(nmid) - sca$D[midx, midx], sca$Pinv[midx, ] %*% mu0) #mean as if stationary
     mf2s <- matrix(0,nmid,1)
     if (ct) {
-      wt <- wtfcn((Re(diag(sca$D[midx, midx],nmid)) - div[1]) / (div[2] - div[1]))
+      wt <- wtfcn((Re(diag(sca$D[midx, midx, drop=FALSE])) - div[1]) / (div[2] - div[1]))
     } else {
-      wt <- wtfcn((abs(diag(sca$D[midx,midx],nmid)) - div[1]) / (div[2] - div[1]))
+      wt <- wtfcn((abs(diag(sca$D[midx,midx, drop=FALSE])) - div[1]) / (div[2] - div[1]))
     }
     mf2 <- mf2s * wt + mf2ns * (1-wt) #wt is the weight on stationary model.
     omega2 <- sca$Pinv[midx, ] %*% Omega %*% t(Conj(sca$Pinv[midx, , drop=FALSE]))

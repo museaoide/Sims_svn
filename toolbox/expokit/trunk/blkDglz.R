@@ -3,13 +3,10 @@ blkDglz <- function(A, div=c(.99, 1-100*.Machine$double.eps), ctOrder=FALSE) {
   ## blocks), the abs(roots) of the upper block of D are all less than div[1],
   ## the abs(roots) of the lower block are all greater than div(2), and the
   ## abs(roots) of the middle block are in between.  P %*% D %*% solve(P) = A.
-  stopifnot(require("Matrix"))
-  sf <- Schur(Matrix(A), vectors=TRUE)
-  A <- as.matrix(A)
-  Q <- as.matrix(sf@Q)
-  T <- as.matrix(sf@T)
-  sf <- list(Q=Q, T=T)
-  sf <- rsf2csf(sf)
+  if ( !is.loaded("zhseqr")) dyn.load("usr/lib/liblapack.so")
+  sf <- schur(A)
+  Q <- sf$Q
+  T <- sf$T
   n <- dim(Q)[1]
   if (ctOrder) {
     comp <- function(a){Re(a) < div[1]}

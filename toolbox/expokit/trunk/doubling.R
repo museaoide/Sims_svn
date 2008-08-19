@@ -4,7 +4,7 @@ doubling <- function(A,omega,crit=1e-9) {
   j <- 1
   vinc <- sum(abs(V))
   while (j < 10000 && vinc > crit ) {
-    dv <-  Aj %*% V %*% t(Aj)
+    dv <-  Aj %*% V %*% t(Conj(Aj))
     vinc <- sum(abs(dv))
     V <- V + dv
     Aj <- Aj %*% Aj

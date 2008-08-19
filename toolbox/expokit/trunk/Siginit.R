@@ -65,8 +65,9 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
       v2 <- doubling(sca$D[midx,midx], omega2)
     }
     v20 <- sca$Pinv[midx, ] %*% Sig0 %*% t(Conj(sca$Pinv[midx, , drop=FALSE]))
-    wt <- c(sqrt(wt))               # c() to strip dimension attribute
-    v2 <- (wt %o% wt) * v2 + ((1-wt) %o% (1-wt)) * v20
+    wta <- c(sqrt(wt))               # c() to strip dimension attribute
+    wtb <- c(sqrt(max(1-wt,0)))
+    v2 <- (wta %o% wta) * v2 + (wtb %o% wtb) * v20
   }
   nhi <- sca$blockDims[3]
   if (nhi == 0) {

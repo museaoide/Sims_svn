@@ -1,4 +1,7 @@
 schur <- function(A) {
+  ## Returns Q and T, T upper triangular, t(Conj(Q)) %*% Q = I, Q %*% T %*% t(Conj(Q)) = A.
+  ## code could be more transparent and maybe more efficient if it called zgees.f, the lapack general Schur routine,
+  ## directly.  
   if (is.null(dim(A))) dim(Q) <- c(1,1)
   if ( dim(A)[1] ==0) return(list(X=matrix(0,0,0), info=0))
   if ( !is.loaded("zhseqr")) dyn.load("/usr/lib/liblapack.so")

@@ -18,12 +18,12 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
   ##        increasing as the actual half-life increases.
   ## ct:    Is this a continuous time model (so Re() rather than abs() ranks roots)?
   ##
-  if (!is.loaded("zhseqr")) dyn.load("usr/lib/liblapack.so")
+  if (!is.loaded("zhseqr")) dyn.load("/usr/lib/liblapack.so")
   wtfcn <- function(x) max(1 - x + sin(2*pi*x)/(2*pi),0)
   if (ct) {
-    div <- c(-1/(Tfac*T), -1000*.Machine$double.eps) # might need to adjust div[2]
+    div <- c(-1/(Tfac*T), -sqrt(100*.Machine$double.eps)) # might need to adjust div[2]
   } else {
-    div <- c(1-1/(Tfac*T), 1-1000*.Machine$double.eps)
+    div <- c(1-1/(Tfac*T), 1-sqrt(100*.Machine$double.eps))
   }
   sca <- blkDglz(A, div, ctOrder=ct)
   nlow <- sca$blockDims[1]

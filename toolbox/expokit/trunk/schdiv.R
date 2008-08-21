@@ -9,14 +9,20 @@ schdiv <- function(sf, comp = function(a){abs(a) <= 1}) {
   ns <- 0
   nb <- 0
   n <- dim(sf$Q)[1]
+  ev <- diag(as.matrix(sf$T))
   while (nb < n) {
-    while (nb < n && !comp(sf$T[nb + 1, nb + 1]) ) {
+    while (nb < n && !comp(ev[nb+1]) ) {
       nb <- nb+1
     }
     if (nb < n) {
       if (nb > ns) {
         for (i in nb:(ns+1)) {
           sf <- schswitch(sf, i)
+          ## switching calculation could change classification of diagonal elements, so
+          ## we keep the sort according to the original ev list.
+          w <- ev[i]
+          ev[i] <- ev[i+1]
+          ev[i+1] <- w
         }
       }
       ns <- ns+1

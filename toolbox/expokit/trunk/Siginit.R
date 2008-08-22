@@ -19,7 +19,7 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
   ## ct:    Is this a continuous time model (so Re() rather than abs() ranks roots)?
   ##
   if (!is.loaded("zhseqr")) dyn.load("/usr/lib/liblapack.so")
-  wtfcn <- function(x) max(1 - x + sin(2*pi*x)/(2*pi),0)
+  wtfcn <- function(x) pmax(1 - x + sin(2*pi*x)/(2*pi),0)
   if (ct) {
     div <- c(-1/(Tfac*T), -sqrt(100*.Machine$double.eps)) # might need to adjust div[2]
   } else {
@@ -66,7 +66,7 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
     }
     v20 <- sca$Pinv[midx, ] %*% Sig0 %*% t(Conj(sca$Pinv[midx, , drop=FALSE]))
     wta <- c(sqrt(wt))               # c() to strip dimension attribute
-    wtb <- c(sqrt(max(1-wt,0)))
+    wtb <- c(sqrt(pmax(1-wt,0)))
     v2 <- (wta %o% wta) * v2 + (wtb %o% wtb) * v20
   }
   nhi <- sca$blockDims[3]

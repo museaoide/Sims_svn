@@ -4,8 +4,8 @@ blkDglz <- function(A, div=c(.99, 1-100*sqrt(.Machine$double.eps)), ctOrder=FALS
   ## the abs(roots) of the lower block are all greater than div(2), and the
   ## abs(roots) of the middle block are in between.  P %*% D %*% solve(P) = A.
   if ( !is.loaded("zhseqr")) dyn.load("usr/lib/liblapack.so")
-  ## sf <- schur(A)
-  sf <- zgeesWrap(A)
+  sf <- schur(A)
+  ## sf <- zgeesWrap(A)
   Q <- sf$Q
   T <- sf$T
   n <- dim(Q)[1]

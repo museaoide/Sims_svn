@@ -18,9 +18,8 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
   ##        increasing as the actual half-life increases.
   ## ct:    Is this a continuous time model (so Re() rather than abs() ranks roots)?
   ##
-  ## should not be treating low and mid sections as independent.  The calculation of steady
-  ## state variance should be done jointly for them.
   if (!is.loaded("zhseqr")) dyn.load("/usr/lib/liblapack.so")
+  n <- dim(A)[1]
   wtfcn <- function(x) pmax(1 - x + sin(2*pi*x)/(2*pi),0)
   if (ct) {
     div <- c(-1/(Tfac*T), -sqrt(100*.Machine$double.eps)) # might need to adjust div[2]
@@ -64,19 +63,25 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
   ##     hix <- (nlowmid + 1):(nlowmid + nhi)
   ##     mf3 <- sca$Pinv[hix, ] %*% mu0
   ##   }
+  nmid <- sca$blockDims[2]
+  midx <- if (nmid > 0) (nlowmid -nmid + 1):(nlowmid) else NULL
   vns <- sca$Pinv %*% Sig0 %*% t(Conj(sca$Pinv))
-  vout <- matrix(0, nlowmid + nhi, nlowmid + nhi)
+  vout <- matrix(0, n, n)
+  if(nmid == 0) {
+    wta <- NULL
+  } else {
   if (ct) {
     wt <- wtfcn((Re(diag(sca$D[midx, midx, drop=FALSE])) - div[1]) / (div[2] - div[1]))
   } else {
     wt <- wtfcn((abs(diag(sca$D[midx,midx, drop=FALSE])) - div[1]) / (div[2] - div[1]))
   }
-  wta <- c(sqrt(wt))                # c() to strip dimension attribute
-  wta <- c(rep(1,nmidlow - nmid), wta, rep(0, (nmidlow + 1):dim(A)[1]))
-  wtb <- sqrt(pmax(1-wt,0))
-  muout <- wtb^2 * sca$Pinv %*% mu0
+  wta <- c(sqrt(pmin(wt,0)))                # c() to strip dimension attribute
+}
+  wta <- c(rep(1,nlowmid - nmid), wta, rep(0, n - nlowmid))
+  wtb <- sqrt(pmax(1-wta,0))
+  muout <- sca$P %*% (wtb^2 * sca$Pinv %*% mu0)
   vout[lowmidx,lowmidx] <- v12
   vdiag <- (wta %o% wta) * vout + (wtb %o% wtb) * vns # vdiag will not be block diag, but will be closer to it than vout.
-  vout <- sca$P %*% vout %*% t(Conj(sca$P))
+  vout <- sca$P %*% vdiag %*% t(Conj(sca$P))
   return(list(mu=muout , v=vout, vdiag=vdiag, P=sca$P, Pinv=sca$Pinv))
 }

@@ -37,9 +37,9 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
           ##-----debug---------
           ## browser()
           ##------------------
-          ydum[il+1,,il,] <- il^mnprior$decay*diag(vprior$sig,nv)
+          ydum[il+1,,il,] <- il^mnprior$decay*diag(vprior$sig,nv,nv)
         }
-      ydum[1,,1,] <- diag(vprior$sig,nv)
+      ydum[1,,1,] <- diag(vprior$sig,nv,nv)
       ydum <- mnprior$tight * ydum
       dim(ydum) <- c(lags+1,nv,lags*nv)
       ydum <- ydum[seq(lags+1,1,by=-1),,]
@@ -59,7 +59,7 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
     {
       ydum2 <- array(0,dim=c(lags+1,nv,nv))
       xdum2 <- array(0,dim=c(lags+1,nx,nv))
-      ydum2[lags+1,,] <- diag(vprior$sig,nv)*vprior$w #The vprior$w factor was missing until 11/29/06
+      ydum2[lags+1,,] <- diag(vprior$sig,nv,nv)*vprior$w #The vprior$w factor was missing until 11/29/06
                                         #Original idea, not implemented, was probably that w be an integer repetition count
                                         #for variance dobs.  Now it's just a scale factor for sig.
       dim(ydum2) <- c((lags+1)*nv,nv)

@@ -11,7 +11,7 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
 ### mnprior$tight:weight on the Minnesota prior dummies.  Prior std dev on first lag is
 ###               1/mnprior$tight
 ### mnprior$decay:prior std dev on own lag j is 1/j^decay
-### vprior$sig:   vector of nv prior std dev''s of equation shocks.  vprior.sig is needed
+### vprior$sig:   vector of nv prior std dev''s of equation shocks.  vprior$sig is needed
 ###               to scale other components of the prior, even if vprior$w=0. Not needed for a pure training
 ###               sample prior.
 ### vprior$w:     weight on vcv dummies.  (1 is reasonable; higher values tighten up.)
@@ -45,7 +45,7 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   Tx <- dim(xdata)[1]
   nx <- dim(xdata)[2]
   vp <- varprior(nv,nx,lags,mnprior,vprior) # vp$: ydum,xdum,pbreaks
-  var=rfvar3(ydata=rbind(ydata, vp$ydum), lags=lags, xdata=rbind(xdata,vp$xdum), breaks=matrix(c(breaks, T, T+vp$pbreaks), ncol=1),
+  var = rfvar3(ydata=rbind(ydata, vp$ydum), lags=lags, xdata=rbind(xdata,vp$xdum), breaks=matrix(c(breaks, T, T + vp$pbreaks), ncol=1),
     const=FALSE, lambda=lambda, mu=mu, ic=ic) # const is FALSE in this call because ones alread put into xdata
   Tu <- dim(var$u)[1]
   if ( var$snglty > 0 ) error( var$snglty, " redundant columns in rhs matrix")

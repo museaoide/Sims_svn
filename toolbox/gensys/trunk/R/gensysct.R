@@ -159,7 +159,8 @@ gensysct <- function(g0, g1, c0=rep(0,dim(g0)[1]), psi, pi, div=-1) {
   }else {
     ## line below is for the discrete time case
     ## C <- G0I %*% rbind(tmat%*% qq %*%c0,solve(qzout$a[uix,uix,drop=FALSE]-qzout$b[uix,uix,drop=FALSE],q2%*%c0) )
-    C <- G0I %*% rbind(tmat%*% qq %*%c0,solve(-qzout$b[uix,uix,drop=FALSE],q2%*%c0) )
+#    C <- G0I %*% rbind(tmat%*% qq %*%c0,solve(-qzout$b[uix,uix,drop=FALSE],q2%*%c0) )
+    C <- G0I %*% rbind(tmat%*% qq %*%c0, matrix(0,nunstab,1) ) # WYP, 8/29/2008, plug in zeros for the unstable root part
     impact <- G0I %*% rbind(tmat %*% qq %*% psi, matrix(0,nunstab, nshock))
     ## fmat <- solve(qzout$b[uix,uix,drop=FALSE],qzout$a[uix,uix,drop=FALSE])
     ## fwt <- -solve(qzout$b[uix,uix,drop=FALSE],q2 %*% psi)

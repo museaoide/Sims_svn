@@ -22,9 +22,11 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
   n <- dim(A)[1]
   wtfcn <- function(x) pmax(1 - x + sin(2*pi*x)/(2*pi),0)
   if (ct) {
-    div <- c(-1/(Tfac*T), -sqrt(100*.Machine$double.eps)) # might need to adjust div[2]
+    ## div <- c(-1/(Tfac*T), -sqrt(100*.Machine$double.eps)) # (original) might need to adjust div[2]
+    div <- c(-1/(Tfac*T), -1/(3*Tfac*T)) # (9/9/08) Avoiding stationary vce > non-stationary near div[2]?
   } else {
-    div <- c(1-1/(Tfac*T), 1-sqrt(100*.Machine$double.eps))
+    ## div <- c(1-1/(Tfac*T), 1-sqrt(100*.Machine$double.eps))
+    div <- c(1-1/(Tfac*T), 1-1/(3*Tfac*T)) # (9/9/08)
   }
   sca <- blkDglz(A, div, ctOrder=ct)
   nlowmid <- sum(sca$blockDims[1:2])
@@ -79,7 +81,7 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
 }
   wta <- c(rep(1,nlowmid - nmid), wta, rep(0, n - nlowmid))
   wtb <- sqrt(pmax(1-wta,0))
-  muout <- sca$P %*% (wtb^2 * sca$Pinv %*% mu0)
+  muout <- sca$P %*% (wtb^2 * sca$Pinv %*% mu0)  
   vout[lowmidx,lowmidx] <- v12
   vdiag <- (wta %o% wta) * vout + (wtb %o% wtb) * vns # vdiag will not be block diag, but will be closer to it than vout.
   vout <- sca$P %*% vdiag %*% t(Conj(sca$P))

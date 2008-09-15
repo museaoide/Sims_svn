@@ -1,11 +1,15 @@
-SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
+SigInit <- function(A, Omega, T, mu0=1, Sig0, Tfac=1, ct=FALSE, ssndx=1) {
   ## The system is y(t) = A(t) %*% y(t-1) + eps(t) in discrete time, ydot = A %*% y + eps in
   ## continuous time, with var(eps(t))=Omega.
   ## If the system has a constant term, it is assumed to be represented
   ## by a row of A that has in discrete time only zeros and a single 1 entry, and a corresponding
   ## row and column of Omega that are all zero.  In continuous time the row of A is all zeros.
   ## T:     sample size.
-  ## mu0:   usually a vector of 0's, except for a 1 corresponding to the constant.
+  ## mu0:   usually just 1, the steady state value of the constant term.  If there are
+  ##        other variables known to be non-stationary for which it is desired to set
+  ##        non-zero ss values, these values should be appended, making mu0 a vector.
+  ## ssndx: A vector of the indexes of variables for which ss values appear in mu0.  Commonly
+  ##        a single number giving the location of the constant term.  ybar[ssndx]==mu0.
   ## Sig0:  A big covariance matrix, to which the distribution of the initial conditions
   ##        converges as roots approach the boundary of the stationary region.
   ##        It should imply standard errors several times as large as the y data itself.
@@ -30,14 +34,15 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
   }
   sca <- blkDglz(A, div, ctOrder=ct)
   nlowmid <- sum(sca$blockDims[1:2])
+  nhi <- n-nlowmid
   if (nlowmid == 0) {
-    mf12 <- rep(0,0)
+    ## mf12 <- rep(0,0)
     v12<- matrix(1,0,0)
     lowmidx <- NULL
   } else {
     lowmidx <-  1:nlowmid 
     ## mf1 <- solve(diag(nlow) - sca$D[lowx,lowx], sca$Pinv[lowx, ] %*% mu0)
-    mf12 <- matrix(0,nlowmid,1)
+    ## mf12 <- matrix(0,nlowmid,1)
     omega12 <- sca$Pinv[lowmidx, ] %*% Omega %*% t(Conj(sca$Pinv[lowmidx, , drop=FALSE]))
     if (ct) {
       v12 <- sylvester(-sca$D[lowmidx, lowmidx], omega12)$X
@@ -81,7 +86,14 @@ SigInit <- function(A, Omega, T, mu0, Sig0, Tfac=1, ct=FALSE) {
 }
   wta <- c(rep(1,nlowmid - nmid), wta, rep(0, n - nlowmid))
   wtb <- sqrt(pmax(1-wta,0))
-  muout <- sca$P %*% (wtb^2 * sca$Pinv %*% mu0)  
+  ## muout <- sca$P %*% (wtb^2 * sca$Pinv %*% mu0)
+  hix <- (nlowmid+1):n
+  if (nhi > length(ssndx)){
+    freey <- setdiff(c(1:n), ssndx)
+    ssndx <- c(ssndx,freey[1:(nhi-length(ssndx))])
+  }
+  z <- solve(sca$P[ssndx,hix], c(mu0,rep(0,nhi-length(ssndx))))
+  muout <- sca$P[ , hix] %*% as.matrix(z)
   vout[lowmidx,lowmidx] <- v12
   vdiag <- (wta %o% wta) * vout + (wtb %o% wtb) * vns # vdiag will not be block diag, but will be closer to it than vout.
   vout <- sca$P %*% vdiag %*% t(Conj(sca$P))

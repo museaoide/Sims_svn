@@ -105,19 +105,16 @@ PstDnsty <- function(param,SysEq,z,bp0,trf,dfactor=1,div,prior.param){
   A[2:12,1] <- fout$C
   Omega <- matrix(0,nrow=12,ncol=12)
   Omega[2:12,2:12] <- fout$impact%*%diag(param[c("sig2m","sig2tau","sig2r","sig2pc")])%*%t(fout$impact)
-  mu0 <- vector("numeric",length=12)
-  names(mu0) <- c("cnst",names(fout$SSvars))
-  mu0[1] <- 1
-  #mu0[2:12] <- fout$SSvars
-  Sig0 <- diag(1e6,nrow=12)
+	mu0 <- c(cnst=1,fout$SSvars[c("p","c","b","tau","lam")])
+  ssndx <- c(1,4,6,8,9,10)
+  Sig0 <- diag(1e0,nrow=12)
   Sig0[1,1] <- 0
-  s0 <- SigInit(A=A, Omega=Omega, T=nz, mu0=mu0, Sig0=Sig0,ct=TRUE)
-#	shat.old <- c(Re(s0$mu),0)
-	shat.old <- c(cnst=1,fout$SSvars,xib=0)
+  s0 <- SigInit(A=A, Omega=Omega, T=nz, mu0=mu0, Sig0=Sig0,ct=TRUE, ssndx=ssndx)
+	shat.old <- c(Re(s0$mu),0)
 	sig.old <- matrix(0,nrow=13,ncol=13)
 	sig.old[1:12,1:12] <- Re(s0$v)
 	sig.old[13,13] <- param["sig2b"]/(1-param["rhob"]^2)
-#browser()
+
   #---------- run kf
 
 #browser()

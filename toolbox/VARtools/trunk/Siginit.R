@@ -1,5 +1,5 @@
 SigInit <- function(A, Omega, T, mu0=1, Sig0, Tfac=1, ct=FALSE, ssndx=1) {
-  ## The system is y(t) = A(t) %*% y(t-1) + eps(t) in discrete time, ydot = A %*% y + eps in
+  ## The system is y(t) = A %*% y(t-1) + eps(t) in discrete time, ydot = A %*% y + eps in
   ## continuous time, with var(eps(t))=Omega.
   ## If the system has a constant term, it is assumed to be represented
   ## by a row of A that has in discrete time only zeros and a single 1 entry, and a corresponding
@@ -88,11 +88,12 @@ SigInit <- function(A, Omega, T, mu0=1, Sig0, Tfac=1, ct=FALSE, ssndx=1) {
   wtb <- sqrt(pmax(1-wta,0))
   ## muout <- sca$P %*% (wtb^2 * sca$Pinv %*% mu0)
   hix <- (nlowmid+1):n
-  if (nhi > length(ssndx)){
+  nss <- length(ssndx)
+  if (nhi > nss)){
     freey <- setdiff(c(1:n), ssndx)
-    ssndx <- c(ssndx,freey[1:(nhi-length(ssndx))])
+    ssndx <- c(ssndx,freey[1:(nhi-nss))])
   }
-  z <- solve(sca$P[ssndx,hix], c(mu0,rep(0,nhi-length(ssndx))))
+  z <- solve(sca$P[ssndx,hix], c(mu0,rep(0,nhi - nss)))
   muout <- sca$P[ , hix] %*% as.matrix(z)
   vout[lowmidx,lowmidx] <- v12
   vdiag <- (wta %o% wta) * vout + (wtb %o% wtb) * vns # vdiag will not be block diag, but will be closer to it than vout.

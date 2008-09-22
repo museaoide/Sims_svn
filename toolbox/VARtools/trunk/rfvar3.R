@@ -1,7 +1,7 @@
 rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu=2,ic=NULL)
   {
     ## This algorithm goes for accuracy without worrying about memory requirements.
-   ## ---------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------
     ## The standard prior it implements is NOT APPROPRIATE for seasonally unadjusted data, even
     ## if seasonal dummies are included in xdata.  The prior shrinks toward simple persistence, so it
     ## will tend to prevent the dummies from picking up all the seasonality.
@@ -81,8 +81,8 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     breaks <- c(0,breaks,T)
     if(any(breaks[2:length(breaks)] <= breaks[1:(length(breaks)-1)]))
       stop("list of breaks must be in strictly increasing order\n")
-## initialize smpl as null if initial observations are only there for lambda/mu prior.
-## matlab code uses the fact that in matlab a:b is null if b<a, which is not true for R.
+    ## initialize smpl as null if initial observations are only there for lambda/mu prior.
+    ## matlab code uses the fact that in matlab a:b is null if b<a, which is not true for R.
     if(breaks[2]>lags)
       smpl <- (lags+1):breaks[2]
     else
@@ -175,7 +175,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
         }
       }
     dimnames(By) <- list(ynames,ynames,as.character(1:lags))
-    xxinames <- c(paste(rep(ynames,each=lags),1:lags,sep=""),xnames)
+    xxinames <- c(paste(rep(ynames,lags),rep(1:lags, each=length(ynames)),sep=""),xnames)
     dimnames(xxi) <- list(xxinames,xxinames)
     if (nox)
       Bx <-  NULL

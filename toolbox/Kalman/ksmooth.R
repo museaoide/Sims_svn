@@ -11,7 +11,12 @@ ksmooth <- function(btt,Stt,bnT,SnT,A,omega) {
   ##SAGI <- AS'/G
   ## line below may slightly slow the routine, but makes it robust vs.
   ## cases where part or all of the state vector is known with certainty.
-  SAGI <- t(qr.solve(t(G),AS))
+  svdg <- svd(G)
+  di <- svdg$d
+  nzndx <- di > sqrt(.Machine$double.eps)
+  di[nzndx] <- 1/di[nzndx]
+  SAGI <- t(AS) %*% svdg$u %*% diag(di) %*% t(svdg$v)
+  ##SAGI <- t(qr.solve(t(G),AS))
   ##*****************************
   btT <- SAGI %*% (bnT - A %*% btt) + btt
   StT <- Stt - SAGI %*% AS + SAGI %*% SnT %*% t(SAGI)

@@ -139,9 +139,8 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
           }
       }
     vldvr <- svd(X)
-    di <- 1./vldvr$d
     dfx <- sum(vldvr$d > 100*.Machine$double.eps)
-    di <- di[1:dfx]
+    di <- 1./vldvr$d[1:dfx]
     vldvr$u <- vldvr$u[, 1:dfx]
     vldvr$v <- vldvr$v[, 1:dfx]
     snglty <- dim(X)[2] - dfx

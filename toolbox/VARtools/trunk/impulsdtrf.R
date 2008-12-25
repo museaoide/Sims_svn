@@ -5,7 +5,8 @@ impulsdtrf <- function(B,smat,nstep)
 ###                 where sigma is the Var(u(t)) matrix and u(t) is the rf residual vector.  One
 ###                 way to get such a smat is to set smat=t(chol(sigma)).  To get the smat
 ###                 corresponding to a different ordering, use
-###                 smat = t(chol(P %*% Sigma %*% t(P)) %*% P), where P is a permutation matrix.
+###                 smat = t(chol(Sigma[ndx, ndx])[ndxi, ndxi] ), where ndx is a permutation vector and
+###                 ndxi is its inverse (e.g. c(3,2,1) and c(3,2,1), or c(2,3,1) and c(3,1,2)).
 ###                 To get impulse responses for a structural VAR in the form A(L)y=eps, with
 ###                 Var(eps)=I, use B(L)=-A_0^(-1)A_+(L) (where A_+ is the coefficients on strictly
 ###                 positive powers of L in A), smat=A_0^(-1).

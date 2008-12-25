@@ -1,6 +1,7 @@
 setUpScrep <- function(crange=c(0.,0.5), nc,  pw, ww, U=function(x,y) { log(pmax(x, .Machine$double.eps*2)) + log(pmax(y-x, .Machine$double.eps*2))}, kappa=1,
                      DxU=function(x,y)  {ifelse(x > 0 & y>x, 1/x - 1/(y-x), 0)}, lbp=1e-7, PNLTY=1) {
-  ## Notes 5/28/2007:  derivative is not working?  needs to be made consistent in obf part with level fcn.  pdf emerges from csminwel not respecting c<w in first column.
+  ## Notes 5/28/2007:  derivative is not working?  needs to be made consistent in obf part with level fcn.
+  ## pdf emerges from csminwel not respecting c<w in first column.
   ## Notes 6/1/2007:  Still need to fix derivative.  With numgrad seems possibly to be working, but numerically rough.
   ## ----------------FIX ABOVE---------------------
   ## ww,pw: Points of support and marginal probabilities for w distribution.  
@@ -18,8 +19,8 @@ setUpScrep <- function(crange=c(0.,0.5), nc,  pw, ww, U=function(x,y) { log(pmax
   screpDC <- function(dc=rep(.1,9), pc=rep(.111,8), alpha=1) {
     ## computes objective function, including the penalty defining the constraints, and its derivative vector
     ## dc:    determines the points in crange that form the support of the c distribution.  The entries are all positive and
-    ##        sum to one.  Support point i is at (sum_1^i dc_i) * crange.
-    ## pc:    Marginal probabilities on the points in c's support, with last one omitted (=1 - sum of others).
+    ##        sum to one.  Support point i is at (sum_1^i dc_i) * (crange[2] - crange[1]) + crange[1].
+    ## pc:    Marginal probabilities on the points in c's support, with last one omitted ( = 1 - sum of others).
     ## alpha: 1/(Lagrange multiplier on info constraint).  This is treated as a free parameter, so that the FOC's
     ##        let us write the joint density as pc %*% exp(alpha*U) %*% mu(w) for a pdf pc and a weighting function mu.
     if ((sum(dc) > 1) || any( dc < 0 ) ) {
@@ -77,7 +78,7 @@ setUpScrep <- function(crange=c(0.,0.5), nc,  pw, ww, U=function(x,y) { log(pmax
     
     dpdfdalpha <- t(c(dhdalpha) * t(peaU)) + t(h * t(dpeaUdalpha))
     ## /deriv---------------
-    h <- rep(1,nc) %*% pdf
+    h <- rep(1,nc) %*% pdf              #Is this redundant?  Looks like should have h == 1, so pdf unchanged.
     h <- pw / h
     pdf <- t(c(h) * t(pdf ))
     EU <- sum(pdf * Umat)

@@ -1,4 +1,4 @@
-csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE,alpha=1e-3,delta=1e-6,long=FALSE){
+csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE,alpha=1e-3,delta=1e-6,long=FALSE) {
 ### FUN:      a function written so that if presented with a matrix x, it produces a return value of
 ###           same dimension as x.  The number of rows in x and FUN(x) are always the
 ###           same.  The number of columns is the number of different input arguments
@@ -83,13 +83,13 @@ csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE,alpha=
       dx <- lambda*dx0
       f <- FUN(x+dx,...)
       af <- sum(abs(f))
-      if(af < afmin) {
+      if(!is.nan(af) && af < afmin) {
         afmin <- af
         fmin <- f
         lambdamin <- lambda
         xmin <- x+dx
       }
-      if( ((lambda >0) && (af0-af < alpha*lambda*af0)) || ((lambda<0) && (af0-af < 0) )) {
+      if (((lambda >0) && (is.nan(af) || (af0-af < alpha*lambda*af0))) || ((lambda<0) && (is.nan(af) || (af0-af < 0)) )) {
         if(!shrink) {
           factor <- factor^.6
           shrink <- TRUE

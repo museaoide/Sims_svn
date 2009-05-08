@@ -147,7 +147,7 @@ gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
       fwt <- -solve(qzl$b[uix,uix,drop=FALSE],q2 %*% psi)
     }
     ywt <- G0I[,uix,drop=FALSE]
-    loose <- etawt1 %*% (diag(neta) - veta %*% t(Conj(veta))) 
+    loose <- G0I %*% etawt1 %*% (diag(neta) - veta %*% t(Conj(veta))) 
     ##-------------------- above are output for system in terms of z'y -------
     G1<-Re(qzl$z %*% G1 %*% t(Conj(qzl$z)))
     C <- Re(qzl$z%*%C)

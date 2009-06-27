@@ -1,4 +1,4 @@
-qzdivct <- function(stake,qzout) {
+qzdivct <- function(stake,qzlist) {
   ## Takes qz decomp output, rearranges a and b
   ## so that all cases of real(b(i,i)/a(i,i))>stake are in lower right
   ## corner, while preserving U.T. and orthonormal properties and q'az' and
@@ -13,8 +13,8 @@ qzdivct <- function(stake,qzout) {
   ##
   realsmall <- sqrt(.Machine$double.eps)*10
   ##realsmall <- 1e-3
-  n   <-  dim(qzout$a)[1]
-  root  <-  cbind(diag(qzout$a), diag(qzout$b))
+  n   <-  dim(qzlist$a)[1]
+  root  <-  cbind(diag(qzlist$a), diag(qzlist$b))
   ## first sort on the non-zero root criterion
   xdown0  <-  abs(root[, 1]) < realsmall
   xdown  <-  xdown0 | (Re(root[ , 2 ] / (xdown0+root[ , 1])) > stake)
@@ -29,8 +29,8 @@ qzdivct <- function(stake,qzout) {
     if ( m == 0) break               #This means we're done with zeros
     if (i > m) {
       for ( k in m:(i-1) ) {
-        qzout  <-  qzswitch(k,qzout)
-        root <- cbind(diag(qzout$a), diag(qzout$b))
+        qzlist  <-  qzswitch(k,qzlist)
+        root <- cbind(diag(qzlist$a), diag(qzlist$b))
         xdown0[k:(k+1)] <- xdown0[(k+1):k]
         xdown[k:(k+1)] <- xdown[(k+1):k]
       }
@@ -45,12 +45,12 @@ qzdivct <- function(stake,qzout) {
         break
       }
     }
-    if (m == 0) return(qzout)
+    if (m == 0) return(qzlist)
     if (i > m) {
       for (k in m:(i-1) ) {
         gevOld <- root[k:(k+1), ]
-        qzout  <-  qzswitch(k,qzout)
-        root <- cbind(diag(qzout$a), diag(qzout$b))
+        qzlist  <-  qzswitch(k,qzlist)
+        root <- cbind(diag(qzlist$a), diag(qzlist$b))
         xdown0[k:(k+1)] <- xdown0[(k+1):k]
         xdown[k:(k+1)] <- xdown[(k+1):k]
         gev <- root[k:(k+1), ]
@@ -63,5 +63,5 @@ qzdivct <- function(stake,qzout) {
   d0 <- which(xor(xdown0f, xdown0))
   d <- which(xor(xdownf, xdown))
   if (length(d0) + length(d) > 0 ) warning(paste("root classification shifted with sort: d0 = ", d0, "d1 = ",d1))
-  return(qzout)
+  return(qzlist)
 }

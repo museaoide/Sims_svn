@@ -1,28 +1,26 @@
 \name{qzswitch}
 \alias{qzswitch}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+\title{Interchanges adjacent eigenvalues in a qz decomposition }
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+The qz decomposition is in the form Q, A, B, Z, with A and B triangular
+and Q and Z Hermitian (complex orthonormal).  qzswitch preserves this
+structure while reordering an adjacent pair of diagonal rows and columns.
 }
 \usage{
-qzswitch(i = 1, a = as.complex(1), b = as.complex(1), q = as.complex(1), z = as.complex(1))
+qzswitch(i = 1, qzlist)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{i}{ ~~Describe \code{i} here~~ }
-  \item{a}{ ~~Describe \code{a} here~~ }
-  \item{b}{ ~~Describe \code{b} here~~ }
-  \item{q}{ ~~Describe \code{q} here~~ }
-  \item{z}{ ~~Describe \code{z} here~~ }
+  \item{i}{Location of first element to be interchanged }
+  \item{qzlist}{List defining the transform as returned by \code{qz()}}
 }
-\details{
-  ~~ If necessary, more details than the description above ~~
-}
+%\details{
+%}
 \value{
   ~Describe the value returned
   If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
+  \item{ }{Description of 'comp1'}
   \item{comp2 }{Description of 'comp2'}
   ...
 }

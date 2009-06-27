@@ -2,8 +2,8 @@ Package: gensys
 Type: Package
 Title: Linear rational expectations model solver
 Version: 1.0
-Date: 2006-05-06
+Date: 2009-06-25
 Author: Chris Sims
 Maintainer: <sims@princeton.edu>
 Description: Takes as arguments a set of matrices defining a linear rational expectations system, and produces a solution equation that characterizes current variables as a function of lagged variables and exogenous disturbances.  Also checks for existence and uniqueness of the solution.
-License: LGPL
+License: GPL >=2

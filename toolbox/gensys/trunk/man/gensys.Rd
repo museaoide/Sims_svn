@@ -2,9 +2,9 @@
 \alias{gensys}
 \title{ Solve linear rational expectations models }
 \description{
-Solve a first order linear RE model using the QZ decomposition.  Also test
-for existence and uniqueness of solutions.  The model is in the form
-\deqn{\Gamma_0 y_t = \Gamma_1 y_{t-1} + c_0 + \Psi z_t + \Pi \eta_t}
+Solve a first order linear RE model using the QZ (i.e. gneralized Schur)
+decomposition.  Also test for existence and uniqueness of solutions.
+The model is in the form \deqn{\Gamma_0 y_t = \Gamma_1 y_{t-1} + c_0 + \Psi z_t + \Pi \eta_t}
 with \eqn{E_t[\eta_{t+1}]=0}.
 }
 \usage{
@@ -32,7 +32,7 @@ gensys(g0, g1, c0, psi, pi, div = -1)
   \item{ywt}{\eqn{\theta_y}}
   \item{gev}{generalized eigenvalues}
   \item{eu}{\code{eu[1]} = solution exists; \code{eu[2]} = solution is unique;
-  For these, 0 mean \code{FALSE}, 1 means \code{TRUE}.  (0,0) is possible.  It means
+  For the \code{eu} values, 0 means \code{FALSE}, 1 means \code{TRUE}.  (0,0) is possible.  It means
   there is no stable solution, and even if a stable solution were imposed by forcing constraints
   on the behavior of \eqn{z}, there would be indeterminacy.  (-2,-2) is possible.  It means there
   are coincident zeros in \code{gev}, which implies that the system is not of full rank --- some equations
@@ -58,7 +58,8 @@ g1 <- matrix(c(-1,-1, rho, theta), 2, 2, byrow=TRUE)
 Pi <- c(1,0)
 Psi <- c(0,1)
 c0 <- c(0,0)
-gensys(g0, g1, c0, Psi, Pi)
-rm(g0, g1, Pi, Psi, c0, rho, theta)
+gout <- gensys(g0, g1, c0, Psi, Pi)
+gout
+rm(gout)
 }
 \keyword{math} 

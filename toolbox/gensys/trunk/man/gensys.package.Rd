@@ -21,7 +21,8 @@ QZ decomposition routine.  The raw QZ decomposition can be useful for diagnosing
 problems with a model.  \code{qzdiv} sorts the generalized eignvalues into larger and
 smaller sets.  \code{qzswitch} is used by \code{qzdiv} and is probably seldom useful by
 itself.  \code{gstate} is an aid to interpreting the output of \code{gensys}, attempting to
-make dimension-reducing simplifications by identifying candidate state vectors.
+make dimension-reducing simplifications by identifying candidate state
+vectors.  \code{gensysct,qzdivct} are for continuous time models.
 }
 \author{
 Chris Sims: \email{sims@princeton.edu}, \url{http://www.princeton.edu/~sims}

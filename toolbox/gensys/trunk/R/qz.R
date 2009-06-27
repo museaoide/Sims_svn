@@ -1,4 +1,4 @@
-qz <- function(a=array(1,dim=1,1),b=array(1,dim=1,1)){
+qz <- function(a=array(1,dim=1,1),b=array(1,dim=1,1)) {
   ## R does not load all of lapack in its own lapack.so library.  The routine
   ## needed here, zgges, therefore has to be loaded directly.
   if(!is.loaded("zgges")){
@@ -17,6 +17,11 @@ qz <- function(a=array(1,dim=1,1),b=array(1,dim=1,1)){
   WORK <- vector("complex",length=LWORK)
   RWORK <- vector("numeric",length=8*N)
   INFO <- 0
+## -------------------------------
+## Notes:  The reordering could be done inside zgges.f.  This would require writing a fortran module that contained both the
+## routine to check the size or sign of the real part of the root and a separate program, that sets div in the module.  (All this to
+## get arund the fact that zgges wants the comparison function to have just two arguments.)  Also, to implement this in f77, and thereby
+## guarantee wider portability, one would have to use a common block and ENTRY, rather than a module and double,save.  
   ##-------------------------------
   ## Returns a,b,q,z s.t. q %*% t(Conj(q)) = z %*% t(Conj(z)) = I, a and b upper triangular,
   ## q %*% a %*% t(Conj(z)) = A, and q %*% b %*% t(Conj(z))=B.  The diagonal of b should be

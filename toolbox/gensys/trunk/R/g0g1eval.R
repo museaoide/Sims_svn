@@ -19,7 +19,7 @@ g0g1eval <- function(dexpr, x, xl=as.vector(x), shock, experr, param) {
   Psi <- matrix(0, nex, nshock)
   Pi <- matrix(0, nex, length(experr))
   for ( i in 1:nex ) {
-    dvec <- attr(eval(eval(dexpr[i]), as.list(c(xl, x, shock, param))),"gradient")
+    dvec <- attr(eval(eval(dexpr[i]), as.list(c(x, xl, shock, param))),"gradient")
     loc <- 0
     g0[i,] <- dvec[1:nx]
     loc <- nx

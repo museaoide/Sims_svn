@@ -1,4 +1,4 @@
-gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
+gensystvc <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1, tvc=NULL)
   {
     ##System given as
     ##        g0*y(t)=g1*y(t-1)+c0+psi*z(t)+pi*eta(t),
@@ -10,7 +10,10 @@ gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
     ## loose characterizes the dimensions along which there is non-uniqueness.
     ## If div is omitted from argument list, a div>1 is calculated.
     ## eu(1)=1 for existence, eu(2)=1 for uniqueness.  eu=[-2,-2] for coincident zeros.
+    ## tvc:  If non-null, tvc is a matrix such that tvc %*% y(t) is a vector whose
+    ## i'th element is constrained to grow slower than div[i]^t.
     ## By Christopher A. Sims 2/24/2004, from earlier matlab code of same author.
+    stop("This code is under construction, not yet usable")
     eu <- c(0,0)
     realsmall <- 1e-7
     fixdiv <- (div>0)
@@ -147,15 +150,13 @@ gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
       fwt <- -solve(qzl$b[uix,uix,drop=FALSE],q2 %*% psi)
     }
     ywt <- G0I[,uix,drop=FALSE]
-    ##loose <- G0I %*% etawt1 %*% (diag(neta) - veta %*% t(Conj(veta)))
-    loose <- G0I %*% qq %*% pi %*% (diag(neta) - veta %*% t(Conj(veta)))
-    ## loose <- G0I %*% rbind(loose,matrix(0,nunstab,neta))  #(think the above is a mistaken remnant)
+    loose <- etawt1 %*% (diag(neta) - veta %*% t(Conj(veta))) 
     ##-------------------- above are output for system in terms of z'y -------
-    G1 <- Re(qzl$z %*% G1 %*% t(Conj(qzl$z)))
+    G1<-Re(qzl$z %*% G1 %*% t(Conj(qzl$z)))
     C <- Re(qzl$z%*%C)
     impact <- Re(qzl$z%*%impact)
     ywt <- qzl$z%*%ywt
-    loose <- Re(qzl$z %*% loose)
+    loose <- Re(qzl$z %*% rbind(loose,matrix(0,nunstab,neta)))
     return(list(G1=G1,C=C,impact=impact,fmat=fmat,fwt=fwt,ywt=ywt,gev=gev,eu=eu,loose=loose))
   }
 

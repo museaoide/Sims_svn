@@ -89,9 +89,9 @@ SigInit <- function(A, Omega, T, mu0=1, Sig0, Tfac=1, ct=FALSE, ssndx=1) {
   ## muout <- sca$P %*% (wtb^2 * sca$Pinv %*% mu0)
   hix <- (nlowmid+1):n
   nss <- length(ssndx)
-  if (nhi > nss)){
+  if (nhi > nss){
     freey <- setdiff(c(1:n), ssndx)
-    ssndx <- c(ssndx,freey[1:(nhi-nss))])
+    ssndx <- c(ssndx,freey[1:(nhi-nss)])
   }
   z <- solve(sca$P[ssndx,hix], c(mu0,rep(0,nhi - nss)))
   muout <- sca$P[ , hix] %*% as.matrix(z)

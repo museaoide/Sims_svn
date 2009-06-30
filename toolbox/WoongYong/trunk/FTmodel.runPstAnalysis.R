@@ -1,4 +1,4 @@
-## clear workspace
+i## clear workspace
 rm(list=ls())
 options(error = recover)
 options(scipen = 5)

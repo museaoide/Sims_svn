@@ -55,7 +55,7 @@ csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE,alpha=
       if(is.finite(grad) && sum(abs(grad))> 4*nv^2*EPS) {
         svdg <- svd(grad)
         svdd <- svdg$d
-        if(!(min(svdd)>0) || max(svdd)/min(svdd)>100*EPS){
+        if(!(min(svdd)>0) || max(svdd)/min(svdd) > 1/(100*EPS)){
           svdd <- pmax(svdd,max(svdd)*1e-13)
           grad <- svdg$u%*% diag(svdd,ncol=length(svdd)) %*% t(svdg$v)
         }

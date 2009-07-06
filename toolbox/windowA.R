@@ -32,6 +32,5 @@ windowA <- function(x, start=NULL, end=NULL, frequency=NULL, deltat=NULL, agg=c(
   }
   if (noagg) warning("No time aggregation")
   if (length(start(xx)) != 2 ) warning("aggregated data not aligned with time unit")
-
   return(xx)
 }

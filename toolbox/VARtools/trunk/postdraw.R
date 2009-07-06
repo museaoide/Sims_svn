@@ -4,6 +4,9 @@ postdraw <- function(vout,n,nosigprior=FALSE){
 ## vout:	return value from rfvar3()
 ## n:		Number of draws
 ## nosigprior:	If true, don't use the Jeffreys-motivated improper prior.
+##-----------------------------------------
+## smat:        t(]]chol(sigma draw)).  Use directly as smat in impulsdtrf.
+## By,Bx:       coefficient draws
 ##--------------------
   xxi <- chol(vout$xxi)
   ncf <- dim(xxi)[1]

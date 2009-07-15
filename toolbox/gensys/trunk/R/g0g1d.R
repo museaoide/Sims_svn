@@ -1,4 +1,4 @@
-g0g1d <- function(ex,x,xl=paste(x,"l",sep=""),shock) {
+g0g1d <- function(ex, x=attr(ex,"vlist"), xl=paste(x,"l",sep=""), shock=attr(ex, "shock")) {
   ## ex:     vector of expressions defining equilibrium
   ## x:      names (character) of current value variables 
   ## xl:     lagged value names. By default, just x names with "l" appended.

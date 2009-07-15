@@ -24,7 +24,6 @@ ssfd <- function(xval, dfcn, shock, param, xlval=xval){
     grad[ifcn,] <- attr(dball,"gradient") # for some reason the column names in gradient are lost here
   }
   dimnames(discrep) <- list(names(dfcn$g1),list(NULL))
-  browser()
   dimnames(grad) <- list(names(dfcn$g1),names(xval))
   return(list(discrep=discrep,grad=grad))
 }

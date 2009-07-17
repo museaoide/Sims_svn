@@ -113,7 +113,10 @@ csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE,alpha=
           }
         }
       } else {
-        if( (lambda >0) && (af-af0 > (1-alpha)*lambda*af0) ) {
+        ## if( (lambda >0) && (af-af0 > (1-alpha)*lambda*af0) ) {
+        ## I think af-af0 instead of af0-af in the line above is a long-standing error that
+        ## means this branch is never visited.  (cas 7/16/2009)
+        if( (lambda >0) && (af0 - af > (1-alpha)*lambda*af0) ) {
           if(shrink) {
             factor <- factor^.6
             shrink <- FALSE

@@ -6,7 +6,7 @@ csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE,alpha=
 ### x:        initial value for FUN's argument.
 ### gradfun:  the function called to evaluate the gradient matrix.  If this
 ###           is NULL (the default), a numerical gradient is used instead.  If it is identical to
-###              FUN, then FUN returns a value v with attr(v,"grad") the gradient.
+###              FUN, then FUN returns a value v with attr(v,"grad") the gradient matrix.
 ### crit:     if the sum of absolute values that FUN returns is less than this,
 ###           the equation is solved.
 ### itmax:    the solver stops when this number of iterations is reached, with rc=4

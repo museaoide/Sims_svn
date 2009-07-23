@@ -3,7 +3,7 @@ g0g1eval <- function(dexpr, x, xl=as.vector(x), shock, experr, param) {
   ##      x:     vector of values (not names) of x
   ##     xl:     vector of values of xl 
   ## shock:      exogenous shocks (all assumed centered at 0)
-  ## experr:     vector of numbers or names of equations with expectational errors
+  ## experr:     logical vector, TRUE for equations with expectational errors
   ##  param:     vector of values of parameters (all other symbols) in the expressions
   ## NB x, xl, and param must all be vectors with named components, or lists.
   if (is.null(names(x))) { names(x) <- dimnames(x)[[1]]}
@@ -17,7 +17,8 @@ g0g1eval <- function(dexpr, x, xl=as.vector(x), shock, experr, param) {
   g0 <- matrix(0, nex, nx)
   g1 <- matrix(0, nex, nxl)
   Psi <- matrix(0, nex, nshock)
-  Pi <- matrix(0, nex, length(experr))
+  nxerr <- sum(experr)
+  Pi <- matrix(0, nex, sum(experr))
   for ( i in 1:nex ) {
     dvec <- attr(eval(eval(dexpr[i]), as.list(c(x, xl, shock, param))),"gradient")
     loc <- 0
@@ -27,11 +28,11 @@ g0g1eval <- function(dexpr, x, xl=as.vector(x), shock, experr, param) {
     loc <- loc + nxl
     Psi[i,] <- dvec[(loc+1):(loc+nshock)]
   }
-  Pi[experr,] <- diag(length(experr))
+  Pi[experr,] <- diag(nxerr)
   dimnames(g0) <- list(names(dexpr),names(x))
   dimnames(g1) <- dimnames(g0)
-  if(is.numeric(experr)) experr <- names(dexpr)[experr]
+  ## if(is.numeric(experr)) experr <- names(dexpr)[experr]
   dimnames(Psi) <- list(names(dexpr),names(shock))
-  dimnames(Pi) <- list(names(dexpr), experr)
+  dimnames(Pi) <- list(names(dexpr), names(dexpr)[experr])
   return(list(g0=g0, g1=-g1, Psi=-Psi, Pi=-Pi))
 }

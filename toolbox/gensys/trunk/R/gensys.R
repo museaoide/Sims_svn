@@ -156,6 +156,12 @@ gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
     impact <- Re(qzl$z%*%impact)
     ywt <- qzl$z%*%ywt
     loose <- Re(qzl$z %*% loose)
+    vn <- dimnames(g0)[[2]]
+    dimnames(G1) <- list(vn,vn)
+    dimnames(C) <- list(vn,NULL)
+    dimnames(impact)[[1]] <- vn
+    dimnames(ywt)[[1]] <- vn
+    dimnames(loose)[[1]] <- vn
     return(list(G1=G1,C=C,impact=impact,fmat=fmat,fwt=fwt,ywt=ywt,gev=gev,eu=eu,loose=loose))
   }
 

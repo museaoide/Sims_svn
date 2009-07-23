@@ -7,7 +7,7 @@ sssys <- function(eq) {
   ## replaced by current variable names.  This is useful in solving
   ## for or checking validity of steady states.
   nq <- length(eq)
-  nv <- length(eattr(eq, "vlist"))
+  nv <- length(attr(eq, "vlist"))
   eq2 <- eq
   for ( iv in 1:nv) {
     eq2 <- parse(text=gsub(paste("(\\b", attr(eqft,"vlist")[iv], ")l\\b", sep=""),  "\\1", eq2, perl=TRUE))

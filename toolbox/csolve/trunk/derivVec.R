@@ -1,4 +1,4 @@
-derivVec <- function(ex, x, param) {
+derivVec <- function(ex, x) {
   ##    ex:    a vector of expressions
   ##     x:    a character vector of variable names w.r.t. which the expressions will be differentiated
   ## param:    a vector of other variable names that will be arguments to the function returned
@@ -8,25 +8,25 @@ derivVec <- function(ex, x, param) {
   nq <- length(ex)
   nv <- length(x)
   outf <- vector("expression",nq)
-  outg <- outf
   for (iq in 1:nq) {
     f <- deriv(ex[iq], x)
     outf[iq] <- f
   }
   fret <- function(z, p) {
-    names(z) <- x
-    names(p) <- param
     fval <- vector("numeric", nq)
     gval <- matrix(0, nq, nv)
+    zv <- as.vector(z)
+    names(zv) <- dimnames(z)[[1]]
     for (iq in 1:nq) {
-      fg <- eval(outf[iq], as.list(c(z,p)))
+      fg <- eval(outf[iq], as.list(c(zv, p)))
       fval[iq] <- fg
       gval[iq, ] <- attr(fg, "grad")
     }
     fval <- c(fval)
+    names(fval) <- names(ex)
+    dimnames(gval) <- list(names(zv), names(zv))
     attr(fval, "grad") <- gval
     return(fval)
   }
   return(fret)
 }
-  

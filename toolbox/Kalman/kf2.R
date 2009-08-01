@@ -8,7 +8,7 @@ kf2 <- function(y,H,shat,sig,G,M) {
   ## The posterior on the new state is N(shatnew,signew) and lh is a two-dimensional vector containing
   ## the increments to the two component terms of the log likelihood function.  They are added 
   ## to form the log likelihood, but are used separately in constructing a concentrated or marginal
-  ## likelihood. yhat is the error in the forecast of y based on the prior.
+  ## likelihood. fcsterr is the error in the forecast of y based on the prior.
   SMALLSV <- 1e-10
   omega <- G %*% sig %*% t(G) + crossprod(M)
   if (is.null(dim(H))) dim(H) <- c(1,length(H))

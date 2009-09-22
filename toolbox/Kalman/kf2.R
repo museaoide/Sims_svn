@@ -46,5 +46,5 @@ kf2 <- function(y,H,shat,sig,G,M) {
       signew <- omega - t(ho) %*% crossprod(hohifac) %*% ho
     }
   }
-  return(list(shatnew=shatnew, signew=signew, lh=lh, fcsterr=fcsterr))
+  return(list(shat=shatnew, sig=signew, lh=lh, fcsterr=fcsterr))
 }

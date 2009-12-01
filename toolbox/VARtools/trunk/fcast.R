@@ -11,7 +11,7 @@ fcast <- function(y0, By, Bx, xdata=NULL, const=TRUE, horiz, shocks=NULL) {
   else
     lags <- dim(y0)[1]
   if( is.null(shocks)) shocks <- matrix(0, horiz, dim(y0)[2])
-  stopifnot(identical(dim(shocks), c(horiz,dim(y0)[2])))
+  stopifnot(all.equal(dim(shocks), c(horiz,dim(y0)[2])))
   stopifnot( lags == dim(By)[3] )
   stopifnot( is.null(xdata) || (is.null(dim(xdata)) && length(xdata) == horiz+lags) || horiz+lags == dim(xdata)[1] )
   if (const) {

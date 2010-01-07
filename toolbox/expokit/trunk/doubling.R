@@ -3,7 +3,7 @@ doubling <- function(A,omega,crit=1e-9) {
   Aj <- A
   j <- 1
   vinc <- sum(abs(V))
-  if (!is.complex(A)) {
+    if (!is.complex(A)) {
     while (j < 10000 && vinc > crit ) {
       dv <-  Aj %*% V %*% t(Aj)
       vinc <- sum(abs(dv))

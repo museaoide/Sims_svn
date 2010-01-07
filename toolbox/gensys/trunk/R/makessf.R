@@ -17,3 +17,4 @@ makessf <- function(eq, xnames, xlnames=paste(xnames,"l",sep=""), shocknames, pa
   }
   return(ssf)
 }
+## this seems to be a "pre-eqsys" version of steady state code.

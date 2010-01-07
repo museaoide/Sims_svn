@@ -9,11 +9,9 @@ g0g1d <- function(ex, x=attr(ex,"vlist"), xl=paste(x,"l",sep=""), shock=attr(ex,
     g0g1out[[ix]] <- deriv(ex[ix],c(x,xl,shock))
   }
   names(g0g1out) <- names(ex)
+  g0g1out <- structure(g0g1out, names=names(ex), vlist=attr(ex, "vlist"), shock=attr(ex, "shock"), param=attr(ex, "param"), forward=attr(ex,"forward"))
   ## What is returned is a list of nf expressions.  When evaluated, these
   ## expressions yield the values of the expressions in ex, but they also have "gradient" attributes, so
-  ## that attr(evaluated expression,"gradient") is the gradient vector,
-  ## or a gradient matrix if the elements of x (say) are vectors.  Note that when this routine
-  ## returns a matrix as the gradient, this is not the df/dx matrix with f the ex vector.  It is
-  ## df(ix)/dx for a particular ix, evaluated at a vector of arguments.
+  ## that attr(evaluated expression,"gradient") is, for each of the expressions in ex,  the gradient vector for that ex[[ix]].
   return(g0g1out)
 }

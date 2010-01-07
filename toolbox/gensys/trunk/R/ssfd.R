@@ -10,19 +10,14 @@ ssfd <- function(xval, dfcn, shock, param, xlval=xval){
   ## grad:    the nv x nf (square) matrix of derivatives of the discrepancy w.r.t. the x vector
   ##-------------------
   if(identical(xval,xlval)) {
-    names(xlval) <- paste(names(x),"l",sep="l")
+    names(xlval) <- paste(names(xval),"l",sep="l")
   }
   nv <- length(xval)
   nf=length(dfcn$g0)
   ## if(!(nv==nf))stop("mismatch of x and f lengths") # wrong place to check this
   discrep <- matrix(0,nf,1)
   grad <- matrix(0,nf,nv)
-  for(ifcn in 1:nf){
-    f <- dfcn$g1[[ifcn]]
-    dball <- do.call("f",c(xval,xlval,shock,param))
-    discrep[ifcn,1] <- c(dball)
-    grad[ifcn,] <- attr(dball,"gradient") # for some reason the column names in gradient are lost here
-  }
+  
   dimnames(discrep) <- list(names(dfcn$g1),list(NULL))
   dimnames(grad) <- list(names(dfcn$g1),names(xval))
   return(list(discrep=discrep,grad=grad))

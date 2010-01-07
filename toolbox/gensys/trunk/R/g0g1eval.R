@@ -1,4 +1,4 @@
-g0g1eval <- function(dexpr, x, xl=as.vector(x), shock, experr, param) {
+g0g1eval <- function(dexpr, x, xl=as.vector(x), shock=attr(dexpr, "shock"), experr=attr(dexpr, "forward"), param) {
   ##  dexpr:     derivative expression vector, as produced by g0g1d
   ##      x:     vector of values (not names) of x
   ##     xl:     vector of values of xl 
@@ -8,7 +8,11 @@ g0g1eval <- function(dexpr, x, xl=as.vector(x), shock, experr, param) {
   ## NB x, xl, and param must all be vectors with named components, or lists.
   if (is.null(names(x))) { names(x) <- dimnames(x)[[1]]}
   if (is.null(names(xl))) names(xl) <- paste(names(x),"l",sep="")
-  if (is.null(names(shock))) names(shock) <- dimnames(shock)[[1]]
+  if(is.character(shock))
+    { nshock <- shock; shock <- rep(0, length(nshock)); names(shock) <- nshock
+  } else {
+    if (is.null(names(shock))) names(shock) <- dimnames(shock)[[1]]
+  }
   if (is.null(names(param))) names(param) <- dimnames(param)[[1]]
   nex <- length(dexpr)
   nx <- length(x)
@@ -34,5 +38,5 @@ g0g1eval <- function(dexpr, x, xl=as.vector(x), shock, experr, param) {
   ## if(is.numeric(experr)) experr <- names(dexpr)[experr]
   dimnames(Psi) <- list(names(dexpr),names(shock))
   dimnames(Pi) <- list(names(dexpr), names(dexpr)[experr])
-  return(list(g0=g0, g1=-g1, Psi=-Psi, Pi=-Pi))
+  return(list(g0=g0, g1=-g1, Psi=-Psi, Pi=-Pi, param=param))
 }

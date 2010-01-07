@@ -10,7 +10,7 @@ sssys <- function(eq) {
   nv <- length(attr(eq, "vlist"))
   eq2 <- eq
   for ( iv in 1:nv) {
-    eq2 <- parse(text=gsub(paste("(\\b", attr(eqft,"vlist")[iv], ")l\\b", sep=""),  "\\1", eq2, perl=TRUE))
+    eq2 <- parse(text=gsub(paste("(\\b", attr(eq,"vlist")[iv], ")l\\b", sep=""),  "\\1", eq2, perl=TRUE))
   }
   attributes(eq2) <- attributes(eq)
   return(eq2)

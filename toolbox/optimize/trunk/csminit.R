@@ -12,7 +12,7 @@ csminit <- function(fcn,x0,f0,g0,badg,H0,...){
 ###
   ## ANGLE <- .0005
   ANGLE <- 1e-7
-  THETA <- .3                           #(0<THETA<.5) THETA near .5 makes long line searches, possibly fewer iterations.
+  THETA <- .1                          #(0<THETA<.5) THETA near .5 makes long line searches, possibly fewer iterations.
   FCHANGE <- 1000
   MINLAMB <- 1e-9
 ### fixed 7/15/94

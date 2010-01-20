@@ -20,7 +20,6 @@ csminwel <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=FAL
 ###        may be a decent starting point.  One can also start from the one with best function value.)
   dots <- list(...)                     # (need this to save these arguments in case of cliffs)
   nx <- length(x0)
-  ## Verbose <- TRUE
   NumGrad <- !is.function(grad)
   done <- 0
   itct <- 0

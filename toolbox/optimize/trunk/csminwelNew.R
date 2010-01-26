@@ -14,7 +14,7 @@ csminwelNew <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=
 ###        Note that if the program ends abnormally, it is possible to retrieve the current x,
 ###        f, and H from the files g1.mat and H.mat that are written at each iteration and at each
 ###        hessian update, respectively.  (When the routine hits certain kinds of difficulty, it
-###        write g2.mat and g3.mat as well.  If all were written at about the same time, any of them
+###        writes g2.mat and g3.mat as well.  If all were written at about the same time, any of them
 ###        may be a decent starting point.  One can also start from the one with best function value.)
   dots <- list(...) # (need this to save these arguments in case of cliffs)
   nx <- length(x0)

@@ -12,7 +12,7 @@ csminit <- function(fcn,x0,f0,g0,badg,H0,...){
 ###
   ## ANGLE <- .0005
   ANGLE <- 1e-7
-  THETA <- .1                          #(0<THETA<.5) THETA near .5 makes long line searches, possibly fewer iterations.
+  THETA <- .01 #(0<THETA<.5) THETA near .5 makes long line searches, possibly fewer iterations.
   FCHANGE <- 1000
   MINLAMB <- 1e-9
 ### fixed 7/15/94
@@ -27,7 +27,7 @@ csminit <- function(fcn,x0,f0,g0,badg,H0,...){
   g <- g0
   gnorm <- sqrt(sum(g^2))
 ###
-  if (!badg && (gnorm < 1.e-12)) {       # put !badg 8/4/94
+  if (!badg && (gnorm < 1.e-12)) {      # put !badg 8/4/94
     retcode <- 1
     dxnorm <- 0
     ## gradient convergence
@@ -61,11 +61,19 @@ csminit <- function(fcn,x0,f0,g0,badg,H0,...){
       ## test for alignment of dx with gradient and fix if necessary
       a <- -dfhat/(gnorm*dxnorm)
       if(a<ANGLE){
-        dx <- dx - as.numeric(ANGLE*dxnorm/gnorm+dfhat/(gnorm*gnorm))*g
-        dx <- dx*dxnorm/sqrt(sum(dx^2)) # This line added 2/18/2004
-        dfhat <- crossprod(dx,g)
-        ## dxnorm <- sqrt(sum(dx^2)) # No longer needed with 2/18/2004 change
-        cat("Correct for low angle:" ,a,"\n")
+        if (a < 0) {
+          dx <- -g / gnorm^2
+          dfhat <- -1
+          cat("H unused\n")
+          ## Don't bother with H.  It's not psd. Step length here appropriate for log LH,
+          ## where 1.0 is a reasonable scale for changes.
+        } else {
+          dx <- dx - as.numeric(ANGLE*dxnorm/gnorm+dfhat/(gnorm*gnorm))*g
+          dx <- dx*dxnorm/sqrt(sum(dx^2)) # This line added 2/18/2004
+          dfhat <- crossprod(dx,g)
+          ## dxnorm <- sqrt(sum(dx^2)) # No longer needed with 2/18/2004 change
+          cat("Correct for low angle:" ,a,"\n")
+        }
       }
     }
     cat(sprintf("Predicted improvement            = %18.9f\n",-dfhat/2))

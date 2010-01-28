@@ -104,8 +104,7 @@ DiscPObjX <- function(param, gy, y, U, alph) {
   DPobj <- c(DPobj) - c((1/alph) * (DPpnew %*% sy(log(ygivenx) * ygivenx) + c(tensor(DPygivenx, c(pnew) * (1 + log(ygivenx)), 2:3, 1:2))))
   DXobj <- c(DXobj) - c((1/alph) * (DXpnew %*% sy(log(ygivenx) * ygivenx) + c(tensor(DXygivenx, c(pnew) * (1 + log(ygivenx)), 2:3, 1:2))))
   obj <- -obj                           #as input to minimizer
-  attr(obj, "gradient") <- -c(cbind(diag(nx - 1), rep(-1, nx - 1)) %*% DPobj, DXobj) #recongizing that there are only nx-1 p parameters, with  
-  ygivenx <- c(h) * t(exp(alph * Umat) )
+  attr(obj, "gradient") <- -c(cbind(diag(nx - 1), rep(-1, nx - 1)) %*% DPobj, DXobj) #recognizing that there are only nx-1 p parameters, with  
   info = sum(f[f>0] * log(f[f>0])) - sum(log(pnew[pnew>0])*pnew[pnew>0]) - sum(log(gy[gy>0])*gy[gy>0])
-  return(list(obj=obj, pnew=pnew, ygivenx=t(ygivenx), h=h, f=f, info=info))
+  return(list(obj=obj, pnew=pnew, ygivenx=ygivenx, h=h, f=f, info=info))
 }

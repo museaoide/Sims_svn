@@ -56,7 +56,7 @@ DiscPObj <- function(param, gy, y, U, alph) {
     DXf[ix, ix, ] <- DXf[ix, ix, ] + p[ix] * eaUh[ix, ] * alph * DXU[ix, ] #the h on the end redundant (?)
   }
   DPobj <- tensor(DPf, Umat, c(2,3), c(1,2))
-  DXobj <- tensor(DXf, Umat, c(2,3), c(1,2)) + sy(f * DXU * alph)
+  DXobj <- tensor(DXf, Umat, c(2,3), c(1,2)) + sy(f * DXU )
   ## Above are derivatives of the expected utility part.  On to the info cost part.
   pnew <- sy(f)
   DPpnew <- tensor(DPf, rep(1, ny), 3, 1)
@@ -80,8 +80,8 @@ DiscPObj <- function(param, gy, y, U, alph) {
     DPygivenx[ , , iy] <- DPygivenx[ , , iy] + DPh[ , iy] %o% (c(1/roweight) * eaU[ipplus , iy])
   }
   for (iw in 1:nr) {
-    DXygivenx[ , iw, ] <- DXroweight[ , iw] %o% ((-1/roweight[iw]^2) * eaUh[ipplus, ,drop=FALSE][iw, ])
-    DXygivenx[ixp[iw], iw, ] <- DXygivenx[iw,iw,] + (1/roweight[iw]) * eaUh[ipplus, ,drop=FALSE][iw, ] * DXU[ipplus, ,drop=FALSE][iw, ] *alph 
+    DXygivenx[ , iw, ] <- DXroweight[ , iw] %o% ((-1/roweight[iw]^2) * eaUh[ixp[iw], ])
+    DXygivenx[ixp[iw], iw, ] <- DXygivenx[ixp[iw],iw,] + (1/roweight[iw]) * eaUh[ixp[iw], ,drop=FALSE] * DXU[ixp[iw], ,drop=FALSE] *alph 
   }
   for (iy in 1:ny) {
     DXygivenx[ , , iy] <- DXygivenx[ , , iy] + DXh[ , iy] %o% (c(1/roweight) * eaU[ipplus , iy])
@@ -92,7 +92,7 @@ DiscPObj <- function(param, gy, y, U, alph) {
   obj <- -obj                           #as input to minimizer
   attr(obj, "gradient") <- -c(cbind(diag(nx - 1), rep(-1, nx - 1)) %*% DPobj, DXobj) #recognizing that there are only nx-1 p parameters, with
                                         # n'th being 1 minus the rest.
-  browser()
+  ##browser()
   ##attr(obj, "pnew") <- pnew             #allows checking that pnew = p (as it should at optimum)
   return(obj)
 }

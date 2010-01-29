@@ -72,13 +72,13 @@ DiscPObjX <- function(param, gy, y, U, alph) {
     DXf[ix, ix, ] <- DXf[ix, ix, ] + p[ix] * eaUh[ix, ] * alph * DXU[ix, ] #the h on the end redundant (?)
   }
   DPobj <- tensor(DPf, Umat, c(2,3), c(1,2))
-  DXobj <- tensor(DXf, Umat, c(2,3), c(1,2)) + sy(f * DXU * alph)
+  DXobj <- tensor(DXf, Umat, c(2,3), c(1,2)) + sy(f * DXU )
   ## Above are derivatives of the expected utility part.  On to the info cost part.
   pnew <- sy(f)
   DPpnew <- tensor(DPf, rep(1, ny), 3, 1)
   DXpnew <- tensor(DXf, rep(1, ny), 3, 1)
   ipplus <- p > 0
-  fplus <- f[ipplus, ]
+  fplus <- f[ipplus, ,drop=FALSE]
   pplus <- pnew[ipplus]
   roweight <- sy(eaUh)
   ygivenx <- c(1/roweight) * eaUh

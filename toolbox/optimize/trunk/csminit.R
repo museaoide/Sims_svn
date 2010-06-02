@@ -69,7 +69,7 @@ csminit <- function(fcn,x0,f0,g0,badg,H0,...){
           ## where 1.0 is a reasonable scale for changes.
         } else {
           dx <- dx - as.numeric(ANGLE*dxnorm/gnorm+dfhat/(gnorm*gnorm))*g
-          dx <- dx*dxnorm/sqrt(sum(dx^2)) # This line added 2/18/2004
+          dx <- dx * dxnorm / sqrt(sum(dx^2)) # This line added 2/18/2004
           dfhat <- crossprod(dx,g)
           ## dxnorm <- sqrt(sum(dx^2)) # No longer needed with 2/18/2004 change
           cat("Correct for low angle:" ,a,"\n")

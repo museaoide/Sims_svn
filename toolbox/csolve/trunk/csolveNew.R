@@ -59,7 +59,7 @@ csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE,alpha=
         }
       }
       ## if(is.real(grad) && is.finite(grad) && sum(abs(grad))> 4*nv^2*EPS) {
-      if(is.finite(grad) && sum(abs(grad))> 4*nv^2*EPS) {
+      if(all(is.finite(grad)) && sum(abs(grad))> 4*nv^2*EPS) {
         svdg <- svd(grad)
         svdd <- svdg$d
         if(!(min(svdd)>0) || max(svdd)/min(svdd) > 1/(100*EPS)){

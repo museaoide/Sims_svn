@@ -5,7 +5,7 @@ postdraw <- function(vout,n,nosigprior=FALSE){
 ## n:		Number of draws
 ## nosigprior:	If true, don't use the Jeffreys-motivated improper prior.
 ##-----------------------------------------
-## smat:        t(]]chol(sigma draw)).  Use directly as smat in impulsdtrf.
+## smat:        t(chol(sigma draw)).  Use directly as smat in impulsdtrf.
 ## By,Bx:       coefficient draws
 ## 11/25/09 Bugnote:  If is.null(vout$Bx) (no constant, no exog vbles), code below
 ## doesn't work.  Need to fix.
@@ -30,5 +30,6 @@ postdraw <- function(vout,n,nosigprior=FALSE){
   ## Bx <- as.vector(vout$Bx)+aperm(nmat,c(2,1,3))[,(neq*lags+1):ncf,]  # Bx added in both here and in cfmat. Bug caught by A.Zawadwoski
   Bx <- Byx[,(neq*lags+1):ncf,]
   ## Note that wmat[,,i] is ready for use as input to impulsdtrf
+  wmat <- aperm(wmat, c(2,1,3))
   return(list(By=By,Bx=Bx,smat=wmat))
 }

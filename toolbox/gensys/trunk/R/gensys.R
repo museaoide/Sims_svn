@@ -151,11 +151,11 @@ gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
     loose <- G0I %*% qq %*% pi %*% (diag(neta) - veta %*% t(Conj(veta)))
     ## loose <- G0I %*% rbind(loose,matrix(0,nunstab,neta))  #(think the above is a mistaken remnant)
     ##-------------------- above are output for system in terms of z'y -------
-    G1 <- Re(qzl$z %*% G1 %*% t(Conj(qzl$z)))
-    C <- Re(qzl$z%*%C)
-    impact <- Re(qzl$z%*%impact)
-    ywt <- qzl$z%*%ywt
-    loose <- Re(qzl$z %*% loose)
+    G1 <- (qzl$z %*% G1 %*% t(Conj(qzl$z)))
+    C <- (qzl$z %*% C)
+    impact <- (qzl$z %*% impact)
+    ywt <- qzl$z %*% ywt
+    loose <- (qzl$z %*% loose)
     vn <- dimnames(g0)[[2]]
     dimnames(G1) <- list(vn,vn)
     dimnames(C) <- list(vn,NULL)

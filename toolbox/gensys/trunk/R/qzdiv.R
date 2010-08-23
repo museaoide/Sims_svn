@@ -1,10 +1,11 @@
-qzdiv <- function (stake,qzlist)  {
+qzdiv <- function (stake,qzlist, flip=FALSE)  {
   ##
   ## Takes U.T. matrices a, b, orthonormal matrices q,z, rearranges them
   ## so that all cases of abs(b(i,i)/a(i,i))>stake are in lower right 
   ## corner, while preserving U.T. and orthonormal properties and qaz' and
   ## qbz'.  
   ##
+  ## if(flip), then cases with abs(b(i,i)/a(i,i)) < stake are in lower right
   ## by Christopher A. Sims, 2/22/2004, based on earlier matlab code finished
   ## 7/27/00
   a <- qzlist$a
@@ -13,6 +14,10 @@ qzdiv <- function (stake,qzlist)  {
   z <- qzlist$z
   n  <- dim(a)[1]
   root <- abs(cbind(diag(a), diag(b)))
+  if (flip) {
+    root <-  root[ , 2:1]
+    stake <- 1/stake
+  }
   root[,1] <- root[,1]-(root[,1]<1.e-13)*(root[,1]+root[,2])
   root[,2] <- root[,2]/root[,1]
   for (i in  n:1) {

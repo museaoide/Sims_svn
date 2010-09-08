@@ -1,22 +1,6 @@
 DiscPObjX <- function(param, gy, y, U, alph) {
   ## DiscPObj, but with useful extras returned, for use in analyzing results,
   ## not in csminwel.
-##   nx <- (length(param)+1)/2
-##   p <- param[1:(nx - 1)]
-##   p <- c(p, 1 - sum(p))
-##   x <- param[nx:(2 * nx - 1)]
-##   ny <- length(gx)
-##   if ( any(p < 0) ) return(1e20)
-##   Umat <- outer(x, y, FUN=U)
-##   peaU <- p %*% exp(alph * Umat)
-##   h <-  gx / peaU
-##   f <- c(p) * t((c(h) * t(exp(alph * Umat))))
-##   pnew <- apply(f, MAR=1, FUN=sum)
-##   fplus <- f[f>0]
-##   pplus <- pnew[pnew > 0]
-##   obj <- sum(f  * Umat ) - (1/alph) * (sum(log(fplus) * fplus) - sum(log(pplus) * pplus))
-##   obj <- -obj                           #as input to minimizer
-##   # browser()
   ## param:  First nx-1 are marginal probabilities on x points,
   ##         remainder are the positions of the discrete x points.
   ## gy:     The marginal probabilities on y
@@ -39,6 +23,7 @@ DiscPObjX <- function(param, gy, y, U, alph) {
   if ( any(p < 0) ) return(1e20)
   mm <- function(z) { matrix(z, nx, ny, byrow=TRUE) }
   sy <- function(z) {apply( z, MAR=1, FUN=sum)}
+  entel <- function(z) ifelse(z > 0, z * log(z), 0)
   Umat <- outer(c(x), c(y), FUN=U)
   ## peaU <- p %*% exp(alph * Umat)
   eaU <- exp(alph * Umat)
@@ -46,6 +31,7 @@ DiscPObjX <- function(param, gy, y, U, alph) {
   DPpeaU <- eaU            
   names(dimnames(DPpeaU))[1] <- "p"
   peaU <- tensor(p, eaU, 2,1)
+  if (any(peaU < 1e-290 * gy)) return(1e20)
   DXU <- matrix(attr(Umat,"gradient"), nx, ny, dimnames=list(x=NULL, y=NULL))
   ##assumes U fcn written to return gradient attribute,
   ##e.g. via deriv().
@@ -77,32 +63,34 @@ DiscPObjX <- function(param, gy, y, U, alph) {
   pnew <- sy(f)
   DPpnew <- tensor(DPf, rep(1, ny), 3, 1)
   DXpnew <- tensor(DXf, rep(1, ny), 3, 1)
-  ipplus <- p > 0
+  ipplus <- pnew > 0
+  ixp <- (1:nx)[ipplus]
+  nr <- sum(ipplus)
   fplus <- f[ipplus, ,drop=FALSE]
   pplus <- pnew[ipplus]
-  roweight <- sy(eaUh)
-  ygivenx <- c(1/roweight) * eaUh
-  DProweight <- tensor(DPh, eaU, 2, 2)  #p=nx x w=nx matrix
-  DXroweight <- diag(sy(eaUh * alph * DXU)) + tensor(DXh, eaU, 2, 2)
-  DPygivenx <- array(0,c(nx,nx,ny))
-  DXygivenx <- array(0,c(nx,nx,ny))
-  ## result of line below is p=nx by weight=nx by y=ny tensor.  Weight indexes rows of ygivenx, p indexes what deriv's are wrt.
-  for (iw in 1:nx) {
-    DPygivenx[ , iw, ] <- DProweight[ , iw] %o% (-(1/roweight[iw]^2) * eaUh[iw, ])
+  roweight <- sy(eaUh)[ipplus]
+  ygivenx <- c(1/roweight) * eaUh[ipplus, ,drop=FALSE]
+  DProweight <- tensor(DPh, eaU[ipplus, ,drop=FALSE], 2, 2) #p=nx x w=nx matrix
+  DXroweight <- diag(sy(eaUh * alph * DXU))[, ipplus,drop=FALSE] + tensor(DXh, eaU[ipplus, ,drop=FALSE], 2, 2)
+  DPygivenx <- array(0,c(nx,nr,ny))
+  DXygivenx <- array(0,c(nx,nr,ny))
+  ## result of line below is p=nx by weight=nr by y=ny tensor.  Weight indexes rows of ygivenx, p indexes what deriv's are wrt.
+  for (iw in 1:nr) {
+    DPygivenx[ , iw, ] <- DProweight[ , iw] %o% (-(1/roweight[iw]^2) * eaUh[ipplus, ,drop=FALSE][iw, ])
   }
   for (iy in 1:ny) {
-    DPygivenx[ , , iy] <- DPygivenx[ , , iy] + DPh[ , iy] %o% (c(1/roweight) * eaU[ , iy])
+    DPygivenx[ , , iy] <- DPygivenx[ , , iy] + DPh[ , iy] %o% (c(1/roweight) * eaU[ipplus , iy])
   }
-  for (iw in 1:nx) {
-    DXygivenx[ , iw, ] <- DXroweight[ , iw] %o% ((-1/roweight[iw]^2) * eaUh[iw, ])
-    DXygivenx[iw, iw, ] <- DXygivenx[iw,iw,] + (1/roweight[iw]) * eaUh[iw, ] * DXU[iw, ] *alph 
+  for (iw in 1:nr) {
+    DXygivenx[ , iw, ] <- DXroweight[ , iw] %o% ((-1/roweight[iw]^2) * eaUh[ixp[iw], ])
+    DXygivenx[ixp[iw], iw, ] <- DXygivenx[ixp[iw],iw,] + (1/roweight[iw]) * eaUh[ixp[iw], ,drop=FALSE] * DXU[ixp[iw], ,drop=FALSE] *alph 
   }
   for (iy in 1:ny) {
-    DXygivenx[ , , iy] <- DXygivenx[ , , iy] + DXh[ , iy] %o% (c(1/roweight) * eaU[ , iy])
+    DXygivenx[ , , iy] <- DXygivenx[ , , iy] + DXh[ , iy] %o% (c(1/roweight) * eaU[ipplus , iy])
   }                                                           
-  obj <- sum(f  * Umat ) - (1/alph) * pnew %*% sy(log(ygivenx) * ygivenx) # + (1/alpha) * sum(gy * log(gy)) (doesn't change with param)
-  DPobj <- c(DPobj) - c((1/alph) * (DPpnew %*% sy(log(ygivenx) * ygivenx) + c(tensor(DPygivenx, c(pnew) * (1 + log(ygivenx)), 2:3, 1:2))))
-  DXobj <- c(DXobj) - c((1/alph) * (DXpnew %*% sy(log(ygivenx) * ygivenx) + c(tensor(DXygivenx, c(pnew) * (1 + log(ygivenx)), 2:3, 1:2))))
+  obj <- sum(f  * Umat ) - (1/alph) * pplus %*% sy(entel(ygivenx)) # + (1/alpha) * sum(gy * log(gy)) (doesn't change with param)
+  DPobj <- c(DPobj) - c((1/alph) * (DPpnew[ , ipplus,drop=FALSE] %*% sy(entel(ygivenx)) + c(tensor(DPygivenx, c(pnew[ipplus]) * (1 + log(ygivenx)), 2:3, 1:2))))
+  DXobj <- c(DXobj) - c((1/alph) * (DXpnew[ , ipplus,drop=FALSE] %*% sy(entel(ygivenx)) + c(tensor(DXygivenx, c(pnew[ipplus]) * (1 + log(ygivenx)), 2:3, 1:2))))
   obj <- -obj                           #as input to minimizer
   attr(obj, "gradient") <- -c(cbind(diag(nx - 1), rep(-1, nx - 1)) %*% DPobj, DXobj) #recognizing that there are only nx-1 p parameters, with  
   info = sum(f[f>0] * log(f[f>0])) - sum(log(pnew[pnew>0])*pnew[pnew>0]) - sum(log(gy[gy>0])*gy[gy>0])

@@ -3,7 +3,8 @@ read.eqsys <- function(file) {
   data <- readLines(con=file)
   ## remove comment lines
   data <- data[-grep("^[ \t]*##",data)]
-  data <- data[-grep("^[ \t]*$", data)]
+  blix <- grep("^[ \t]*$", data)
+  if (length(blix) > 0)  data <- data[-blix]
   ## so comment lines are any starting with 0 or more blanks and
   ## tabs, followed by ##.  Blank lines also ignored.
   neq <- length(data)/2 - 3

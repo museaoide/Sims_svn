@@ -4,7 +4,7 @@ gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
     ##        g0*y(t)=g1*y(t-1)+c0+psi*z(t)+pi*eta(t),
     ##with z an exogenous variable process and eta being endogenously determined
     ##one-step-ahead expectational errors.  Returned system is
-    ##       y(t)=G1*y(t-1)+C+impact*z(t)+ywt*inv(I-fmat*inv(L))*fwt*z(t+1) + loose*eta .
+    ##       y(t)=G1*y(t-1)+C+impact*z(t)+ywt*inv(I-fmat*inv(L))*fmat*fwt*z(t+1) + loose*eta .
     ## If z(t) is i.i.d., the term involving fmat and fwt drops out.
     ## If the solution is unique (eu[2]==1) there is no "loose" term.  Otherwise
     ## loose characterizes the dimensions along which there is non-uniqueness.

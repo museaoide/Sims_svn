@@ -1,6 +1,6 @@
 pijDraw <- function(S, alpha, nState, lags) {
   ## S is of length equal to the sample.  We use only time=lag (one before sample start) onward.
-  ## Transpose of this function's alpha is the alpha for rdirichlet
+  ## Transpose of this function's alpha is the alpha for rdirichlet.  It defines the Dirichlet prior for pij.
   ## if (!require(MCMCpack)) stop("Program requires rdirichlet() from the MCMCpack package") # replaced by rdirichletCS.R
   Scount <- matrix(0, nState, nState)
   nT <- length(S)

@@ -18,9 +18,11 @@ HClhObj <- function(parvec, y, x, pyGs, phat0, lags, parPrior, ...) {
   llh <- 0.0
   for (it in (lags+1):nT) {
     lhe <- HClhElement(y=y[it, ], pyGs=pyGs, phat=psGYfilt[it-1, ], transMat=transMat, yl=y[(it-lags):(it-1), ], x=x[it, ], parvec=parvec, )
-    psGYfilt <- lhe$phatnew
+    psGYfilt[it, ] <- lhe$phatnew
     llh <- llh + lhe$lhElement
   }
-  dObsOut <- setDumObs(parPrior, sigsq, y0, x0) 
+  dObsOut <- setDumObs(parPrior, sigsq, y0, x0)
+  ## need separate prior for each state.  In principle, both rho-gam and sigsq could change.
+  ## Is this trying to be general VAR switching?  Seems so.
   return(llh-lpijNorm)
 }

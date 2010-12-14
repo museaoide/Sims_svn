@@ -1,4 +1,4 @@
-g0g1eval <- function(dexpr, x, xl=as.vector(x), shock=attr(dexpr, "shock"), experr=attr(dexpr, "forward"), param) {
+g0g1eval <- function(dexpr, x, xl=as.vector(x), shock=attr(dexpr, "shock"), experr=attr(dexpr, "forward"), param=attr(x,"param")) {
   ##  dexpr:     derivative expression vector, as produced by g0g1d
   ##      x:     vector of values (not names) of x
   ##     xl:     vector of values of xl 

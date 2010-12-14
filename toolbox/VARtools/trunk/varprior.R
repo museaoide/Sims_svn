@@ -1,4 +1,4 @@
-varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=list(sig=1,w=1))
+varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=list(sig=1,w=1),urprior=list(lambda=NULL, mu=NULL))
 ### ydum, xdum:   dummy observation data that implement the prior
 ### breaks:       vector of points in the dummy data after which new dummy obs start
 ###                   Set breaks=T+matrix(c(0,breaks),ncol=1), ydata=rbind(ydata,ydum), xdum=rbind(xdata,xdum), where 
@@ -13,6 +13,11 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
 ###                   Set vprior$w=0 to achieve this.
 ###                   mnprior and vprior.w can each be set to NULL, thereby eliminating the corresponding
 ###                   dummy observations.
+### urprior:          Parameters of the "unit roots" and "co-persistence" priors that are
+###                   implemented directly in rfvar3.  lambda and mu should be NULL here if
+###                   the dummy observations generated here are used with rfvar3 and lanbda and mu
+###                   are not NULL in rfvar3.
+### norm              normalizing constant to make prior integrate to one conditional on Sigma
 ### Note:         The original Minnesota prior treats own lags asymmetrically, and therefore
 ###                   cannot be implemented entirely with simple dummy observations.  It is also usually
 ###                   taken to include the sum-of-coefficients and co-persistence components
@@ -55,6 +60,9 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
       breaks <- NULL;
       lbreak <- 0;
     }
+  if (!is.null(urprior) ) {
+    
+  }
   if (!is.null(vprior) && vprior$w>0)
     {
       ydum2 <- array(0,dim=c(lags+1,nv,nv))

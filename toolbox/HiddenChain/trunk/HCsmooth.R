@@ -12,7 +12,8 @@ HCsmooth <- function(psGYfilt=matrix(0,5,2), pyGs=function(y=0, S=c(1, 2), ...){
   nState <- dim(psGYfilt)[2]
   for (it in seq(nT-1,lags,-1)) {
     psGYsmooth[it, ] <- psGYfilt[it, ] * (( (psGYsmooth[it+1, ] / psGYfilt[it+1, ]) *
-                                       exp(pyGs( ydata[it+1], 1:nState, yl=ydata[it:(it-lags+1)], x=xdata[it+1, ], ... )) ) %*% transMat)
+              exp(pyGs( ydata[it+1], 1:nState, yl=ydata[it:(it-lags+1)], x=xdata[it+1, ], ... )) )
+                                          %*% transMat)
   }
   psGYsmooth <- psGYsmooth / as.vector(psGYsmooth %*% c(1,1,1))
   return(psGYsmooth)

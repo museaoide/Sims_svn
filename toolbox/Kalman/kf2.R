@@ -15,36 +15,36 @@ kf2 <- function(y,H,shat,sig,G,M) {
   nobs <- dim(H)[1]
   nstate <- dim(H)[2]
   ## stopifnot (nstate >= nobs)
-  if (isTRUE(all.equal(H, 0))) { # No observation case.  Just propagate the state.
+  ##------------ Don't need separate treatment of H == 0.  H %*% G %*% t(H) = 0 covers it.
+  ##   if (isTRUE(all.equal(H, 0))) { # No observation case.  Just propagate the state.
+  ##     lh <- c(0,0)
+  ##     shatnew <- G %*% shat
+  ##     signew <- omega
+  ##     fcsterr <- y                        # y had better be 0
+  ##     if (!all.equal(y,0) ) warning("zero H but non-zero y")
+  ##   } else {   
+  svdhoh <- svd( H %*% omega %*% t(H) )
+  if (all(svdhoh$d < SMALLSV)) { # Observation is uninformative. Propagate state.
     lh <- c(0,0)
     shatnew <- G %*% shat
     signew <- omega
-    fcsterr <- y                        # y had better be 0
-    if (!all.equal(y,0) ) warning("zero H but non-zero y")
-  } else {   
-    svdhoh <- svd( H %*% omega %*% t(H) )
-    if (all(svdhoh$d < SMALLSV)) { # Observation is uninformative.  Again propagate state.
-      lh <- c(0,0)
-      shatnew <- G %*% shat
-      signew <- omega
-      fcsterr <- y - H %*% G %*% shat            # had better be 0
-      if (!isTRUE(all.equal(y,0)) ) warning("Uninformative H but non-zero fcsterr")
-    } else {
-      first0 <- match(TRUE, svdhoh$d < SMALLSV)
-      if (is.na(first0)) first0 <- min(dim(H))+1
-      u <- svdhoh$u[ , 1:(first0-1), drop=FALSE]
-      v <- svdhoh$v[ , 1:(first0-1), drop=FALSE]
-      d <- svdhoh$d[1:(first0-1), drop=FALSE]
-      fcsterr <- y-H %*% G %*% shat
-      ho <- H %*% omega
-      hohifac <- (1/sqrt(d)) * t(u) #diag(1/sqrt(d)) %*% t(u)
-      ferr <- hohifac %*% fcsterr
-      lh <- c(0,0)
-      lh[1] <- -.5 * crossprod(ferr)
-      lh[2] <- -.5 * sum( log(d) )
-      shatnew <- t(ho) %*% t(hohifac) %*% ferr + G %*% shat
-      signew <- omega - t(ho) %*% crossprod(hohifac) %*% ho
-    }
+    fcsterr <- y - H %*% G %*% shat     # had better be 0
+    if (!all(abs(fcsterr) < 1e-7)) warning("Uninformative H but non-zero fcsterr")
+  } else {
+    first0 <- match(TRUE, svdhoh$d < SMALLSV)
+    if (is.na(first0)) first0 <- min(dim(H))+1
+    u <- svdhoh$u[ , 1:(first0-1), drop=FALSE]
+    v <- svdhoh$v[ , 1:(first0-1), drop=FALSE]
+    d <- svdhoh$d[1:(first0-1), drop=FALSE]
+    fcsterr <- y-H %*% G %*% shat
+    ho <- H %*% omega
+    hohifac <- (1/sqrt(d)) * t(u)       #diag(1/sqrt(d)) %*% t(u)
+    ferr <- hohifac %*% fcsterr
+    lh <- c(0,0)
+    lh[1] <- -.5 * crossprod(ferr)
+    lh[2] <- -.5 * sum( log(d) )
+    shatnew <- t(ho) %*% t(hohifac) %*% ferr + G %*% shat
+    signew <- omega - t(ho) %*% crossprod(hohifac) %*% ho
   }
   return(list(shat=shatnew, sig=signew, lh=lh, fcsterr=fcsterr))
 }

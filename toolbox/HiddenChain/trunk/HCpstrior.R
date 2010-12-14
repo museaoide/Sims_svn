@@ -1,14 +1,11 @@
-HClhObj <- function(parvec, y, x, pyGs, phat0, lags, parPrior, ...) {
+HCpstrior <- function(parvec, y, x, pyGs, lags, parPrior, ...) {
   ## To keep this function generic, we do not deduce lags from parvec, but make it a separate
-  ## argument.  Only the pij component of parvec is parsed out in HClhObj.
-  transMat <- makeTmat(parvec$pij)
-  ##  rho <- parvec$rho
-  ##  gam <- parvec$gam
-  ##  sigsq <- parvec$sigsq
-  ##  nState <- length(sigsq)
+  ## argument.  Only the pij component of parvec is parsed out here.
+  lpijp <- lpijprior(alpha=parvec$alpha, pij=parvec$pij, phat0)     #log joint prior on pij,phat0
+  lpijpfac <- lpijp$lpdf
+  phat0 <- lpijp$pbar
+  lpYpfac <- lparprior(parvec$pY)       #log prior on pYgS parameters
   nT <- dim(ydata)[1]
-  alpha <- parPrior$alpha
-  lpijNorm <- sum(lgamma(alpha)) - sum(lgamma(rep(1,nState) %*% alpha)) # (nState columns of pij's)
   if ( is.null(dim(y)) ) {
     dim(y) <- c(length(y),1)
     if (!is.null(x) && dim(x)[1] != dim(y)[1]) stop("x and y must have the same nrow")
@@ -24,5 +21,5 @@ HClhObj <- function(parvec, y, x, pyGs, phat0, lags, parPrior, ...) {
   dObsOut <- setDumObs(parPrior, sigsq, y0, x0)
   ## need separate prior for each state.  In principle, both rho-gam and sigsq could change.
   ## Is this trying to be general VAR switching?  Seems so.
-  return(llh-lpijNorm)
+  return(llh-lpij)
 }

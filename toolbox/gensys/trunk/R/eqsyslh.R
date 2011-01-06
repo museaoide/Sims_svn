@@ -1,10 +1,11 @@
-eqsyslh <- function(eq, param, y, v0, shockss, sigvec){
+eqsyslh <- function(eq, param, y, v0, sigvec,logged, H){
   ## eq is an equation system that has already been passed through g0g1d so that
-  ## its equation expressions have gradient expression attributes.
-  ## shockss is ordinarily a 0 vector with names.
+  ##    its equation expressions have gradient expression attributes.
   ## v0 is a guess at a starting value for the steady state calculation
   ## y is the data matrix, possibly including dummy observations
   ## sigvec is the standard deviations of the structural shocks
+  ## logged is a vector of names of variables that should be logged.
+  ## H is the observation matrix, with dimnames.  Usually a selection matrix.
   ## It is assumed that the model is stationary.  If there are a priori
   ## certain unit roots, they should be removed from the system by appropriate differencing.
   ##------- Find ss ---------------
@@ -18,7 +19,7 @@ eqsyslh <- function(eq, param, y, v0, shockss, sigvec){
     llh <- -1e20
   } else {
     vbar <- ssout$xss
-    eqg0g1 <- g0g1eval(eq, x=vbar, xl = vbar, shock=shockss, attr(eq, "forward"), param=param)
+    eqg0g1 <- g0g1eval(eq, x=vbar, xl = vbar)
     gout <- with(eqg0g1, gensys(g0,g1, psi=Psi, pi=Pi))
     nv <- dim(gout$G1[1])
     nsh <- dim(gout$Psi)[2]
@@ -28,10 +29,11 @@ eqsyslh <- function(eq, param, y, v0, shockss, sigvec){
       llh <- -1e20
     } else {
       ## expand system to add constant, cbar
-      logged <- c("pi","cd","cbg","ccd") # Not b, tau because these could flip sign
+      ## logged <- c("pi","cd","cbg","ccd") # Not b, tau because these could flip sign
       vbar[logged,1] <- log(vbar[logged,1])
-      ## H (observation weights) matrix
-      ny <- dim(y)[2]
+      ## H (observation weights) matrix.  Must be inside lh evaluation, because its elements depend on ss, and thus
+      ## on param.
+       ny <- dim(y)[2]
       H <- matrix(0, ny, nv+2)
       ## data are r, pi, cd + cbar, b/cd, a, tau/cd.  Note that b and tau data are normalized by c (i.e. gdp)
       ## Since cd (in original, unlogged system) is formed as c/cbar, b, the ratio of debt to cbar, divided by cd, is
@@ -50,7 +52,7 @@ eqsyslh <- function(eq, param, y, v0, shockss, sigvec){
       H[6, "cd"] <- -vbar["tau"] * exp(-vbar["cd"])
       G <- cbind(gout$G1, matrix(0, nv, 2))
       G <- rbind(G, matrix(0, 2, nv+2))
-      G[(nv + 1):(nv + 1), (nv + 1):(nv + 1)] <- matrix(c(1, parm["mu"],  0,1), 2, 2, byrow=TRUE)
+      G[(nv + 1):(nv + 2), (nv + 1):(nv + 2)] <- matrix(c(1, parm["mu"],  0,1), 2, 2, byrow=TRUE)
       impact <- rbind(gout$impact, matrix(0, 2, nsh))
       impact[nv+1, "epsg"] <- 1
       ## Pull out steady states from stationary part.

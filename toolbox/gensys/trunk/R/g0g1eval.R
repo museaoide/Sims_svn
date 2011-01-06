@@ -4,7 +4,9 @@ g0g1eval <- function(dexpr, x, xl=as.vector(x), shock=attr(dexpr, "shock"), expe
   ##     xl:     vector of values of xl 
   ## shock:      exogenous shocks (all assumed centered at 0)
   ## experr:     logical vector, TRUE for equations with expectational errors
-  ##  param:     vector of values of parameters (all other symbols) in the expressions
+  ##  param:     vector of values of parameters (all other symbols) in the expressions.
+  ##             When x is something like flmss$xss, where flmss is a returned value from sssolve, the default
+  ##             assignment for param works.  
   ## NB x, xl, and param must all be vectors with named components, or lists.
   if (is.null(names(x))) { names(x) <- dimnames(x)[[1]]}
   if (is.null(names(xl))) names(xl) <- paste(names(x),"l",sep="")

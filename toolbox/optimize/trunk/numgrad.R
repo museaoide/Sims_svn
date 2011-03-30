@@ -19,7 +19,7 @@ numgrad <- function(fcn, x, ...) {
       dim(tvecv) <- dim(x)
     }
     g0 <- (fcn(x+scale*tvecv,...) - f0)/(scale*delta)
-    if (max(abs(g0))< 1e15){
+    if (max(abs(g0))< 1e50){
       g[i, ] <- as.vector(g0)
     }else{
       cat("bad gradient ------------------------\n")

@@ -9,7 +9,7 @@ kf2 <- function(y,H,shat,sig,G,M) {
   ## the increments to the two component terms of the log likelihood function.  They are added 
   ## to form the log likelihood, but are used separately in constructing a concentrated or marginal
   ## likelihood. fcsterr is the error in the forecast of y based on the prior.
-  SMALLSV <- 1e-10
+  SMALLSV <- 1e-7
   omega <- G %*% sig %*% t(G) + crossprod(M)
   if (is.null(dim(H))) dim(H) <- c(1,length(H))
   nobs <- dim(H)[1]

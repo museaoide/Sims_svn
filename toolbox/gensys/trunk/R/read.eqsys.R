@@ -1,8 +1,8 @@
 read.eqsys <- function(file) {
-  ix <- 0
   data <- readLines(con=file)
   ## remove comment lines
-  data <- data[-grep("^[ \t]*##",data)]
+  coix <- grep("^[ \t]*##",data)
+  if (length(coix) > 0) data <- data[-coix]
   blix <- grep("^[ \t]*$", data)
   if (length(blix) > 0)  data <- data[-blix]
   ## so comment lines are any starting with 0 or more blanks and
@@ -35,6 +35,9 @@ read.eqsys <- function(file) {
   cnct <- textConnection(data[2, neq+3])
   shock <- scan(cnct, what="char", quiet=TRUE)
   close(cnct)
+  if (vlist[1] == "NONE") vlist <- vector("character", 0)
+  if (param[1] == "NONE") param <- vector("character", 0)
+  if (shock[1] == "NONE") shock <- vector("character", 0)
   class(eq) <- c("eqsys", "expression")
   names(eq) <- name
   eq <- structure(eq, forward=forward, vlist=vlist, param=param, shock=shock)

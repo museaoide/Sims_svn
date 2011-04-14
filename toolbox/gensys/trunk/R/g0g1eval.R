@@ -10,10 +10,14 @@ g0g1eval <- function(dexpr, x, xl=as.vector(x), shock=attr(dexpr, "shock"), expe
   ## NB x, xl, and param must all be vectors with named components, or lists.
   if (is.null(names(x))) { names(x) <- dimnames(x)[[1]]}
   if (is.null(names(xl))) names(xl) <- paste(names(x),"l",sep="")
-  if(is.character(shock))
-    { nshock <- shock; shock <- rep(0, length(nshock)); names(shock) <- nshock
-  } else {
-    if (is.null(names(shock))) names(shock) <- dimnames(shock)[[1]]
+  if(shock == "NONE")
+    shock <- vector("character", 0)
+  else {
+    if(is.character(shock))
+      { nshock <- shock; shock <- rep(0, length(nshock)); names(shock) <- nshock
+      } else {
+        if (is.null(names(shock))) names(shock) <- dimnames(shock)[[1]]
+      }
   }
   if (is.null(names(param))) names(param) <- dimnames(param)[[1]]
   nex <- length(dexpr)

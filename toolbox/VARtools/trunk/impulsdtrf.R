@@ -1,14 +1,12 @@
-impulsdtrf <- function(vout=NULL, pout=NULL, smat=NULL, nstep=40, order=NULL)
-### vout:           output structure from rfvar3
-### pout:           output structure from postdraw
+impulsdtrf <- function(vout=NULL, smat=NULL, nstep=40, order=NULL)
+### vout:           output structure from rfvar3.
+###                 To use this with output from postdraw, create a dummy vout with vout$By=pout$By[ , , ,id] and provide smat=pout$smat[ , ,id]
 ### smat:           if !is.null(vout) and order and smat are NULL, the impulse responses will be for a cholesky decomp with variables
 ###                 ordered as in the input to rfvar3.  More generally, can be any set of initial
 ###                 values for the shocks.  To keep the shocks orthogonal and scaled properly,
 ###                 smat should be such that t(smat) %*% smat == crossprod(vout$u)/dim(u)[1].
 ###                 However, the routine works with singular smat or with smat's column dimension
 ###                 less than its row dimension.
-###                 If pout non=NULL instead, input is from postdraw().  smat can be set to override the smat
-###                 from pout as with vout, and order can reorder the shocks from pout.
 ### order:          To get a cholesky decomp with a different ordering, set order to an integer
 ###                 vector giving the desired ordering.  
 ### response:       nvar x nshocks x nstep array of impulse responses.
@@ -19,29 +17,15 @@ impulsdtrf <- function(vout=NULL, pout=NULL, smat=NULL, nstep=40, order=NULL)
     ##-----debug--------
     ##browser()
     ##------------------
-    if (!is.null(vout)) {
-      B <- vout$By
-    } else {
-      if (!is.null(pout)) {
-        B <- pout$By
-      } else {
-        error("One of pout and vout must be provided.")
-      }
-    }
+    B <- vout$By
     neq <- dim(B)[1]
     nvar <- dim(B)[2]
     lags <- dim(B)[3]
     dimnB <- dimnames(B)
     if (is.null(smat)) {
-      if (!is.null(vout)) {
-        if (is.null(order) ) order <- 1:neq         
-        smat <- t(pchol(crossprod(vout$u)/dim(vout$u)[1], order)) # makes first shock affect all variables
-      } else {                          #pout case
         if (is.null(order) ) {
-          smat <- pout$smat
-        } else {
-        smat <- t(pchol(pout$smat %*% t(pout$smat), order)) 
-        }
+          order <- 1:neq         
+        smat <- t(pchol(crossprod(vout$u)/dim(vout$u)[1], order)) # makes first shock affect all variables
       }
     }
     nshock <- dim(smat)[2]
@@ -55,7 +39,6 @@ impulsdtrf <- function(vout=NULL, pout=NULL, smat=NULL, nstep=40, order=NULL)
     B <- B[, , seq(from=lags, to=1, by=-1)] #reverse time index to allow matrix mult instead of loop
     B <- matrix(B,nrow=nvar)
     for (it in 1:(nstep-1)) {
-                                        #browser()
       response[ilhs, ] <- B %*% response[irhs, ]
       irhs <- irhs + nvar
       ilhs <- ilhs + nvar

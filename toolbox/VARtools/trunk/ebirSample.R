@@ -22,7 +22,7 @@ ebirSample <- function(pdout, horiz, shockf=NULL, ... ) {
   lags <- dim(By)[3]
   ndraw <- dim(By)[4]
   resp <- array(0, c(nv, nv, horiz, ndraw))
-  for (id in 1:ndraw) resp[ , , , id] <-
-    impulsdtrf(By[ , , , id], sfac[ , , id], horiz)
+  for (id in 1:ndraw)
+    resp[ , , , id] <-   impulsdtrf(vout=list(By=mxpd$By[, , , id]), smat=mxpd$smat[, , id], nstep=horiz)
   return(resp)
 }

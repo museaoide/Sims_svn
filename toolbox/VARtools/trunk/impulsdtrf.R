@@ -4,7 +4,7 @@ impulsdtrf <- function(vout=NULL, smat=NULL, nstep=40, order=NULL)
 ### smat:           if !is.null(vout) and order and smat are NULL, the impulse responses will be for a cholesky decomp with variables
 ###                 ordered as in the input to rfvar3.  More generally, can be any set of initial
 ###                 values for the shocks.  To keep the shocks orthogonal and scaled properly,
-###                 smat should be such that t(smat) %*% smat == crossprod(vout$u)/dim(u)[1].
+###                 smat should be such that smat %*% t(smat) == crossprod(vout$u)/dim(u)[1].
 ###                 However, the routine works with singular smat or with smat's column dimension
 ###                 less than its row dimension.
 ### order:          To get a cholesky decomp with a different ordering, set order to an integer
@@ -23,10 +23,10 @@ impulsdtrf <- function(vout=NULL, smat=NULL, nstep=40, order=NULL)
     lags <- dim(B)[3]
     dimnB <- dimnames(B)
     if (is.null(smat)) {
-        if (is.null(order) ) {
-          order <- 1:neq         
-        smat <- t(pchol(crossprod(vout$u)/dim(vout$u)[1], order)) # makes first shock affect all variables
+      if (is.null(order) ) {
+        order <- 1:neq
       }
+      smat <- t(pchol(crossprod(vout$u)/dim(vout$u)[1], order)) # makes first shock affect all variables
     }
     nshock <- dim(smat)[2]
     if(dim(smat)[1] != dim(B)[1]) stop("B and smat conflict on # of equations") #

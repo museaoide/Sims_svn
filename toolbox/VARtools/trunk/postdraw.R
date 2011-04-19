@@ -29,7 +29,7 @@ postdraw <- function(vout,n,nosigprior=FALSE){
   dim(By) <- c(neq,neq,lags,n)
   ## Bx <- as.vector(vout$Bx)+aperm(nmat,c(2,1,3))[,(neq*lags+1):ncf,]  # Bx added in both here and in cfmat. Bug caught by A.Zawadwoski
   Bx <- Byx[,(neq*lags+1):ncf,]
-  ## Note that wmat[,,i] is ready for use as input to impulsdtrf
+  ## Note that wmat[,,i] is not ready for use as input to impulsdtrf, needs chol() first.
   wmat <- aperm(wmat, c(2,1,3))
   return(list(By=By,Bx=Bx,smat=wmat))
 }

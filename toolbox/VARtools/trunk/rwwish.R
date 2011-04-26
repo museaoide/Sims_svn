@@ -26,7 +26,7 @@ rwwish <- function (v, S,n) {
   Z <- matrix(0, n, p^2)
   dseq <- (0:(p-1))*p+(1:p)
   nch <- n*p
-  Z[ , dseq] <- sqrt(rchisq(nch, v:(v - p + 1)))
+  Z[ , dseq] <- t(matrix(sqrt(rchisq(nch, v:(v - p + 1))), p, n))
   if (p > 1) {
     pseq <- 1:(p - 1)
     Z[ , rep(p * pseq, pseq) + unlist(lapply(pseq, seq))] <-
@@ -36,8 +36,12 @@ rwwish <- function (v, S,n) {
   Z <- Z %*% CC
   dim(Z) <- c(n, p,p)
   Z <- aperm(Z,c(2,3,1))
-  ## for (id in 1:n){
-  ##   Z[ , , id] <- crossprod(Z[ , , id])
-  ## }                                     
+  for (id in 1:n){
+    Z[ , , id] <- crossprod(Z[ , , id])
+  }
+  ##---------
+  ## note that before the crossprod(), Z could be used directly as smat in impulsdtrf, but has
+  ## the last, not the first, variable impacting all other variables in the initial period.
+  ## In other words, it would reverse the usual ordering of impulse responses.
   return(Z)
 }

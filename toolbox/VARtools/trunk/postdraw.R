@@ -18,7 +18,7 @@ postdraw <- function(vout,n,nosigprior=FALSE){
   lags <- (ncf-dim(vout$Bx)[2])/neq
   if(nosigprior){df <- df-dim(S)[1]-1}	# This undoes the |Sigma|^{-(nvar+1)/2} prior
   wmat <- rwwish(df,solve(S),n)
-  for (it in 1:n){wmat[,,it] <- solve(wmat[,,it])}
+  for (it in 1:n){wmat[,,it] <- chol(solve(wmat[,,it]))}
   nmat <- array(rnorm(n*neq*ncf),c(ncf,neq,n))
   cfmat <- t(cbind(matrix(vout$By,neq,neq*lags),vout$Bx))
   for (ir in 1:n){
@@ -29,7 +29,8 @@ postdraw <- function(vout,n,nosigprior=FALSE){
   dim(By) <- c(neq,neq,lags,n)
   ## Bx <- as.vector(vout$Bx)+aperm(nmat,c(2,1,3))[,(neq*lags+1):ncf,]  # Bx added in both here and in cfmat. Bug caught by A.Zawadwoski
   Bx <- Byx[,(neq*lags+1):ncf,]
-  ## Note that wmat[,,i] is not ready for use as input to impulsdtrf, needs chol() first.
-  wmat <- aperm(wmat, c(2,1,3))
+  ## Note that if reordered as below, wmat[,,i] would be  ready for use as input to impulsdtrf.
+  ## but as is, needs transposition.
+  ## wmat <- aperm(wmat, c(2,1,3))
   return(list(By=By,Bx=Bx,smat=wmat))
 }

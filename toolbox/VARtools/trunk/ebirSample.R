@@ -1,4 +1,4 @@
-ebirSample <- function(pdout, horiz, shockf=NULL, ... ) {
+ebirSample <- function(pdout, horiz, shockf=chol, ... ) {
   ## pdout is the output list from postdraw(), which has
   ## elements By (equations by variables by lags by draws),
   ## Bx (equations by nx by draws), and smat (equations by
@@ -10,19 +10,16 @@ ebirSample <- function(pdout, horiz, shockf=NULL, ... ) {
   ## smat.  "..." is extra arguments for shockf.
   ##-------------
   ndraw <- dim(pdout$By)[4]
-  if (is.null(shockf)) {
-    sfac <- pdout$smat
-  } else {
-    sfac <- array(0, dim(pdout$smat))
-    for (id in 1:ndraw) 
+  sfac <- array(0, dim(pdout$smat))
+  for (id in 1:ndraw) 
     sfac[ , , id] <- shockf(pdout$smat[,,id], ...)
-  }
   By <- pdout$By
   nv <- dim(By)[1]
   lags <- dim(By)[3]
   ndraw <- dim(By)[4]
   resp <- array(0, c(nv, nv, horiz, ndraw))
   for (id in 1:ndraw)
-    resp[ , , , id] <-   impulsdtrf(vout=list(By=mxpd$By[, , , id]), smat=t(chol(mxpd$smat[, , id])), nstep=horiz)
+    resp[ , , , id] <-   impulsdtrf(vout=list(By=mxpd$By[, , , id]), smat=t(sfac[, , id]), nstep=horiz)
   return(resp)
+  
 }

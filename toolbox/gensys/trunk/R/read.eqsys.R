@@ -35,7 +35,7 @@ read.eqsys <- function(file) {
   cnct <- textConnection(data[2, neq+3])
   shock <- scan(cnct, what="char", quiet=TRUE)
   close(cnct)
-j  if (vlist[1] == "NONE") vlist <- vector("character", 0)
+  if (vlist[1] == "NONE") vlist <- vector("character", 0)
   if (param[1] == "NONE") param <- vector("character", 0)
   if (shock[1] == "NONE") shock <- vector("character", 0)
   class(eq) <- c("eqsys", "expression")

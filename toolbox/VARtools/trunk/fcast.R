@@ -19,11 +19,16 @@ fcast <- function(y0, By, Bx, xdata=NULL, const=TRUE, horiz, shocks=NULL) {
       xdata <- matrix(1,horiz+lags,1)
     else
       xdata <- cbind(xdata, matrix(1, horiz+lags, 1))
+  } else {                              #no constant, or it's explicitly in xdata
+    if (!is.null(xdata)) {
+      if (is.null(dim(xdata))) xdata <- matrix(xdata,ncol=1)
+    } else {                            #no constant, no xdata.  0 x 1  as placeholder
+      xdata <- matrix(0, horiz+lags, 1)
+      Bx <- matrix(1, 1, 1)
+    }
   }
   if (is.null(dim(y0))) dim(y0) <- c(length(y0),1)
   nvar <- dim(y0)[2]
-  if (is.null(dim(xdata))) xdata <- matrix(xdata,ncol=1)
-  if (is.null(dim(Bx))) Bx <- matrix(Bx,ncol=1)
   nx <- dim(Bx)[2]
   yhat <- matrix(0,horiz+lags,nvar)
   yhat[1:lags,] <- y0

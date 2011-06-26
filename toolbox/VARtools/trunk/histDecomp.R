@@ -18,8 +18,8 @@ histDecomp <- function(vout, vts, xdata=NULL, const=TRUE, orthmat=NULL) {
     shocks <- shocks %*% orthmat
     ydecomp[ , iv, ] <-  t(fcast(matrix(0, lags, nv), vout$By, vout$Bx, xdata=NULL, const=FALSE, horiz, shocks))
   }
-  ydecompStacked <- apply(ydecomp, c(1,2), cumsum)
-  ydecompStacked <- aperm(ydecompStacked, c(2, 3, 1))
+  ydecompStacked <- apply(ydecomp, c(1,3), cumsum)
+  ydecompStacked <- aperm(ydecompStacked, c(2, 1, 3))
   dn2 <- dimnames(vout$By)[[1]]
   if (const) dn2 <- c(dn2, "const")
   dimnames(ydecomp) <- list(dimnames(vout$By)[[1]], dn2, NULL)

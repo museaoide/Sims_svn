@@ -1,4 +1,4 @@
-csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE,alpha=1e-3,delta=1e-6,long=FALSE) {
+csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE, vverbose=FALSE, alpha=1e-3,delta=1e-6,long=FALSE) {
 ### FUN:      A function with vector argument x or (when numerical derivatives are used) with matrix argument x.
 ###           the number of rows in x matches the number of rows in the return value.  For numerical derivatives,
 ###           the number of columns in x is the number of distinct argument vectors at which FUN is evaluated.
@@ -90,6 +90,7 @@ csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE,alpha=
       dx <- lambda*dx0
       f <- FUN(x+dx,...)
       af <- sum(abs(f))
+      if(vverbose) cat("lambda: ",lambda,":  ","af: ", af, "\n") 
       if(!is.nan(af) && af < afmin) {
         afmin <- af
         fmin <- f

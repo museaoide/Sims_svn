@@ -1,4 +1,4 @@
-varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=list(sig=1,w=1),urprior=list(lambda=NULL, mu=NULL))
+varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=list(sig=1,w=1),urprior=list(lambda=NULL, mu=NULL), yinit=NULL, nstat=rep(TRUE,nv))
 ### ydum, xdum:   dummy observation data that implement the prior
 ### breaks:       vector of points in the dummy data after which new dummy obs start
 ###                   Set breaks=T+matrix(c(0,breaks),ncol=1), ydata=rbind(ydata,ydum), xdum=rbind(xdata,xdum), where 
@@ -16,7 +16,9 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
 ### urprior:          Parameters of the "unit roots" and "co-persistence" priors that are
 ###                   implemented directly in rfvar3.  lambda and mu should be NULL here if
 ###                   the dummy observations generated here are used with rfvar3 and lanbda and mu
-###                   are not NULL in rfvar3.
+###                   are not NULL in rfvar3.  As in rfvar3, lambda<0 means constant not included.
+### yinit:            lags x nv initial data matrix, used in constructing urprior component, but not otherwise.
+### nstat:             Set components corresponding to non-persistent variables to FALSE.
 ### norm              normalizing constant to make prior integrate to one conditional on Sigma
 ### Note:         The original Minnesota prior treats own lags asymmetrically, and therefore
 ###                   cannot be implemented entirely with simple dummy observations.  It is also usually
@@ -44,7 +46,7 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
           ##------------------
           ydum[il+1,,il,] <- il^mnprior$decay*diag(vprior$sig,nv,nv)
         }
-      ydum[1,,1,] <- diag(vprior$sig,nv,nv)
+      ydum[1,,1,] <- diag(vprior$sig * nstat, nv, nv) # so own lag has mean zero if nstat FALSE
       ydum <- mnprior$tight * ydum
       dim(ydum) <- c(lags+1,nv,lags*nv)
       ydum <- ydum[seq(lags+1,1,by=-1),,]
@@ -61,7 +63,14 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
       lbreak <- 0;
     }
   if (!is.null(urprior) ) {
-    
+    ## lambda obs.  just one
+    ydumur0 <- matrix(apply(yinit, 2, mean), nrow=lags, ncol=nv, byrow=TRUE)
+    ydumur <- ydumur0[ , nstat] * lambda           #so we don't let stationary variables contribute
+    for (iv in which(nstat)) {
+      ydumuri <- matrix(0, lags, nv)
+      ydumuri[:, iv] <- ydumur0[:, iv]
+      ydumur <- rbind(ydumur, mu *ydumuri)
+    }###working here
   }
   if (!is.null(vprior) && vprior$w>0)
     {

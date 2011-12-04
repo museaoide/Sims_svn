@@ -29,14 +29,13 @@ derivVec <- function(ex, x=attr(ex,"vlist"), param=vector("numeric",0), xchk=fun
         gval[iq, ] <- attr(fg, "grad")
       }
       fval <- c(fval)
-      attr(fval, "grad") <- gval
     } else {                            #bad z input
       fval[] <- 1e20
-      gval[] <- diag(-1, nq, nv)
-      attr(fval, "grad") <- gval
+      gval <- diag(-1, nq, nv)
     }
     names(fval) <- names(ex)
-    dimnames(gval) <- list(eq=names(ex), vbl=names(zv))
+    dimnames(gval) <- list(eq=names(ex), vbl=attr(ex,"vlist"))
+    attr(fval, "grad") <- gval
     return(fval)
   }
   return(fret)

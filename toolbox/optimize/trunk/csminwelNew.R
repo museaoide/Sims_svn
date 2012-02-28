@@ -51,7 +51,7 @@ csminwelNew <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=
   retcode3 <- 101
   x <- x0
   f <- f0
-  if (is.null(attr(fcn,"hessian"))) {
+  if (is.null(attr(f0,"hessian"))) {
     H <- H0
   }else{
     H <- attr(f0,"hessian")
@@ -69,7 +69,7 @@ csminwelNew <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=
     }
     ##-------------------------
     itct <- itct+1
-    itout <- csminit(fcn,x,f,g,badg,H,...)
+    itout <- csminit(fcn,x0=x, f0=f, g0=g,badg=badg, H0=H,...)
     f1 <- itout$fhat
     x1 <- itout$xhat
     fc <- itout$fcount
@@ -96,7 +96,7 @@ csminwelNew <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=
         ##
         Hcliff <- H+diag(diag(H) * rnorm(nx))
         cat("Cliff.  Perturbing search direction. \n")
-        itout <- csminit(fcn,x,f,g,badg,Hcliff,...)
+        itout <- csminit(fcn,x0=x,f0=f,g0=g, badg=badg, H0=Hcliff,...)
         f2 <- itout$fhat
         x2 <- itout$xhat
         fc <- itout$fcount
@@ -127,7 +127,7 @@ csminwelNew <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=
             ## as.numeric below for robustness against f's being 1x1 arrays
             gcliff <- (x2 - x1) * (as.numeric(f2 - f1)/(normdx^2))
             dim(gcliff) <- c(nx,1)
-            itout <- csminit(fcn,x,f,gcliff,0,diag(nx),...)
+            itout <- csminit(fcn,x0=x,f0=f, g0=gcliff, badg=FALSE,H0=diag(nx),...)
             f3 <- itout$fhat
             x3 <- itout$xhat
             fc <- itout$fc

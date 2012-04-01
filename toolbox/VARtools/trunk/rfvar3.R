@@ -6,8 +6,8 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ## if seasonal dummies are included in xdata.  The prior shrinks toward simple persistence, so it
     ## will tend to prevent the dummies from picking up all the seasonality.
     ## ---------------------------------------------------------------------------
-    ## ydata:   T x nvar dependent variable data matrix
-    ## xdata:   T x nx exogenous variable data matrix
+    ## ydata:   T x nvar dependent variable data matrix.  Can be ts object.
+    ## xdata:   T x nx exogenous variable data matrix.  Can be ts object.
     ##          Note that if either ydata or xdata has only one column, it must still have a dim vector.  In
     ##          other words it must be a Tx1 array, not a vector of length T.
     ##------------------
@@ -63,8 +63,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     if(!nox){
       T2 <- dim(xdata)[1]
       nx <- dim(xdata)[2]
-    }
-    else {
+    } else {
       T2 <- T; nx <- 0; xdata<- matrix(0,T2,0)
     } 
     ## note that x must be same length as y, even though first part of x will not be used.
@@ -76,8 +75,18 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     }
     if (identical(breaks,NULL))
       nbreaks <- 0
-    else
+    else {
+      if (is.ts(ydata)) {                # Can use Yr, month-or-quarter pairs, or real number dates.
+        if (is.matrix(breaks) ) {
+          breaks <- breaks[ , 1] + (breaks[ ,2] - 1) / frequency(ydata)
+        } else {
+          if (any(abs(breaks - round(breaks))) > 1e-8) {
+            breaks <- match(breaks, time(ydata))
+          }
+        }                               #if not real numbers, not yr-month pairs, it's just obs number
+      }
       nbreaks<-length(breaks)
+    }
     breaks <- c(0,breaks,T)
     if(any(breaks[2:length(breaks)] <= breaks[1:(length(breaks)-1)]))
       stop("list of breaks must be in strictly increasing order\n")

@@ -9,9 +9,9 @@ SVARlh0 <- function(pvec, idmat, sigma, T) {
   A0 <- matrix(0,n,n)
   A0[idmat] <- pvec
   lh <- SVARlh(A0, sigma, T)
-  ## penalty for contemporaneous response of FF (variable 1) to M (variable 6) negative
-  ## and contemp policy response to pcrm small
+  ## penalty for contemporaneous response of R  to M  negative
+  ## (and contemp policy response to pcrm small)
   Tdum <- 20
-  lh <- lh - Tdum*log(2*pi) + 2*Tdum*log(A0[1,1]) - Tdum*((.005*A0[1,1] + .007*A0[1,6])^2/2 +(.005*A0[1,1] + .05 * A0[1,7])^2/2)
+  lh <- lh - Tdum*log(2*pi) + 2*Tdum*log(A0[1,1]) - Tdum*(.005*A0[1,1] + .007*A0[1,2])^2/2 ### +(.005*A0[1,1] + .05 * A0[1,7])^2/2)
   return(-lh)
 }

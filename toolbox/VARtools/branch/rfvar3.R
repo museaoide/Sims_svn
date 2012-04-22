@@ -1,5 +1,8 @@
-rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu=2,ic=NULL)
+rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, omit=NULL, lambda=5,mu=2,ic=NULL)
   {
+    ## probably should scrap this, instead follow the R philosopy and create a spare version that does not use
+    ## ts properties, just breaks, does not know about omissions and dummy variables.  Then a wrapper that can
+    ## assemble the input for this one (or for mgnldnsty), perhaps put dates on u.
     ## This algorithm goes for accuracy without worrying about memory requirements.
     ## ---------------------------------------------------------------------------
     ## The standard prior it implements is NOT APPROPRIATE for seasonally unadjusted data, even
@@ -24,6 +27,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ##          of data ranges to omit.  These are integer pairs (in a
     ##          two-column matrix) that correspond to the date pairs (e.g. c(1990,3)) used to specify dates
     ##          in manipulations of time series objects.  Note that ydata includes the omitted data.  [not implemented yet]
+    ##          Note that lags periods of data from the omitted period are used as initial conditions for the following segment.
     ## lambda:  weight on "co-persistence" prior dummy observations.  This expresses
     ##          belief that when all variables are at a fixed initial level, they tend to
     ##          stay there.  This is consistent with stationarity and with nonstationarity with or
@@ -56,6 +60,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ## Code written by Christopher Sims.  This version 8/13/04.
     ## 12/18/05:  added ts properties for u, better comments.
     ##
+    ## ----------------- preprocess mts data ---------------------
     if (is.null(dim(ydata))) dim(ydata) <- c(length(ydata),1)
     T <-dim(ydata)[1]
     nvar<-dim(ydata)[2]

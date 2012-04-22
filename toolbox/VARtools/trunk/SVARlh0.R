@@ -10,6 +10,6 @@ SVARlh0 <- function(pvec, idmat, sigma, T) {
   A0[idmat] <- pvec
   lh <- SVARlh(A0, sigma, T)
   Tdum <- 60
-  lh <- lh + Tdum*log(abs(A0[1,1])) - Tdum*((.005*A0[1,1] + .002*A0[1,2])^2/2 ) #prior isn't normalized
+  lh <- lh + 2*Tdum*log(abs(A0[1,1])) - Tdum*((.005*A0[1,1] + .003*A0[1,2])^2/2 + .01 * A0[1,5]^2) #prior isn't normalized
   return(-lh)
 }

@@ -89,18 +89,26 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
       nbreaks<-length(breaks)
     }
     breaks <- c(0,breaks,T)
-    if(any(breaks[2:length(breaks)] <= breaks[1:(length(breaks)-1)]))
-      stop("list of breaks must be in strictly increasing order\n")
+    if(any(breaks[2:length(breaks)] < breaks[1:(length(breaks)-1)]))
+      stop("list of breaks must be in increasing order\n")
     ## initialize smpl as null if initial observations are only there for lambda/mu prior.
     ## matlab code uses the fact that in matlab a:b is null if b<a, which is not true for R.
-    if(breaks[2]>lags)
-      smpl <- (lags+1):breaks[2]
-    else
-      smpl <- NULL
-    if(nbreaks>0){
-      for (nb in 2:(nbreaks+1))
-        smpl <- c(smpl,(breaks[nb]+lags+1):breaks[nb+1])
+    ## if(breaks[2]>lags)
+    ##   smpl <- (lags+1):breaks[2]
+    ## else
+    ##   smpl <- NULL
+    ## if(nbreaks>0){
+    ##   for (nb in 2:(nbreaks+1))
+    ##     smpl <- c(smpl,(breaks[nb]+lags+1):breaks[nb+1])
+    ## }
+    smpl <- NULL
+    for (nb in 2:(nbreaks + 2)) {
+      if ( breaks[nb] > breaks[nb-1] + lags )
+        smpl <- c(smpl, (breaks[nb-1] + lags + 1):breaks[nb])
     }
+    ## With logic above, one can use an mts-type ydata and omit sections of it by including sequences of breaks separated by
+    ## less than lags+1.  E.g. with lags=6, monthly data, breaks=rbind(c(1979,8), c(1980,2), c(1980,8), c(1980,12)) omits
+    ## Sep 1979 through Dec 1981, plus 6 months after that, which are initial conditions for the next sample segment.
     Tsmpl <- length(smpl)
     X <- array(0,dim=c(Tsmpl,nvar,lags))
     for(ix in seq(along=smpl))

@@ -1,7 +1,7 @@
 fillPlotts <- function (x, y = NULL, plot.type = c("multiple", "single"), xy.labels, 
     xy.lines, panel = polygon, nc, yax.flip = FALSE, mar.multi = c(0, 
         5.1, 0, if (yax.flip) 5.1 else 2.1), oma.multi = c(6, 
-        0, 5, 0), axes = TRUE, polyarg=list(density=-1, fillOddEven="odd-even",...) 
+        0, 5, 0), axes = TRUE, polyarg=list(density=-1, fillOddEven="odd-even"),...) 
 {
     plotts <- function(x, y = NULL, plot.type = c("multiple", 
         "single"), xy.labels, xy.lines, panel = lines, nc, xlabel, 
@@ -44,7 +44,7 @@ fillPlotts <- function (x, y = NULL, plot.type = c("multiple", "single"), xy.lab
                 plot.default(tp, xp[, i], axes = FALSE, xlab = "", 
                   ylab = "", log = log, col = col, bg = bg, pch = pch, 
                   ann = ann, type = "n", ...)
-                do.call(panel, c(list(tp, xp[, i], col = col, bg = bg, pch = pch, type = type), polyarg,...)
+                do.call(panel, c(list(tp, xp[, i], col = col, bg = bg, pch = pch, type = type), polyarg))
                 if (frame.plot) 
                   box(...)
                 y.side <- if (i%%2 || !yax.flip) 

@@ -1,8 +1,9 @@
-DiscCAPMobj <- function(param, gy, y, U, alph) {
+DiscCAPMobj <- function(param, gy, y, alph) {
   ## DiscPObj, but with useful extras returned, for use in analyzing results,
   ## not in csminwel.
   ## param:  First nx-1 are marginal probabilities on x points,
-  ##         remainder are the positions of the discrete x points as nq x nx  array
+  ##         remainder are the positions of the discrete x points as (nq-1) x nx  array
+  ##         The minus 1 reflects the need for x to sum to wealth down columns.
   ## gy:     The marginal probabilities on y, an ny x 1 array
   ## y:      The discrete y points, an ny x nq array
   ## --------- With nq assets, ny is likely to by prod(nyi, i=1:nq), so the y's are in an nq-d 
@@ -14,31 +15,45 @@ DiscCAPMobj <- function(param, gy, y, U, alph) {
   ## "weight" indexes the nx rows of the joint density
   ## "y" indexes the ny columns of the joint density
   ##------------------------
-  ## 18.1.10, verified results vs. numerical gradients on nx=4 problem
   ##
-  require("tensor")
-  nx <- (length(param)+1)/2
+  require("tensorA")
+  W <- 2                                #set wealth to 2, so it's easy to see that its components are not probabilities.
+  nq <- dim(y)[2]
+  ny <- dim(y)[1]
+  SIGZ <- diag(c(rep(.04, nq-1), 0))             # covariance matrix of irreducible part.
+  MUZ <- c(rep(.5, nq-1), .4)                    # mean of irreducible part
+  nx <- (length(param) + 1) / (nq + 1)
   ny <- length(gy)
   p <- param[1:(nx - 1)]
   p <- matrix(c(p, 1 - sum(p)), 1,nx, dimnames=list(NULL, p=NULL))
-  x <- matrix(param[nx:(2 * nx - 1)], 1, nx, dimnames=list(NULL, x=NULL))
+  x <- matrix(param[nx:(nq * nx - 1)], nq-1, nx, dimnames=list(NULL, x=NULL))
+  x <- rbind(x, W - apply(x, 2, sum))
   if ( any(p < 0) ) return(1e20)
   mm <- function(z) { matrix(z, nx, ny, byrow=TRUE) }
   sy <- function(z) {apply( z, MAR=1, FUN=sum)}
   entel <- function(z) ifelse(z > 0, z * log(z), 0)
-  Umat <- outer(c(x), c(y), FUN=U)
+  xy <- t(y %*% x)
+  zmux <- matrix(MUZ %*% x, nx, ny)
+  zsigxx <- apply(x * (SIGZ %*% x), 2, sum)
+  zsigxx <- matrix(zsigxx, nx, ny)
+  Umat <- xy + zmux - (xy + zmux)^2/2 -zsigxx/2
+  yt <- rep(to.tensor(t(y), c(q=nq, y=ny)), nx, pos=3, names="x")
+  zmuxt <- rep(to.tensor(zmux, c(x=nx, y=ny)), nq, pos=1, names="q")
+  zsigxxt <- rep(to.tensor(zsigxx, c(x=nx, y=ny)), pos=1, names="q")
+  DXU <- (yt + zmuxt) * (1 - rep(to.tensor(xy + zmux, c(x=nx, y=ny)), nq, names="q")) - rep(to.tensor(SIGZ %*% x, c(q=nq, x=nx)), ny, names="y")
+  ## now DXU is an nq x nx x ny tensor
+  ## Umat <- outer(c(x), c(y), FUN=U)
   ## peaU <- p %*% exp(alph * Umat)
   eaU <- exp(alph * Umat)
   dimnames(eaU) <- list(weight=NULL, y=NULL)
   DPpeaU <- eaU            
   names(dimnames(DPpeaU))[1] <- "p"
-  peaU <- tensor(p, eaU, 2,1)
+  ## peaU <- mul.tensor(p, eaU, 2,1)           # isn't this just p %*% eau ?
+  peaU <-  p %*%  eaU
   if (any(peaU < 1e-290 * gy)) return(1e20)
-  DXU <- matrix(attr(Umat,"gradient"), nx, ny, dimnames=list(x=NULL, y=NULL))
-  ##assumes U fcn written to return gradient attribute,
-  ##e.g. via deriv().
   ## DXpeaU <- mm(tensor(p, alph * eaU, 2, 1)) * DXU
-  DXpeaU <- c(p) * (alph * eaU * DXU)
+  DXpeaU <- c(p) * (alph * mul.tensor(to.tensor(eaU, c(x=nx, y=ny)), NULL, DXU, by = c("nx","ny")))
+  ## working here 5/2/2012
   h <-  gy / peaU
   DPh <- -DPpeaU * mm(c(gy / peaU^2))
   DXh <- -DXpeaU * mm(c(gy / peaU^2))

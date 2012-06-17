@@ -1,4 +1,5 @@
 g0g1 <- function(ex,x,xl,shock,experr,param){
+  ## THIS IS PROBABLY OBSOLETE, REPLACED BY g0g1d followed by g0g1eval
   ## ex:     vector of expressions defining equilibrium
   ## x:      current values (or time derivatives in continuous case)
   ## xl:     lagged values (or levels in continuous case)

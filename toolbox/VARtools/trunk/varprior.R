@@ -1,4 +1,5 @@
-varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=list(sig=1,w=1),urprior=list(lambda=NULL, mu=NULL), yinit=NULL, nstat=rep(TRUE,nv))
+varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=list(sig=1,w=1),
+                      urprior=list(lambda=NULL, mu=NULL), xsig=NULL, ybar=NULL, xbar=1, nstat=rep(TRUE,nv))
 ### ydum, xdum:   dummy observation data that implement the prior
 ### breaks:       vector of points in the dummy data after which new dummy obs start
 ###                   Set breaks=T+matrix(c(0,breaks),ncol=1), ydata=rbind(ydata,ydum), xdum=rbind(xdata,xdum), where 
@@ -7,20 +8,24 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
 ### mnprior$tight:Overall tightness of Minnesota prior
 ### mnprior$decay:Standard deviations of lags shrink as lag^(-decay)
 ### vprior$sig:   Vector of prior modes for square roots of diagonal elements of r.f. covariance matrix
+###                  Names of this vecror name columns of output ydum.
 ### vprior$w:     Weight on prior on vcv.  1 corresponds to "one dummy observation" weight
 ###                   vprior.sig is needed
 ###                   to scale the Minnesota prior, even if the prior on sigma is not used itself.
 ###                   Set vprior$w=0 to achieve this.
 ###                   mnprior and vprior.w can each be set to NULL, thereby eliminating the corresponding
 ###                   dummy observations.
-### urprior:          Parameters of the "unit roots" and "co-persistence" priors that are
+### xsig:          rough scale of x variances.  names of this vector name output xdum
+### urprior:       Parameters of the "unit roots" and "co-persistence" priors that are
 ###                   implemented directly in rfvar3.  lambda and mu should be NULL here if
 ###                   the dummy observations generated here are used with rfvar3 and lanbda and mu
-###                   are not NULL in rfvar3.  As in rfvar3, lambda<0 means constant not included.
-### yinit:            lags x nv initial data matrix, used in constructing urprior component, but not otherwise.
-### nstat:             Set components corresponding to non-persistent variables to FALSE.
-### norm              normalizing constant to make prior integrate to one conditional on Sigma
-### Note:         The original Minnesota prior treats own lags asymmetrically, and therefore
+###                   are not NULL in rfvar3.   lambda < 0 means x'st not included.  Note that constant
+###                   is assumed to be last element of x.  If you want lambda < 0 to be the only source
+###                   of a prior on the constant, but xsig is not null, set the last element of xsig
+###                   to zero.  The default xbar=1 is correct when the constant is the only x.
+### yinit:         lags x nv initial data matrix, used in constructing urprior component, but not otherwise.
+### nstat:         Set components corresponding to non-persistent variables to FALSE.
+### Note:          The original Minnesota prior treats own lags asymmetrically, and therefore
 ###                   cannot be implemented entirely with simple dummy observations.  It is also usually
 ###                   taken to include the sum-of-coefficients and co-persistence components
 ###                   that are implemented directly in rfvar3.R.  The diagonal prior on v, combined
@@ -30,15 +35,18 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
 ###                   univariate ARs.
 ###-----------------------
 ###
-{
+{ require(abind)
   if (!is.null(mnprior))
-    {
+    { ## single-coefficient prior dummy obs.
+      ## each vbl and each lag has a dummy observation, and each dummy obs has values for current and lagged
+      ## y's  and current x's. we separate the y's and the x's into two arrays.  The last two indexes, lag
+      ## and rhsy, index the dummy observations.  
       xdum <- if(nx > 0) {
-        array(0, dim=c(lags + 1, nx, lags, nv), dimnames=list(obsno=1:(lags + 1), xvbl=1:nx, lag=1:lags, lhsy=1:nv))
+        array(0, dim=c(lags + 1, nx, lags, nv), dimnames=list(obsno=1:(lags + 1), xvbl=1:nx, lag=1:lags, rhsy=1:nv))
       } else {
         NULL
       }
-      ydum <- array(0,dim=c(lags+1,nv,lags,nv),dimnames=list(obsno=1:(lags+1),rhsy=1:nv,lag=1:lags,lhsy=1:nv))
+      ydum <- array(0,dim=c(lags+1,nv,lags,nv),dimnames=list(obsno=1:(lags+1),rhsy=1:nv,lag=1:lags, rhsy=1:nv))
       for (il in 1:lags)
         {
           ##-----debug---------
@@ -46,6 +54,14 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
           ##------------------
           ydum[il+1,,il,] <- il^mnprior$decay*diag(vprior$sig,nv,nv)
         }
+      ## If we have non-trivial x's, need dobs's for them, also.
+      if(!is.null(xsig)) {
+        ydumx <-  array(0, dim=c(lags + 1, nv, nx), dimnames=list(obsno=1:(lags + 1), rhsy=1:nv, dx=1:nx))
+        xdumx <-  array(0, dim=c(lags + 1, nx, nx), dimnames=list(obsno=1:(lags + 1), xvbl=nx, dx=1:nx))
+        xdumx[1, , ] <- diag(xsig, nx, nx)
+        ## note that xvalues for obsno 2:(lags+1) don't matter.  This is one dummy obseervation,
+        ## so only the "current" x is used.
+      }
       ydum[1,,1,] <- diag(vprior$sig * nstat, nv, nv) # so own lag has mean zero if nstat FALSE
       ydum <- mnprior$tight * ydum
       dim(ydum) <- c(lags+1,nv,lags*nv)
@@ -53,59 +69,85 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
       xdum <- mnprior$tight*xdum
       dim(xdum) <- c(lags+1,nx,lags*nv)
       xdum <- xdum[seq(lags+1,1,by=-1),,]
-      breaks <- (lags+1)*matrix(1:(nv*lags),nv*lags,1)
-      lbreak <- breaks[length(breaks)]
-      breaks <- breaks[-length(breaks)] #end of sample is not a "break".  Note this makes breaks NULL if nv==lags==1.
     } else {
       ydum <- NULL;
       xdum <- NULL;
       breaks <- NULL;
       lbreak <- 0;
     }
-  if (!is.null(urprior) ) {
+  if (!is.null(urprior$lambda) ) {
     ## lambda obs.  just one
-    ydumur0 <- matrix(apply(yinit, 2, mean), nrow=lags, ncol=nv, byrow=TRUE)
-    ydumur <- ydumur0[ , nstat] * lambda           #so we don't let stationary variables contribute
-    for (iv in which(nstat)) {
-      ydumuri <- matrix(0, lags, nv)
-      ydumuri[:, iv] <- ydumur0[:, iv]
-      ydumur <- rbind(ydumur, mu *ydumuri)
-    }###working here
+    ydumur <- matrix(ybar, nrow=lags+1, ncol=nv, byrow=TRUE) * abs(urprior$lambda)
+    if(urprior$lambda > 0) {
+      xdumur <- matrix(xbar, lags + 1, nx, byrow=TRUE) * urprior$lambda # (all but first row redundant)
+    } else {
+      xdumur <- matrix(0, lags + 1, nx)
+    }
+  } else {
+    ydumur <- NULL
+    xdumur <- NULL
   }
-  if (!is.null(vprior) && vprior$w>0)
+  ## mu obs. sum(nstat) of them
+  if (!is.null(urprior$mu)) {
+    ydumuri <-array(0, c(lags+1, nv, nv))
+    for (iv in which(nstat)) {
+      ydumuri[ , iv, iv] <- ybar[iv]
+    }
+    ydumur <- abind(ydumur, urprior$mu *ydumuri, along=3)
+    xdumur <- abind(xdumur, array(0, c(lags+1, nx, nv)), along=3)
+    }
+  }
+  if (!is.null(vprior) && vprior$w > 0)
     {
       ydum2 <- array(0,dim=c(lags+1,nv,nv))
       xdum2 <- array(0,dim=c(lags+1,nx,nv))
       ydum2[lags+1,,] <- diag(vprior$sig,nv,nv)*vprior$w #The vprior$w factor was missing until 11/29/06
-                                        #Original idea, not implemented, was probably that w be an integer repetition count
-                                        #for variance dobs.  Now it's just a scale factor for sig.
-      dim(ydum2) <- c((lags+1)*nv,nv)
-      dim(ydum) <- c((lags+1)*nv,lags*nv)
-      ydum <- cbind(ydum,ydum2)
-      dim(xdum2) <- c((lags+1)*nx,nv)
-      dim(xdum) <- c((lags +1)*nx,lags*nv)
-      xdum <- cbind(xdum,xdum2)
-      dim(ydum) <- c(lags+1,nv,dim(ydum)[2])
-      ydum <- aperm(ydum,c(1,3,2))
-      dim(ydum) <- c(dim(ydum)[1]*dim(ydum)[2],nv)
-      dim(xdum) <- c(lags+1,nx,dim(xdum)[2])
-      xdum <- aperm(xdum,c(1,3,2))
-      dim(xdum) <- c(dim(xdum)[1]*dim(xdum)[2],nx)
-      if(nv>1){
-        breaks <- c(breaks, (lags+1)*(0:(nv-1))+lbreak)
-      }
+                                        # Original idea, not implemented, was probably that w be an integer
+                                        # repetition count for variance dobs.
+                                        # Now it's just a scale factor for sig. in variance prior.
     } else {
-      if (!is.null(ydum)) { # case with mnprior non-null, but vprior null
-        ydum <- aperm(ydum, c(1, 3, 2))
-        dim(ydum) <- c(prod(dim(ydum)[1:2]), dim(ydum)[3])
-        xdum <- aperm(xdum, c(1,3,2))
-        dim(xdum) <- c(prod(dim(xdum)[1:2]), dim(xdum)[3])
-      }
+      ydum2 <- NULL
+      xdum3 <- NULL
     }
+  ## stack everything up.
+  dim(ydum) <- c(lags + 1, nv, lags * nv) # merge all the individual mn dobs
+  dim(xdum) <- c(lags + 1, nx, lags * nv)
+  ydum <- abind(ydum, ydumur, ydum2, along=3)
+  xdum <- abind(xdum, xdumur, xdum2, along=3)
+  breaks <- (lags+1) * (1:(dim(ydum)[3] -1)) # end of sample is not a "break".
+  ydum <- aperm(ydum, c(1, 3, 2))
+  ydum <- matrix(ydum, ncol=dim(ydum)[3])
+  xdum <- aperm(xdum, c(1,3,2))
+  xdum <- matrix(xdum, ncol=dim(xdum)[3])
+  ##   dim(ydum2) <- c((lags+1)*nv,nv)
+  ##   dim(ydum) <- c((lags+1)*nv,lags*nv)
+  ##   ydum <- cbind(ydum,ydum2)
+  ##   dim(xdum2) <- c((lags+1)*nx,nv)
+  ##   dim(xdum) <- c((lags +1)*nx,lags*nv)
+  ##   xdum <- cbind(xdum,xdum2)
+  ##   dim(ydum) <- c(lags+1,nv,dim(ydum)[2])
+  ##   ydum <- aperm(ydum,c(1,3,2))
+  ##   dim(ydum) <- c(dim(ydum)[1]*dim(ydum)[2],nv)
+  ##   dim(xdum) <- c(lags+1,nx,dim(xdum)[2])
+  ##   xdum <- aperm(xdum,c(1,3,2))
+  ##   dim(xdum) <- c(dim(xdum)[1]*dim(xdum)[2],nx)
+  ##   if(nv>1){
+  ##     breaks <- c(breaks, (lags+1)*(0:(nv-1))+lbreak)
+  ##   }
+  ## } else {
+  ##   if (!is.null(ydum)) { # case with mnprior non-null, but vprior null
+  ##     ydum <- aperm(ydum, c(1, 3, 2))
+  ##     dim(ydum) <- c(prod(dim(ydum)[1:2]), dim(ydum)[3])
+  ##     xdum <- aperm(xdum, c(1,3,2))
+  ##     dim(xdum) <- c(prod(dim(xdum)[1:2]), dim(xdum)[3])
+  ##   }
+  ## }
+  dimnames(ydum) <- list(NULL, names(vprior$sig))
+  dimnames(xdum) <- list(NULL, names(xsig))
   return(list(ydum=ydum,xdum=xdum,pbreaks=breaks))
-  ## data here in the form of T by nv y, and T x nx x.  Lagged y's not put in to a rhs regression matrix, so a "breaks" vector
-  ## is needed.  
-  ## rfvar3 adds persistence and sum of coeffs dummy observations to data in lhs and rhs regression matrix form.
-  ## The panel VAR programs, to accommodate the connection of cs to y0's, must reorganize lhs to (T*nv) by 1 form and construct
-  ## corresponding much larger (but sparse) rhs X matrix.
+  ## data here in the form of T by nv y, and T x nx x.  Lagged y's not put in to a rhs
+  ## regression matrix, so a "breaks" vector is needed.  
+  ## rfvar3 adds persistence and sum of coeffs dummy observations at end of  data in lhs and rhs
+                                        #3 regression matrix form.  So to combine thiw with rfvar3, set lambda and mu to NULL in one or the
+  ## other program.
 }

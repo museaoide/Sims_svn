@@ -4,12 +4,12 @@ rfvarKF <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, p
   ## breaks:   breaks in the data.  The first lags data points after a break are used
   ##           as new initial conditions, not data points for the fit.  Breaks separated by less than lags
   ##           result in omission of stretches of data.
-  ## sigfac:   n x n x Tarray of sqrts of covariance matrices for disturbances.  crossprod(sigfac[ , , it])
+  ## sigfac:   n x n x T array of sqrts of covariance matrices for disturbances.  crossprod(sigfac[ , , it])
   ##           is residual variance at it.
   ## prior:    List of output from varpriorN(): initial shat and sighat
   ##--------------------------
-  ## layout of state vector and shat:  By[ , , iq], with lags (second) index running first,
-  ##           concatenated with Bx[ ,iq], repeated neq times, then the neq disturbances.
+  ## layout of state vector and shat:  By[iq , , ], 
+  ##           concatenated with Bx[iq, ], repeated neq times, then the neq disturbances.
   if (is.null(dim(ydata))) dim(ydata) <- c(length(ydata),1)
   T <-dim(ydata)[1]
   nvar<-dim(ydata)[2]

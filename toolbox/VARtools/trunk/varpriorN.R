@@ -7,13 +7,20 @@ varpriorN <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=l
    ## contruct prior mean and variance from varprior output
   vpout <- rfvar3(prior$ydum, lags=lags, xdata=prior$xdum, const=FALSE,
                   breaks=prior$pbreaks, lambda=NULL, mu=NULL)
-  browser()
-  shat <- with(vpout, c(rbind(matrix(aperm(By, c(2,3,1)), prod(dim(By)[2:3]), dim(By)[1]), t(Bx)))) #lags,vbls for y, then x, then eq
+  shat <- with(vpout, c(rbind(matrix(aperm(By, c(2,3,1)), prod(dim(By)[2:3]), dim(By)[1]), t(Bx))))
+  ## lags,vbls for y, then x, then eq
   ## Indexing in shat: ((vbl x lag), const) x eqn
   sighat <- with(vpout, kronecker(crossprod(u), xxi))
+  ##----------------
   ## crossprod(u) rather than var(u) above because in the prior,only nv dummy observations contribute
   ## to the variance prior.  The others "fit perfectly" and should not contribute to the sigma prior.
   ##----------------------------------------
+  ## scale by vprior$sig, since this is an absolute normal prior, not dummy observations that would be
+  ## implicitly scaled by equation variances.
+  ##---------------------------
+  wtvec <- rep(vprior$sig, each=nv * lags + nx)
+  shat <- shat * wtvec
+  sighat <- wtvec * t(wtvec * sighat)
   return(list(shat=shat, sighat=sighat))
 }
   

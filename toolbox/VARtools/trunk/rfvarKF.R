@@ -66,7 +66,7 @@ rfvarKF <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, p
   sighat <- prior$sighat
   ## seems don't need to keep shat, sighat, since coeffs are constant
   for (it in 1:Tsmpl) {
-    MM[(nXX + 1):(nXX+nvar), (nXX + 1):(nXX+nvar)] <- M[smpl[it], , ]
+    MM[(nXX + 1):(nXX+nvar), (nXX + 1):(nXX+nvar)] <- sigfac[, , smpl[it]]
     H[1:nXX, 1:nXX] <- kronecker(diag(nvar), X[it, ])
     kfout <- kf2(y[it, ], H, shat, sighat, G, MM)
     shat <- kfout$shat

@@ -15,7 +15,9 @@ rfvarKF <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, p
   nvar<-dim(ydata)[2]
   ##nox=isempty(xdata)
   if (const) {
-    xdata <- cbind(xdata,matrix(1,T,1))
+    xc <- matrix(1,T,1)
+    dimnames(xc) <- list(NULL, "const")
+    xdata <- cbind(xdata,xc)
   }
   nox <- identical(xdata,NULL)
   if(!nox){
@@ -56,34 +58,49 @@ rfvarKF <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, p
   y <- ydata[smpl,,drop=FALSE]
   ## Everything now set up with input data for y=Xb+e
   ##--------------------
-   nXX <- dim(X)[2] * nvar
-  G <- diag(c(rep(1, nXX), rep(0,nvar))) # X coefficients constant, resids iid
-  MM <- matrix(0, nXX + nvar, nXX + nvar)
+  nXX <- dim(X)[2] * nvar                #nXX here different from in kfVC()
+  ## G <- diag(c(rep(1, nXX), rep(0,nvar))) # X coefficients constant, resids iid
+  ## MM <- matrix(0, nXX + nvar, nXX + nvar)
   lh <- matrix(0, Tsmpl, 2)
   fcsterr <- matrix(0, Tsmpl, nvar)
-  H <- MM
-  shat <- prior$shat
-  sighat <- prior$sighat
-  ## seems don't need to keep shat, sighat, since coeffs are constant
+  ## H <- matrix(0, nvar, nXX + nvar)
+  ## H[ , (nXX + 1):(nXX + nvar)] <- diag(nvar)
+  shat <- c(prior$shat, rep(0,nvar))
+  sighat <- matrix(0, nXX + nvar, nXX + nvar)
+  sighat[1:nXX, 1:nXX] <- prior$sighat
+  ## sighat[(nXX + 1):(nXX+nvar), (nXX + 1):(nXX+nvar)] <- crossprod(sigfac[ , , 1])
+  ## The lower corner being crossprod(sigfac[ , , 1]) doesn't matter.  It gets wiped out by G.
+  ## don't need to keep shat, sighat, since coeffs are constant
   for (it in 1:Tsmpl) {
-    MM[(nXX + 1):(nXX+nvar), (nXX + 1):(nXX+nvar)] <- sigfac[, , smpl[it]]
-    H[1:nXX, 1:nXX] <- kronecker(diag(nvar), X[it, ])
-    kfout <- kf2(y[it, ], H, shat, sighat, G, MM)
+    ## MM[(nXX + 1):(nXX+nvar), (nXX + 1):(nXX+nvar)] <- sigfac[, , smpl[it]]
+    ## H[ , 1:nXX] <- kronecker(diag(nvar), X[it, , drop=FALSE])
+    ## kfout <- kf2(y[it, ], H, shat, sighat, G, MM)
+    kfout <- kfVC(y[it, ], X[it, ], shat, sighat, sigfac[ , , smpl[it]])
     shat <- kfout$shat
     sighat <- kfout$sig
     lh[it, ] <- kfout$lh
     fcsterr[it, ] <- kfout$fcsterr
   }
-  ixBy <- rep(1:(nvar^2*lags), nvar) + nXX * rep((0:(nvar - 1)) * nXX, each=nvar^2*lags) 
+  nX <- nvar * lags + nx
+  ixBy <- rep(1:(nvar*lags), nvar) +  rep((0:(nvar - 1)) * nX, each=nvar * lags) 
   By <- array(shat[ixBy], c(nvar, lags, nvar))
-  ixBx <- rep(nvar^2 * lags + (1:nx), nvar) + rep(0:(nvar-1) * nXX, each=nx)
-  Bx <- t(matrix(shat[iBx], nx, nvar))
+  By <- aperm(By, c(3,1,2))
+  ixBx <- rep(nvar * lags + (1:nx), nvar) + rep(0:(nvar-1) * nX, each=nx)
+  Bx <- t(matrix(shat[ixBx], nx, nvar))
   Vb <- sighat[1:nXX, 1:nXX]
   yn <- dimnames(ydata)[[2]]
   xn <- dimnames(xdata)[[2]]
   dimnames(By) <- list(yn, yn, NULL)
   dimnames(Bx) <- list(yn, xn)
-  vbn <- c(paste0(rep(yn, each=lags), rep(1:lags, nvar)), xn)
+  vbn <-rep(c(paste0(rep(yn, lags), rep(1:lags, each=nvar)), xn), nvar)
   dimnames(Vb) <- list(vbn, vbn)
-  return(list(By=By, Bx=Bx, Vb=Vb, lh=lh, fcsterr=fcsterr))
+  dimnames(fcsterr) <- list(NULL, yn)
+  if( max(abs(smpl[-1]-smpl[-length(smpl)])) < 1.1) {
+     fcsterr <- ts(fcsterr)
+     tsp(fcsterr) <- tsp(ydata)
+     tsp(fcsterr)[1] <- time(ydata)[smpl[1]]
+     tsp(fcsterr)[2] <- time(ydata)[smpl[Tsmpl]]
+  }
+  ferrTime <- time(ydata)[smpl]
+  return(list(By=By, Bx=Bx, Vb=Vb, lh=lh, fcsterr=fcsterr, ferrtime=ferrtime))
 }

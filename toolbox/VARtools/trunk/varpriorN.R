@@ -19,7 +19,6 @@ varpriorN <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=l
   ## implicitly scaled by equation variances.
   ##---------------------------
   wtvec <- rep(vprior$sig, each=nv * lags + nx)
-  shat <- shat * wtvec
   sighat <- wtvec * t(wtvec * sighat)
   return(list(shat=shat, sighat=sighat))
 }

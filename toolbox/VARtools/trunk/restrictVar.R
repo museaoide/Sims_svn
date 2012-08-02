@@ -1,13 +1,16 @@
-restrictVAR <- function(vout, rmat=NULL, yzrone=NULL, xzrone=NULL, const=NULL) {
+restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=NULL, const=NULL) {
   ## restrictions can be specified as rows of rmat, with coefficients applied to elements of By and Bx
   ## stacked as they are in xxi (and then repeated across the equation index), or they can be specified
   ## in yzrone, xzrone.  Each zero element of yzrone or xzrone generates a restriction that sets the corresponding
   ## coefficient in By or Bx to zero.  Both kinds of restrictions can be non-trivial in the same call.
+  #-------------------------------------------
+  ## type:     vout in as from rfvar3 ("3") or as from rfvarKF ("KF")
+  ## const:    the right hand side of rmat %*% coeff = const, not the constant in the var.
+  ##------------------------------------------
   ncf <- dim(vout$By)[2] * dim(vout$By)[3] + dim(vout$Bx)[2]
   neq <- dim(vout$By)[1]
   ny <- dim(vout$By)[2]
   lags <- dim(vout$By)[3]
-  cfarray <- 
   nx <- dim(vout$Bx)[2]
   if (is.null(rmat)) {
     rmat <- matrix(0, 0, ncf *neq)
@@ -28,12 +31,16 @@ restrictVAR <- function(vout, rmat=NULL, yzrone=NULL, xzrone=NULL, const=NULL) {
       rmat <- rbind(rmat, newrow)
     }
   }
-  sig <- cov(vout$u)
-  rvcv <- rmat %*% kronecker(sig, vout$xxi) %*% t(rmat)
+  if (type == "3") {
+    sig <- cov(vout$u)
+    rvcv <- rmat %*% kronecker(sig, vout$xxi) %*% t(rmat)
+  } else {                              #type=="KF"
+    rvcv <- vout$Vb
+  }
   if(is.null(const)) const <- rep(0, dim(rmat)[1])
   stackedcf <- c(t(cbind(matrix(vout$By, nrow=neq), vout$Bx)))
   gap <- rmat %*% stackedcf - const
-  chstat <- t(gap) %*% solve(rvcv) %*% gap
+  chstat <- t(gap) %*% solve(rvcv, gap)
   return(chstat)
 }
   

@@ -97,10 +97,8 @@ rfvarKF <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, p
   dimnames(fcsterr) <- list(NULL, yn)
   if( max(abs(smpl[-1]-smpl[-length(smpl)])) < 1.1) {
      fcsterr <- ts(fcsterr)
-     tsp(fcsterr) <- tsp(ydata)
-     tsp(fcsterr)[1] <- time(ydata)[smpl[1]]
-     tsp(fcsterr)[2] <- time(ydata)[smpl[Tsmpl]]
+     tsp(fcsterr) <- c(time(ydata)[smpl[1]], time(ydata)[smpl[Tsmpl]], tsp(ydata)[3])
   }
   ferrTime <- time(ydata)[smpl]
-  return(list(By=By, Bx=Bx, Vb=Vb, lh=lh, fcsterr=fcsterr, ferrtime=ferrtime))
+  return(list(By=By, Bx=Bx, Vb=Vb, lh=lh, fcsterr=fcsterr, ferrTime=ferrTime))
 }

@@ -19,7 +19,7 @@ windowA <- function(x, start=NULL, end=NULL, frequency=NULL, deltat=NULL, agg=c(
       ## make sure lengths are multiples of nagg, so variables don't spill over
       leftover <- tdim %% nagg
       if (leftover != 0) {
-        xx <- window(xx, end=tsp(xx)[2] + (1 - leftover / nagg) / nagg, extend=TRUE)
+        xx <- window(xx, end=tsp(xx)[2] + (1 - leftover / nagg) / frequency, extend=TRUE)
         tdim <- tdim + nagg - leftover
       }
       xxa <- array(as.vector(xx), c(nagg, tdim %/% nagg, vdim))
@@ -27,6 +27,7 @@ windowA <- function(x, start=NULL, end=NULL, frequency=NULL, deltat=NULL, agg=c(
       if (agg[1] == "average") xxa <- xxa/nagg
       if (leftover != 0) warning("last obs incomplete")
       xx <- ts(xxa, start=tsp(xx)[1], freq= frequency)
+      dimnames(xx) <- list(NULL, dimnames(x)[[2]])
       noagg <- FALSE
     }
   }

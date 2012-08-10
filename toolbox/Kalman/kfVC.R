@@ -54,7 +54,7 @@ kfVC <- function(y, X, shat, sig, M) {
     if (!all(abs(fcsterr) < 1e-7)) warning("Uninformative H but non-zero fcsterr")
   } else {
     first0 <- match(TRUE, svdhoh$d < SMALLSV)
-    if (is.na(first0)) first0 <- min(dim(H))+1
+    if (is.na(first0)) first0 <- nv + 1
     u <- svdhoh$u[ , 1:(first0-1), drop=FALSE]
     v <- svdhoh$v[ , 1:(first0-1), drop=FALSE]
     d <- svdhoh$d[1:(first0-1), drop=FALSE]

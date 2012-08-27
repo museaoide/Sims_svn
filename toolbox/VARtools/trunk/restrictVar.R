@@ -41,18 +41,36 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
     }
     const <- c(const, cxzr[bxz])
   }
+  svdr <- svd(rmat)
+  if (max(abs(svdr$d)) > 1e10 * min(abs(svdr$d))){
+    error("restrictions not full rank")
+  }
+  ## Note that t(rv) spans the same space as rmat, so the restrictiosn are crossprod(v,coeffs)=gamma
+  rv <- svdr$v
   if (type == "3") {
     sig <- cov(vout$u)
-    rvcv <- rmat %*% kronecker(sig, vout$xxi) %*% t(rmat)
+    svdsig <- svd(sig)
+    singsig <- (max(svdsig$d) > 1e10 * min(svdsig$d))
+    svdxxi <- svd(vout$xxi)
+    singxxi <- (max(svdxxi$d) > 1e10 * min(svdxxi$d))
+    singv <- singsig || singxxi
+    if(!singv) {
+          ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
+          schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxx$d)) * t(svdxxi$u)) %*% rv
+        }
   } else {                              #type=="KF"
-    rvcv <- rmat %*% vout$Vb %*% t(rmat)
+    svdVb <- svd(vout$Vb)
+    ## schwarz <- rmat %*% svdVb$u %*% diag(1/sqrt(svdVb$d)) #below is more efficient version for large Vb
+    schwarz <- (1/sqrt(svdVb$d)) * (t(svdVb$u) %*% rv)
   }
+  schwarz <- -sum(log(diag(chol(crossprod(schwarz)))))  +
+     dim(rmat)[1] * log(2 * pi)
   if(is.null(const)) const <- rep(0, dim(rmat)[1])
   stackedcf <- c(t(cbind(matrix(vout$By, nrow=neq), vout$Bx)))
   gap <- rmat %*% stackedcf - const
-  svdv <- svd(rvcv)
+  svdv <- svd(rmat %*% vout$Vb %*% t(rmat))
   chstat <- (1/sqrt(svdv$d)) * (t(svdv$u) %*% gap)
   chstat <- crossprod(chstat)
-  return(list(chiSquared=chstat, df=dim(rmat)[1], logDetV=sum(log(svdv$d))))
+  return(list(chiSquared=chstat, df=dim(rmat)[1], sc=schwarz))
 }
   

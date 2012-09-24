@@ -11,14 +11,6 @@ varpriorN <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=l
   ## lags,vbls for y, then x, then eq
   ## Indexing in shat: ((vbl x lag), const) x eqn
   sighat <- with(vpout, kronecker(crossprod(u), xxi))
-  ##----------------
-  ## crossprod(u) rather than var(u) above because in the prior,only nv dummy observations contribute
-  ## to the variance prior.  The others "fit perfectly" and should not contribute to the sigma prior.
-  ##----------------------------------------
-  ## scale by vprior$sig, since this is an absolute normal prior, not dummy observations that would be
-  ## implicitly scaled by equation variances.
-  ##---------------------------
-  wtvec <- rep(vprior$sig, each=nv * lags + nx)
   sighat <- wtvec * t(wtvec * sighat)
   return(list(shat=shat, sighat=sighat))
 }

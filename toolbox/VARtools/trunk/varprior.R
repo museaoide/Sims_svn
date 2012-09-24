@@ -96,7 +96,6 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
     ydumur <- abind(ydumur, urprior$mu *ydumuri, along=3)
     xdumur <- abind(xdumur, array(0, c(lags+1, nx, nv)), along=3)
     }
-  }
   if (!is.null(vprior) && vprior$w > 0)
     {
       ydum2 <- array(0,dim=c(lags+1,nv,nv))

@@ -1,11 +1,11 @@
-varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=list(sig=1,w=1),
+varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=5,decay=.5),vprior=list(sig=1,w=1),
                       urprior=list(lambda=NULL, mu=NULL), xsig=NULL, ybar=NULL, xbar=1, nstat=rep(TRUE,nv))
 ### ydum, xdum:   dummy observation data that implement the prior
 ### breaks:       vector of points in the dummy data after which new dummy obs start
 ###                   Set breaks=T+matrix(c(0,breaks),ncol=1), ydata=rbind(ydata,ydum), xdum=rbind(xdata,xdum), where 
 ###                   actual data matrix has T rows, in preparing input for rfvar3
 ### nv,nx,lags: VAR dimensions
-### mnprior$tight:Overall tightness of Minnesota prior
+### mnprior$tight:Overall tightness of Minnesota prior. 1/tight ~ own lag std dev
 ### mnprior$decay:Standard deviations of lags shrink as lag^(-decay)
 ### vprior$sig:   Vector of prior modes for square roots of diagonal elements of r.f. covariance matrix
 ###                  Names of this vecror name columns of output ydum.
@@ -36,6 +36,7 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=.2,decay=.5),vprior=li
 ###-----------------------
 ###
 { require(abind)
+  ## nx=0 case messes up, at least at the end (2012.9.23)
   if (!is.null(mnprior))
     { ## single-coefficient prior dummy obs.
       ## each vbl and each lag has a dummy observation, and each dummy obs has values for current and lagged

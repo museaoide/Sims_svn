@@ -41,6 +41,7 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   if (const) {
     xdata <- cbind(xdata, matrix(1,T,1))
   }
+  ## looks likely that const=FALSE, xdata=NULL case crashes.  (2012.9.24)
   if (!is.null(xdata) ) stopifnot( dim(xdata)[1] == T)
   Tx <- dim(xdata)[1]
   nx <- dim(xdata)[2]

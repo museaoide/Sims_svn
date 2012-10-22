@@ -8,22 +8,31 @@ fcastMany <- function(ydata, By, Bx, xdata=NULL, const=TRUE, horiz) {
   nv <- dim(By)[1]
   nx <- ifelse( is.null(xdata), 0, dim(xdata)[2])
   nx <- ifelse(const, nx + 1, nx)
-  hmax <- horiz[length(horiz)]
+  nh <- length(horiz)
+  hmax <- horiz[nh]
   hmin <- horiz[1]
-  fc <- array(0, c(dim(ydata)[1] - lags, length(horiz), nv))
+  fc <- array(0, c(dim(ydata)[1] - lags + 1, nh, nv))
   u <- fc
   if (const) xdata <- cbind(xdata, matrix(1, T + hmax, 1))
-  for (it in (lags + 1):(T - hmin)) {
-    y0 <- ydata[(it - lags):(it-1), ]
-    hz <- horiz[(it + horiz) <= T]
-    hmax <- max(hz)
-    x0 <- xdata[(it - lags):(it - 1 + hmax), ]
-    fc[it - lags, 1:length(hz), ] <- fcast(y0, By, Bx, x0, const=FALSE, hmax)[ lags + hz, ]
+  for (it in lags:T) {                  #it is date of latest date used in forecast
+    y0 <- ydata[(it - lags + 1):it, ]
+    hzu <- horiz[(it + horiz) <= T]
+    nhu <- length(hzu)
+    x0 <- xdata[(it - lags + 1):(it + hmax), ]
+    fc[it - lags + 1, 1:nh, ] <- fcast(y0, By, Bx, x0, const=FALSE, hmax)[ lags + horiz, ]
     ## const=FALSE for fcast because we have already filled x0 with ones.
     ## note that fcast returns initial conditions and forecast all stacked up.
-    u[it - lags, 1:length(hz) , ] <- ydata[it + hz, ] - fc[it - lags, 1:length(hz), ]
+    u[it - lags + 1, nhu, ] <- ydata[it + hzu, ] - fc[it - lags + 1, nhu, ]
+    ## note that u will have zeros for dates beyond the end of the sample.
   }
   dimnames(fc) <- list(NULL, horiz, dimnames(ydata)[[2]])
   dimnames(u) <- dimnames(fc)
-  return(list(fc=fc, u=u))
+  tspfu <- tsp(ydata)
+  tspfu[1] <- tspfu[1] + (lags-1)/tspfu[3]
+  attr(fc,"tsp") <- tspfu
+  attr(u,"tsp") <- tspfu
+  ## Note that dates attached to u and fc are the dates the forecasts are formed.  One-step forecasts and forecast
+  ## errors, e.g., are for dates one period after the listed dates.  Sadly, ts() and as.ts() both drop the tsp attributes
+  ## as soon as you subset.  I.e., ts(u[ , 2, ]) will discard the tsp attribute of u.
+  return(list(fc=fc, u=u, horiz=horiz))
 }

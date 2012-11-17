@@ -129,13 +129,13 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
                  xbar <- apply(array(xdata[1:lags,,drop=FALSE],dim=c(lags,dim(xdata)[2])),2,mean)
                  dim(xbar)=c(1,dim(xdata)[2])
                } else
-               xbar <- NULL
+                 xbar <- NULL
              }
           }else
-        {
-          ybar <- ic$ybar
-          xbar <- ic$xbar
-        }
+            {
+              ybar <- ic$ybar
+              xbar <- ic$xbar
+            }
         if (!is.null(lambda)){
           if (lambda<0){
             lambda <- -lambda
@@ -178,18 +178,17 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
       {
         ynames <- dimnames(ydata)[[2]]
       }else
-    {
-      ynames <- rep("",times=nvar)
-    }
+        {
+          ynames <- rep("",times=nvar)
+        }
     if(!nox)
       {
-        if(!is.null(dimnames(xdata)[2]))
+        if(!is.null(dimnames(xdata)[[2]]))
           {
             xnames <- dimnames(xdata)[[2]]
-          }else
-        {
-          xnames <- rep("",times=nx)
-        }
+          } else {
+            xnames <- rep(" ",times=nx)
+          }
       }
     dimnames(By) <- list(ynames,ynames,as.character(1:lags))
     xxinames <- c(paste(rep(ynames,lags),rep(1:lags, each=length(ynames)),sep=""),xnames)

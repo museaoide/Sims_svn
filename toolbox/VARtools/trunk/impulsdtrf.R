@@ -11,6 +11,8 @@ impulsdtrf <- function(vout=NULL, smat=NULL, nstep=40, order=NULL)
 ###                 vector giving the desired ordering.  
 ### response:       nvar x nshocks x nstep array of impulse responses.
 ###
+###                 with vout from rfvarKF, smat argument is required, since there is no vout$u.
+###
 ### Code written by Christopher Sims, based on 6/03 matlab code.  This version 3/27/04.
 ### Added dimension labeling, 8/02/04.  Allow non-square smat, integrate with rfvar3 output, 4.7.10.
   {

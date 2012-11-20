@@ -96,7 +96,7 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=5,decay=.5),vprior=lis
     }
     ydumur <- abind(ydumur, urprior$mu *ydumuri, along=3)
     xdumur <- abind(xdumur, array(0, c(lags+1, nx, nv)), along=3)
-    }
+  }
   if (!is.null(vprior) && vprior$w > 0)
     {
       ydum2 <- array(0,dim=c(lags+1,nv,nv))
@@ -148,6 +148,6 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=5,decay=.5),vprior=lis
   ## data here in the form of T by nv y, and T x nx x.  Lagged y's not put in to a rhs
   ## regression matrix, so a "breaks" vector is needed.  
   ## rfvar3 adds persistence and sum of coeffs dummy observations at end of  data in lhs and rhs
-                                        #3 regression matrix form.  So to combine thiw with rfvar3, set lambda and mu to NULL in one or the
+  ## regression matrix form.  So to combine this with rfvar3, set lambda and mu to NULL in one or the
   ## other program.
 }

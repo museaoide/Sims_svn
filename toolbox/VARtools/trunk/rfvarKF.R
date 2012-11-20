@@ -98,7 +98,7 @@ rfvarKF <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, p
   if( max(abs(smpl[-1]-smpl[-length(smpl)])) < 1.1) {
      fcsterr <- ts(fcsterr)
      tsp(fcsterr) <- c(time(ydata)[smpl[1]], time(ydata)[smpl[Tsmpl]], tsp(ydata)[3])
-  }
+   }
   ferrTime <- time(ydata)[smpl]
   return(list(By=By, Bx=Bx, Vb=Vb, lh=lh, fcsterr=fcsterr, ferrTime=ferrTime, call=match.call()))
 }

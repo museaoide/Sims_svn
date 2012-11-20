@@ -5,7 +5,6 @@ varpriorN <-  function(nv=1,nx=1,lags=1,mnprior=list(tight=5,decay=.5),vprior=li
   prior <- varprior(nv, nx, lags, mnprior,vprior, urprior, xsig, ybar, xbar, nstat)
   ##------------------------------------------------------------------------
   ## contruct prior mean and variance from varprior output
-  browser()
   vpout <- rfvar3(prior$ydum, lags=lags, xdata=prior$xdum, const=FALSE,
                   breaks=prior$pbreaks, lambda=NULL, mu=NULL)
   shat <- with(vpout, c(rbind(matrix(aperm(By, c(2,3,1)), prod(dim(By)[2:3]), dim(By)[1]), t(Bx))))

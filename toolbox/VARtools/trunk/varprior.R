@@ -8,7 +8,7 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=5,decay=.5),vprior=lis
 ### mnprior$tight:Overall tightness of Minnesota prior. 1/tight ~ own lag std dev
 ### mnprior$decay:Standard deviations of lags shrink as lag^(-decay)
 ### vprior$sig:   Vector of prior modes for square roots of diagonal elements of r.f. covariance matrix
-###                  Names of this vecror name columns of output ydum.
+###                  Names of this vector name columns of output ydum.
 ### vprior$w:     Weight on prior on vcv.  1 corresponds to "one dummy observation" weight
 ###                   vprior.sig is needed
 ###                   to scale the Minnesota prior, even if the prior on sigma is not used itself.

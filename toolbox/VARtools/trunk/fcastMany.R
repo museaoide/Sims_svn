@@ -22,7 +22,7 @@ fcastMany <- function(ydata, By, Bx, xdata=NULL, const=TRUE, horiz) {
     fc[it - lags + 1, 1:nh, ] <- fcast(y0, By, Bx, x0, const=FALSE, hmax)[ lags + horiz, ]
     ## const=FALSE for fcast because we have already filled x0 with ones.
     ## note that fcast returns initial conditions and forecast all stacked up.
-    u[it - lags + 1, nhu, ] <- ydata[it + hzu, ] - fc[it - lags + 1, nhu, ]
+    if (it < T) u[it - lags + 1, 1:nhu, ] <- ydata[it + hzu, ] - fc[it - lags + 1, 1:nhu, ]
     ## note that u will have zeros for dates beyond the end of the sample.
   }
   dimnames(fc) <- list(NULL, horiz, dimnames(ydata)[[2]])

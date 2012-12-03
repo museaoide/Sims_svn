@@ -1,6 +1,6 @@
 fcastMany <- function(ydata, By, Bx, xdata=NULL, const=TRUE, horiz) {
   ## calculates forecasts and forecast errors at horizons given by the horiz vector
-  ## at each date from lags+1 through end(ydata)-min(horiz).
+  ## at each date from lags+1 through end(ydata).
   ## xdata, if present, must have first dimension exceeding that of ydata by max(horiz)
   ##-----------------------------------------------------------
   lags <- dim(By)[3]
@@ -11,7 +11,7 @@ fcastMany <- function(ydata, By, Bx, xdata=NULL, const=TRUE, horiz) {
   nh <- length(horiz)
   hmax <- horiz[nh]
   hmin <- horiz[1]
-  fc <- array(0, c(dim(ydata)[1] - lags + 1, nh, nv))
+  fc <- array(0, c(T - lags +1, nh, nv))
   u <- fc
   if (const) xdata <- cbind(xdata, matrix(1, T + hmax, 1))
   for (it in lags:T) {                  #it is date of latest date used in forecast
@@ -29,6 +29,8 @@ fcastMany <- function(ydata, By, Bx, xdata=NULL, const=TRUE, horiz) {
   dimnames(u) <- dimnames(fc)
   tspfu <- tsp(ydata)
   tspfu[1] <- tspfu[1] + (lags-1)/tspfu[3]
+  ## Note that dates on u's and fc's are date forecasts were *made*, not dates that
+  ## were being forecast. So at horiz=4, if time(u)==1972, the forecast error is for c(1973,1).
   attr(fc,"tsp") <- tspfu
   attr(u,"tsp") <- tspfu
   ## Note that dates attached to u and fc are the dates the forecasts are formed.  One-step forecasts and forecast

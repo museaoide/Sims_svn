@@ -11,6 +11,12 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
   ## cyzr, cxar:  If using yzrone, xzrone with non-trivial constants, leave const=NULL and specify
   ##           constants with cyzr and cxzr
   ##------------------------------------------
+  ## sc:       The Schwarz criterion rejects the restriction if the chisq value plus the sc value
+  ##           is positive.  This version of the sc is scale-sensitive.  Variables with higher
+  ##           variance are penalized more strongly, as with a prior that expects higher-variance
+  ##           variables to explain more variance.
+  ##
+  ##------------------------------------------------
   ncf <- dim(vout$By)[2] * dim(vout$By)[3] + dim(vout$Bx)[2]
   neq <- dim(vout$By)[1]
   ny <- dim(vout$By)[2]
@@ -56,21 +62,23 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
     singv <- singsig || singxxi
     if(!singv) {
           ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
-          schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxx$d)) * t(svdxxi$u)) %*% rv
+          schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxxi$d)) * t(svdxxi$u)) %*% rv
         }
   } else {                              #type=="KF"
     svdVb <- svd(vout$Vb)
     ## schwarz <- rmat %*% svdVb$u %*% diag(1/sqrt(svdVb$d)) #below is more efficient version for large Vb
     schwarz <- (1/sqrt(svdVb$d)) * (t(svdVb$u) %*% rv)
   }
-  schwarz <- -sum(log(diag(chol(crossprod(schwarz)))))  +
-     dim(rmat)[1] * log(2 * pi)
+  ## T <- if (type == "3") dim(vout$u)[1] else dim(vout$fcsterr)[1]
+  df <- dim(rmat)[1]
+  schwarz <- -2 * sum(log(diag(chol(crossprod(schwarz)))))   +
+     df * log(2 * pi)
   if(is.null(const)) const <- rep(0, dim(rmat)[1])
   stackedcf <- c(t(cbind(matrix(vout$By, nrow=neq), vout$Bx)))
   gap <- rmat %*% stackedcf - const
   svdv <- svd(rmat %*% vout$Vb %*% t(rmat))
   chstat <- (1/sqrt(svdv$d)) * (t(svdv$u) %*% gap)
   chstat <- crossprod(chstat)
-  return(list(chiSquared=chstat, df=dim(rmat)[1], sc=schwarz))
+  return(list(chiSquared=chstat, df=df, sc=schwarz))
 }
   

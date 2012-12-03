@@ -202,5 +202,5 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
       }
 ### logintlh <-  matrictint(u'*u,xxi,size(X,1)-nvar-1)-.5*nvar*(nvar+1)*log(2*pi);
 ### Might want to create a version without the dimnames if using this in a program.
-    return(list(By=By, Bx=Bx, u=u, xxi= xxi, snglty=snglty)) #var.logintlh <-  logintlh
+    return(list(By=By, Bx=Bx, u=u, xxi= xxi, snglty=snglty, call=match.call())) #var.logintlh <-  logintlh
   }

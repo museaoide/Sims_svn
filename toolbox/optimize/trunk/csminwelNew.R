@@ -29,7 +29,7 @@ csminwelNew <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=
   badg <- FALSE
   ## browser()
   if( f0 > 1e50 ) {
-    stop("Bad initial parameter.")
+    stop(paste("Bad initial parameter. f0 =", f0))
   }
   if( NumGrad ) {
     if( !is.numeric(grad) ) {

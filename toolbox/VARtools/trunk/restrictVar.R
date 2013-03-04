@@ -17,6 +17,7 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
   ##           variables to explain more variance.
   ##
   ##------------------------------------------------
+  ## Note 2013-3-4:  Try eliminating scale effects by converting X'X to correlation matrix
   ncf <- dim(vout$By)[2] * dim(vout$By)[3] + dim(vout$Bx)[2]
   neq <- dim(vout$By)[1]
   ny <- dim(vout$By)[2]

@@ -79,6 +79,6 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
   svdv <- svd(rmat %*% vout$Vb %*% t(rmat))
   chstat <- (1/sqrt(svdv$d)) * (t(svdv$u) %*% gap)
   chstat <- crossprod(chstat)
-  return(list(chiSquared=chstat, df=df, sc=schwarz))
+  return(list(chiSquared=chstat, df=df, sc=schwarz, pval=pchisq(chstat,df), sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)) ))
 }
   

@@ -35,6 +35,6 @@ bvarWrap2 <- function(x, prior) {
     ev <- sum(abs(ev[abs(ev) > 1] - 1))^2*1e3 #(so one root of 1.03 penalized by .9 (weak)
     lh <- lh+ev - lplmd
     attr(lh, "penalty") <- ev
-    ##return(lh)
-    return(list(lh=lh, vout=vout, A=A, lmd=exp(lmd))) # uncomment for analyzing output 
+    return(lh)
+    ##return(list(lh=lh, vout=vout, A=A, lmd=exp(lmd))) # uncomment for analyzing output 
 }

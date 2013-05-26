@@ -5,7 +5,7 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
   ## in yzrone, xzrone.  Each zero element of yzrone or xzrone generates a restriction that sets the corresponding
   ## coefficient in By or Bx to zero (or to a constant, if !is.null(const)).  Both kinds of restrictions
   ## can be non-trivial in the same call.
-  #-------------------------------------------
+  ##-------------------------------------------
   ## type:     vout as from rfvar3 ("3") or as from rfvarKF ("KF")
   ## const:    the right hand side of rmat %*% coeff = const, not the constant in the var.
   ## cyzr, cxar:  If using yzrone, xzrone with non-trivial constants, leave const=NULL and specify
@@ -53,7 +53,8 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
     error("restrictions not full rank")
   }
   ## Note that t(rv) spans the same space as rmat, so the restrictiosn are crossprod(v,coeffs)=gamma
-  rv <- svdr$v
+  ## rv <- svdr$v    #2013.5.9
+  T <- if (type == "3") dim(vout$u)[1] else dim(vout$fcsterr)[1]
   if (type == "3") {
     sig <- cov(vout$u)
     svdsig <- svd(sig)
@@ -62,24 +63,44 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
     singxxi <- (max(svdxxi$d) > 1e10 * min(svdxxi$d))
     singv <- singsig || singxxi
     if(!singv) {
-          ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
-          schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxxi$d)) * t(svdxxi$u)) %*% rv
-        }
+      ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
+      ##schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxxi$d)) * t(svdxxi$u)) %*% rv  #2013.5.9
+      sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), 1/sqrt(svdxxi$d)) * t(svdxxi$u)
+      dgVb <- apply(sqrtVb^2, 2, sum)
+      rmatC <- rmat %*% diag(sqrt(T * dgVb))
+      sqrtVbC <- sqrtVb %*% diag(1/sqrt(T * dgVb))
+      lndetVb <- sum(log(svdsig$d)) * dim(vout$xxi)[1] + sum(log(svdxxi$d)) * dim(sig)[1]
+      lndetVbC <- lndetVb - sum(log(dgVb * T))
+    }
   } else {                              #type=="KF"
     svdVb <- svd(vout$Vb)
+    sqrtVb <- sqrt(diag(svdVb$d)) %*% t(svdVb$u)
+    dgVb <- diag(vout$Vb)
+    rmatC <- rmat %*% diag(sqrt(T * dgVb))
+    sqrtVbC <- sqrtVb %*% diag(1/sqrt(T * dgVb))
+    lndetVb <- sum(log(svdVb$d))
+    lndetVbC <- lndetVb - sum(log(dgVb * T))
     ## schwarz <- rmat %*% svdVb$u %*% diag(1/sqrt(svdVb$d)) #below is more efficient version for large Vb
-    schwarz <- (1/sqrt(svdVb$d)) * (t(svdVb$u) %*% rv)
+    ## schwarz <- (1/sqrt(svdVb$d)) * (t(svdVb$u) %*% rv)
   }
-  ## T <- if (type == "3") dim(vout$u)[1] else dim(vout$fcsterr)[1]
+  svdvr <- svd(sqrtVb %*% t(rmat))
+  svdvrC <- svd(sqrtVbC %*% t(rmatC))   #result == line above?
+  vdim1 <- dim(svdvr$u)[1]
+  svdvrp <- svd(diag(vdim1) - svdvr$u %*% t(svdvr$u), nu=vdim1 - dim(rmat)[1])
+  svdvrpC <- svd(diag(vdim1) - svdvrC$u %*% t(svdvrC$u), nu=vdim1 - dim(rmat)[1])
+  svdvrpuv <- svd(crossprod(svdvrp$u, t(sqrtVb))) 
+  svdvrpuvC <- svd(crossprod(svdvrpC$u, t(sqrtVbC))) 
+  lndetUR <- sum(log(svdvrpuv$d))
+  lndetURC <- sum(log(svdvrpuvC$d))
   df <- dim(rmat)[1]
-  schwarz <- -2 * sum(log(diag(chol(crossprod(schwarz)))))   +
-     df * log(2 * pi)
+  ## schwarz <- -2 * sum(log(diag(chol(crossprod(schwarz)))))   +  df * log(2 * pi)
+  schwarz <- lndetVb - 2 * lndetUR + df * log(2 * pi)
+  schwarzC <- lndetVbC - 2 * lndetURC + df * log(2 * pi)
   if(is.null(const)) const <- rep(0, dim(rmat)[1])
   stackedcf <- c(t(cbind(matrix(vout$By, nrow=neq), vout$Bx)))
   gap <- rmat %*% stackedcf - const
-  svdv <- svd(rmat %*% vout$Vb %*% t(rmat))
-  chstat <- (1/sqrt(svdv$d)) * (t(svdv$u) %*% gap)
+  ##svdv <- svd(rmat %*% vout$Vb %*% t(rmat))
+  chstat <- (1/svdvr$d) * (t(svdvr$v) %*% gap)
   chstat <- crossprod(chstat)
-  return(list(chiSquared=chstat, df=df, sc=schwarz, pval=pchisq(chstat,df), sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)) ))
+  return(list(chiSquared=chstat, df=df, sc=schwarz, pval=pchisq(chstat,df), sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)), scC=schwarzC ))
 }
-  

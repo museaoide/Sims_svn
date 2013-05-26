@@ -1,21 +1,22 @@
 fcastCndl <- function(y0, Ay, Ax, xdata=NULL, const=TRUE, horiz, R=NULL, g=NULL, whichShocks=rep(TRUE, dim(y0)[2]), yr=NULL) {
-  require(tensor)
 ### model is Ay(L)y = Ax(L)x + eps with eps N(0,I).
 ### function returns a horiz-step forecast conditional on given values for
 ### certain linear combinations of y's (e.g. a path for some variable).
 ### The conditioning information is R*y = g, where y is the (lags + horiz) x nv
-### data and forecast matrix, stacked.using the shocks for which whichShocks is TRUE.
-### The conditional forecast will be generated 
+### data and forecast matrix, stacked.
+### The conditional forecast will be generated using the shocks for which whichShocks is TRUE.
 ### Alternatively, a horiz x nv matrix can be provided witn NaN values in all positions
-### except those that values of $y$ that are constrained, and the constrained values
+### except those at values of $y$ that are constrained, and the constrained values
 ### in other positions.
-### Note that if a reduced form VAR y=By(L)y+e is being used, Ay(L) is I - By(L).  
+### Note that if a reduced form VAR y=By(L)y+e is being used, Ay(L) is I - By(L) only if Var(e)=I.
+### If Var(e)=Sigma in the reduced form, A(L) = S %*% (I-B(L)), where S %*% Sigma %*% t(S) = I.
 ###
   nv <- dim(y0)[2]
   lags <- dim(y0)[1]
-  A0i <- solve(Ay[ , , 1])
-  By <- tensor(-A0i, Ay[ , , -1], 2, 1)
-  Bx <- A0i %*% Ax
+  By <- -solve(Ay[ , , 1], matrix(Ay, nrow=dim(Ay)[1]))
+  By <- array(By, dim(Ay))[ , , -1]
+  ## By <- tensor(-A0i, Ay[ , , -1], 2, 1)
+  ## Bx <- solve(Ay[ , , 1], Ax)
   yhat0 <- fcast(y0, By, Bx, xdata, const, horiz)
   yic <- window(yhat0, end=time(yhat0)[lags])
   yhat0 <- window(yhat0, start=time(yhat0)[lags+1])

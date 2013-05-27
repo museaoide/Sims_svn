@@ -20,11 +20,11 @@ fcastCndl <- function(y0, Ay, Ax, xdata=NULL, const=TRUE, horiz, R=NULL, g=NULL,
   yhat0 <- fcast(y0, By, Bx, xdata, const, horiz)
   yic <- window(yhat0, end=time(yhat0)[lags])
   yhat0 <- window(yhat0, start=time(yhat0)[lags+1])
-  ## Note that yhat0 includes initial conditions at the top
+  ## Note that yhat0 on input includes initial conditions at the top
   if (!is.null(yr)) {
     nr <- nv * horiz - sum(is.nan(yr))
     R <- array(0, c(nr, horiz, nv))
-    g <- rep(0, ir)
+    g <- rep(0, nr)
     ir <- 0
     for (iv in 1:nv) {
       for (it in 1:horiz) {

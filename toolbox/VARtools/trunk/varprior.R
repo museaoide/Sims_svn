@@ -22,8 +22,9 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=5,decay=.5),vprior=lis
 ###                   are not NULL in rfvar3.   lambda < 0 means x'st not included.  Note that constant
 ###                   is assumed to be last element of x.  If you want lambda < 0 to be the only source
 ###                   of a prior on the constant, but xsig is not null, set the last element of xsig
-###                   to zero.  The default xbar=1 is correct when the constant is the only x.
-### yinit:         lags x nv initial data matrix, used in constructing urprior component, but not otherwise.
+###                   to zero.  
+### ybar,xbar:        estimates of data means, used in constructing urprior component, but not otherwise.
+###                   The default xbar=1 is correct when the constant is the only x.    
 ### nstat:         Set components corresponding to non-persistent variables to FALSE.
 ### Note:          The original Minnesota prior treats own lags asymmetrically, and therefore
 ###                   cannot be implemented entirely with simple dummy observations.  It is also usually

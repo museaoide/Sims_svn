@@ -21,7 +21,7 @@ varpriorN <-  function(nv=1,nx=1,lags=1,mnprior=list(tight=5,decay=.5),vprior=li
   ## This rescaling looks wrong to me today  (2012.9.24)
   ## wtvec <- rep(vprior$sig, each=nv * lags + nx)
   ## sighat <- wtvec * t(wtvec * sighat)
-  return(list(shat=shat, sighat=sighat))
+  return(list(shat=shat, sighat=sighat, call=match.call()))
 }
   
   

@@ -33,19 +33,18 @@ kfVCx <- function(y, X, shat, sig, M) {
     }
     nXX <- nv*nx
     nstate <- length(shat)
-    omega <- array(sig, c(nv, nx, nv, nx))
+    omega <- array(sig, c(nx, nv, nx, nv))
     sigObs <- crossprod(M)
     stopifnot(nstate == length(shat))
     ## ho: kron(I,X) %*% sighat
-    ho <- array(0, c(nv, T, nx, nv))
-    sv <- array(0, c(nv, T, nv, T))
+    ho <- array(0, c(T, nv, nx, nv))
+    sv <- array(0, c(T, nv, T, nv))
     for (iv in 1:nv) {
-        ho[iv, , , ] <- tensor(X, omega[iv, , ,  ], 2, 1)
+        ho[ , iv, , ] <- tensor(X, omega[ , iv, ,  ], 2, 1)
         for (jv in 1:nv)
-            sv[iv, , jv, ] <- tensor(ho[iv, , , jv ], X, 2, 2) + sigObs[iv, jv] * diag(T)
+            sv[ , iv, , jv] <- tensor(ho[ , iv, , jv ], X, 2, 2) + sigObs[iv, jv] * diag(T)
     }  
     svdsv <- svd( matrix(sv, nv * T, nv * T ))
-    print(paste("d=",svdsv$d))
     shatmat <- matrix(shat,nx, nv ) 
     if (all(svdsv$d < SMALLSV)) { # Observation is uninformative. Propagate state.
         lh <- c(0,0)

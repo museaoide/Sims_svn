@@ -11,8 +11,6 @@ rfvarKFx <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, 
   ##--------------------------
   ## layout of state vector and shat:  By[iq , , ], 
   ##           concatenated with Bx[iq, ], repeated neq times, then the neq disturbances.
-  ##--------- June 27, 2013 problem:  y and X have been extracted with smpl.  In calls to kfVCx, data
-  ##          is extracted from ydata directly, but this is not so simple for X and still not fixed.
   nsig <- dim(sigfac)[3]
   stopifnot(nsig  == length(Tsigbrk) - 1)
   if (is.null(dim(ydata))) dim(ydata) <- c(length(ydata),1)
@@ -70,7 +68,7 @@ rfvarKFx <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, 
   ## G <- diag(c(rep(1, nXX), rep(0,nvar))) # X coefficients constant, resids iid
   ## MM <- matrix(0, nXX + nvar, nXX + nvar)
   lh <- matrix(0, Tsmpl, 2)
-  fcsterr <- matrix(0, Tsmpl, nvar)
+  fcsterr <- matrix(0, T, nvar)
   ## H <- matrix(0, nvar, nXX + nvar)
   ## H[ , (nXX + 1):(nXX + nvar)] <- diag(nvar)
   shat <- prior$shat
@@ -83,12 +81,14 @@ rfvarKFx <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, 
     ## H[ , 1:nXX] <- kronecker(diag(nvar), X[it, , drop=FALSE])
     ## kfout <- kf2(y[it, ], H, shat, sighat, G, MM)
     Tisig <- (Tsigbrk[isig]+1):Tsigbrk[isig+1]
-    kfout <- kfVCx(ydata[intersect(Tisig, smpl), , drop=FALSE], X[intersect(Tisig, smpl), , drop=FALSE], shat, sighat, sigfac[ , , isig])
+    kfT <- intersect(Tisig, smpl)
+    kfout <- kfVCx(ydata[kfT, , drop=FALSE], X[kfT, , drop=FALSE], shat, sighat, sigfac[ , , isig])
     shat <- kfout$shat
     sighat <- kfout$sig
     lh[isig, ] <- kfout$lh
-    fcsterr[seq(along=intersect(Tisig, smpl)), ] <- kfout$fcsterr
+    fcsterr[kfT, ] <- kfout$fcsterr
   }
+  plot(1:dim(fcsterr)[1], fcsterr[ ,1], type="l")
   nX <- nvar * lags + nx
   ixBy <- rep(1:(nvar*lags), nvar) +  rep((0:(nvar - 1)) * nX, each=nvar * lags) 
   By <- array(shat[ixBy], c(nvar, lags, nvar))
@@ -105,7 +105,7 @@ rfvarKFx <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, 
   dimnames(fcsterr) <- list(NULL, yn)
   if( max(abs(smpl[-1]-smpl[-length(smpl)])) < 1.1) { #i.e. don't try to make fcsterr a ts if there were breaks
      fcsterr <- ts(fcsterr)
-     tsp(fcsterr) <- c(time(ydata)[smpl[1]], time(ydata)[smpl[Tsmpl]], tsp(ydata)[3])
+     tsp(fcsterr) <- tsp(ydata)
    }
   ferrTime <- time(ydata)[smpl]
   return(list(By=By, Bx=Bx, Vb=Vb, lh=lh, fcsterr=fcsterr, ferrTime=ferrTime, call=match.call()))

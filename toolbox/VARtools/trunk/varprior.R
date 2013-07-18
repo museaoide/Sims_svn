@@ -10,7 +10,7 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=5,decay=.5),vprior=lis
 ### vprior$sig:   Vector of prior modes for square roots of diagonal elements of r.f. covariance matrix
 ###                  Names of this vector name columns of output ydum.
 ### vprior$w:     Weight on prior on vcv.  1 corresponds to "one dummy observation" weight
-###                   vprior.sig is needed
+###                   vprior$sig is needed
 ###                   to scale the Minnesota prior, even if the prior on sigma is not used itself.
 ###                   Set vprior$w=0 to achieve this.
 ###                   mnprior and vprior.w can each be set to NULL, thereby eliminating the corresponding
@@ -108,7 +108,7 @@ varprior <-  function(nv=1,nx=0,lags=1,mnprior=list(tight=5,decay=.5),vprior=lis
                                         # Now it's just a scale factor for sig. in variance prior.
     } else {
       ydum2 <- NULL
-      xdum3 <- NULL
+      xdum2 <- NULL
     }
   ## stack everything up.
   dim(ydum) <- c(lags + 1, nv, lags * nv) # merge all the individual mn dobs

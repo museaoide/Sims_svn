@@ -65,7 +65,9 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
     if(!singv) {
       ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
       ##schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxxi$d)) * t(svdxxi$u)) %*% rv  #2013.5.9
-      sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), 1/sqrt(svdxxi$d)) * t(svdxxi$u)
+      ## sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), 1/sqrt(svdxxi$d)) * t(svdxxi$u)
+      ## line above seems to be a mistake, since xxi is already x'x-inverse
+      sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), sqrt(svdxxi$d) * t(svdxxi$u))
       dgVb <- apply(sqrtVb^2, 2, sum)
       rmatC <- rmat %*% diag(sqrt(T * dgVb))
       sqrtVbC <- sqrtVb %*% diag(1/sqrt(T * dgVb))
@@ -100,7 +102,7 @@ restrictVAR <- function(vout, type=c("3", "KF"), rmat=NULL, yzrone=NULL, xzrone=
   stackedcf <- c(t(cbind(matrix(vout$By, nrow=neq), vout$Bx)))
   gap <- rmat %*% stackedcf - const
   ##svdv <- svd(rmat %*% vout$Vb %*% t(rmat))
-  chstat <- (1/svdvr$d) * (t(svdvr$v) %*% gap)
+  chstat <- (1/svdvr$d) * t(svdvr$v) %*%  gap
   chstat <- crossprod(chstat)
   return(list(chiSquared=chstat, df=df, sc=schwarz, pval=pchisq(chstat,df), sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)), scC=schwarzC ))
 }

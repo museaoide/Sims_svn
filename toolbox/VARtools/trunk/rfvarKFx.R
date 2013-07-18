@@ -67,7 +67,7 @@ rfvarKFx <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, 
   nXX <- dim(X)[2] * nvar                #nXX here different from in kfVC()
   ## G <- diag(c(rep(1, nXX), rep(0,nvar))) # X coefficients constant, resids iid
   ## MM <- matrix(0, nXX + nvar, nXX + nvar)
-  lh <- matrix(0, Tsmpl, 2)
+  lh <- matrix(0, nsig, 2)
   fcsterr <- matrix(0, T, nvar)
   ## H <- matrix(0, nvar, nXX + nvar)
   ## H[ , (nXX + 1):(nXX + nvar)] <- diag(nvar)
@@ -88,7 +88,7 @@ rfvarKFx <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, 
     lh[isig, ] <- kfout$lh
     fcsterr[kfT, ] <- kfout$fcsterr
   }
-  plot(1:dim(fcsterr)[1], fcsterr[ ,1], type="l")
+  ## plot(1:dim(fcsterr)[1], fcsterr[ ,1], type="l")
   nX <- nvar * lags + nx
   ixBy <- rep(1:(nvar*lags), nvar) +  rep((0:(nvar - 1)) * nX, each=nvar * lags) 
   By <- array(shat[ixBy], c(nvar, lags, nvar))

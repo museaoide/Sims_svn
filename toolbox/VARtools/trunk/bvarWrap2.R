@@ -1,6 +1,5 @@
-bvarWrap2 <- function(x, prior, verbose=FALSE) {
-    ## For returning detailed results, after convergence, use second return
-    ## below and comment out the simple return(lh).
+bvarWrap2 <- function(x, verbose=FALSE) {
+    ## For returning detailed results, set verbose=TRUE
     Tsigbrk <- invTime(c(1979.75, 1983.0, 2008.0, 2010.0),  slimdata4)
     ## here, Tsigbrk is when new sig starts; below we shift it back to be last obs with old sig.
     Lags <- 6
@@ -19,23 +18,48 @@ bvarWrap2 <- function(x, prior, verbose=FALSE) {
     sigfac <- array(0, c(nv, nv, nsig))
     for (isig in 1:nsig) 
         sigfac[ , , isig] <- exp(-.5 * lmd[ , isig]) * t(A)
+    sig0 <- crossprod(sigfac[ , , 1])
+    dimnames(sig0) <- list(dimnames(slimdata4)[[2]], dimnames(slimdata4)[[2]])
+    ## --------- set up prior parameters ---------------
+    mnprior <- list(tight=2, decay=0.3)
+    vprior <- list(sig=sqrt(diag(sig0)), w=0)
+    
+    urprior <- list(lambda=5, mu=1)
+    ybar <- apply(slimdata4[1:6, ], 2, mean, na.rm = TRUE)
+    sigfix <- sig0
+    prior <- varpriorN(nv, nx = 1, lags = Lags, mnprior = mnprior, vprior = vprior, urprior = urprior, ybar = ybar, sigfix=sigfix)
     vout <- rfvarKFx(ydata = window(slimdata4, end=enddata), lags = Lags, sigfac = sigfac, Tsigbrk=Tsigbrk, prior = prior)
-    lh=-sum(vout$lh)
+    lh <- -sum(vout$lh)                 #Note sign flip, for minimization
     attr(lh,"prior") <- prior
     attr(lh,"sigfac") <- sigfac
     attr(lh, "T") <- T
     attr(lh, "data") <- "slimdata4"
     ## prior on lambda's, to stay away from zeros.
-    lmscale <- .002
-    nlmd <- length(c(lmd))
-    lplmd <- nlmd * (log(2) -  2 * log(lmscale)) + 3 * sum(lmd) - 3 * sum(log(1 + lmscale^(-2) * exp(2 * lmd)))
-    ## penalize highly unstable roots
-    ev <- eigen(sysmat(vout$By))$values
-    ev <- sum(abs(ev[abs(ev) > 1] - 1))^2*1e3 #(so one root of 1.03 penalized by .9 (weak)
-    lh <- lh + ev - lplmd
+    ## lmscale <- .002
+    ## nlmd <- length(c(lmd))
+    ## lplmd <- nlmd * (log(2) -  2 * log(lmscale)) + 3 * sum(-lmd) - 3 * sum(log(1 + lmscale^(-2) * exp(-2 * lmd)))
+    ## simpler exponential prior on lambdas
+    lplmd <- -sum(lmd) - sum(exp(-lmd))  #exp(-lmd) ~ exponential
+    ##---------- ev penalty messes up MCMC logic, so omit unless really needed. ---------
+    ## ## penalize highly unstable roots
+    ## ev <- eigen(sysmat(vout$By))$values
+    ## ev <- sum(abs(ev[abs(ev) > 1] - 1))^2*1e3 #(so one root of 1.03 penalized by .9 (weak)
+    ##-----------------------------
+    ev <- 0
+    ##-------------------------------------------------------------------------
+    lh <- lh + ev - lplmd                     # correct marginal posterior pdf | lmd, A
+    ##-------------------------------------------------------------------------
+    ## dsig <- diag(chol(vout$Vb, pivot=TRUE))
+    ## if (any(dsig <= 0)) {
+    ##     dsig <- -1e20
+    ## } else {
+    ##     dsig <- sum(log(dsig))
+    ## }
+    ## lh <- lh + ev - lplmd - dsig        #fixed "-.5 * dsig", 13.7.12
+    ## ## dsig component here converts max'd llh into log of mgnl lh given lmd, A.
     attr(lh, "penalty") <- ev
     if(verbose)
-        return(list(lh=lh, vout=vout, A=A, lmd=exp(lmd))) # uncomment for analyzing output
+        return(list(lh=lh, vout=vout, A=A, lmd=exp(-.5*lmd), llmd = lmd)) #llmd included because exp(-.5*lmd) might lose precision.
     else
         return(lh)
 }

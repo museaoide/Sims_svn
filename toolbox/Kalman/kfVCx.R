@@ -1,24 +1,6 @@
 kfVCx <- function(y, X, shat, sig, M) {
-    ## s is the state, and the plant equation is s(t)=G %*% s(t-1)+t(M) %*% e, where e is
-    ## N(0,I).  The observation equation is y(t)=Hs(t).  The prior distribution for
-    ## s is N(shat,sig).  To handle the standard Kalman Filter setup where the observation
-    ## equation is y(t)=Hs(t)+Nu(t), expand s to become [s;v] (where v=Nu), expand H to [H I], replace
-    ## G by [G 0;0 0], and replace M with [M 0;0 N].  The resulting model has no "error" in the
-    ## observation equation but is equivalent to the original model with error in the state equation.
-    ## The posterior on the new state is N(shatnew,signew) and lh is a two-dimensional vector containing
-    ## the increments to the two component terms of the log likelihood function.  They are added 
-    ## to form the log likelihood, but are used separately in constructing a concentrated or marginal
-    ## likelihood. fcsterr is the error in the forecast of y based on the prior.
-    ## ----------------
-    ## This version specializes to the case of a constant-coefficient VAR, where H= cbind(kronecker(I, X[it, ], I)
-    ## and G is the identity (for the constant coefficients) with zeros (for the shocks in the state vector)
-    ## appended in the lower right.  Also, kf2's M is all zeros except for the lower right nvar x nvar.  By
-    ## bypassing lots of multiplication by zero, this version is faster than generic kf2by a factor of four for
-    ## a 7-variable, 13-lag VAR.  Here M is the
-    ## cholesky factor of the VAR shock covariances, not the full state equation M (whichis full of
-    ## zeros).  With M constant, plain rfvar3 is more efficient.
-    ## ----------------------
-    ##cat("\nstart kfVCx", proc.time())
+    ## This is for the case of the state  constant, with the observation
+    ## equation y = X %*% s + e, sqrt(Var(e))=M.
     require(tensor)
     SMALLSV <- 1e-30
     if (!is.null(dim(y))) {
@@ -36,7 +18,6 @@ kfVCx <- function(y, X, shat, sig, M) {
     nstate <- length(shat)
     omega <- array(sig, c(nx, nv, nx, nv))
     sigObs <- crossprod(M)
-    stopifnot(nstate == length(shat))
     ## ho: kron(I,X) %*% sighat
     ## ho <- array(0, c(T, nv, nx, nv))
     ## sv <- array(0, c(T, nv, T, nv))

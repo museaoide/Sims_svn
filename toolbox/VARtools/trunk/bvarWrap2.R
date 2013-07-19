@@ -19,18 +19,21 @@ bvarWrap2 <- function(x, verbose=FALSE) {
     for (isig in 1:nsig) 
         sigfac[ , , isig] <- exp(-.5 * lmd[ , isig]) * t(A)
     sig0 <- crossprod(sigfac[ , , 1])
-    dimnames(sig0) <- list(dimnames(slimdata4)[[2]], dimnames(slimdata4)[[2]])
+    vnames <- dimnames(slimdata4)[[2]]
+    dimnames(sig0) <- list(vnames, vnames)
     ## --------- set up prior parameters ---------------
-    mnprior <- list(tight=2, decay=0.3)
-    vprior <- list(sig=sqrt(diag(sig0)), w=0)
-    
-    urprior <- list(lambda=5, mu=1)
+    mnprior <- list(tight=1, decay=0.3)
+    ## vprior <- list(sig=sqrt(diag(sig0)), w=0)
+    vprior <- list(sig=c(rep(.01,5),.1), w=0)
+    names(vprior$sig) <- dimnames(slimdata4)[[2]]
+    urprior <- list(lambda=2, mu=.5)
     ybar <- apply(slimdata4[1:6, ], 2, mean, na.rm = TRUE)
-    sigfix <- sig0
+    sigfix <- diag(vprior$sig^2)
+    dimnames(sigfix) <- list(vnames,vnames)
     prior <- varpriorN(nv, nx = 1, lags = Lags, mnprior = mnprior, vprior = vprior, urprior = urprior, ybar = ybar, sigfix=sigfix)
     vout <- rfvarKFx(ydata = window(slimdata4, end=enddata), lags = Lags, sigfac = sigfac, Tsigbrk=Tsigbrk, prior = prior)
     lh <- -sum(vout$lh)                 #Note sign flip, for minimization
-    attr(lh,"prior") <- prior
+    attr(lh,"prior") <- list(mnprior, vprior, urprior, ybar, sigfix)
     attr(lh,"sigfac") <- sigfac
     attr(lh, "T") <- T
     attr(lh, "data") <- "slimdata4"

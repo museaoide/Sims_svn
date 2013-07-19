@@ -41,8 +41,6 @@ kfVCx <- function(y, X, shat, sig, M) {
         rankr <- nv * T
     } else {
         rankr <- rankr - 1
-        qrsv$qr <- qrsv$qr[ , 1:rankr]
-        qrsv$aux <- qrsv$aux[1:rankr]
     }
     shatmat <- matrix(shat,nx, nv )
     fcsterr <- y - X %*% shatmat  
@@ -55,10 +53,10 @@ kfVCx <- function(y, X, shat, sig, M) {
         signew <- omega
         if (!all(abs(fcsterr) < 1e-7)) warning("Uninformative H but non-zero fcsterr")
     } else if (rankr < nv *T) {
-        R <- qr.R[1:rankr, ]
+        R <- qr.R(qrsv)[1:rankr, ]
         d <- diag(R)
         R <- R[ , sort.list(qrsv$pivot)]
-        Q <- qr.Q(arsv)[ , 1:rankr]
+        Q <- qr.Q(qrsv)[ , 1:rankr]
         RQ <- R %*% Q
         oie <- Q %*% solve(RQ, crossprod(Q, c(fcsterr)))
         lh[1] <- -.5 * c(fcsterr) %*% oie

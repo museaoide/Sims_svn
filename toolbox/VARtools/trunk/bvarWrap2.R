@@ -1,10 +1,12 @@
 bvarWrap2 <- function(x, verbose=FALSE) {
     ## For returning detailed results, set verbose=TRUE
-    Tsigbrk <- invTime(c(1979.75, 1983.0, 2008.0, 2010.0),  slimdata4)
+    ## Tsigbrk <- invTime(c(1979.75, 1983.0, 2008.0, 2010.0),  slimdata4)
+    Tsigbrk <- invTime(c(1979.75, 1983.0, 2008.0),  slimdata4)
     ## here, Tsigbrk is when new sig starts; below we shift it back to be last obs with old sig.
     Lags <- 6
     nv <- 6
-    enddata <- 2007.75
+    ## enddata <- 2007.75
+    enddata <- end(slimdata4)
     T <- dim(window(slimdata4, end=enddata))[1]
     Tsigbrk <- c(0, Tsigbrk - 1)
     Tsigbrk <- c(Tsigbrk[Tsigbrk < T], T)

@@ -46,7 +46,7 @@ kfVCx <- function(y, X, shat, sig, M) {
     fcsterr <- y - X %*% shatmat  
     lh <- c(0,0)
     ## we're relying on qr( ,LAPACK=TRUE) always putting zeros in diagonal of R on bottom.
-    ## Note that in the case of 0 < rankr < nv * T, we have to account for possible pivot
+    ## Note that we have to account for possible pivot
     ## in QR
     if (rankr == 0) { # Observation is uninformative. Propagate state.
         shatnew <- shat

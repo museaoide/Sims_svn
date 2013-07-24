@@ -22,18 +22,20 @@ bvarWrap2 <- function(x, verbose=FALSE) {
     vnames <- dimnames(slimdata4)[[2]]
     dimnames(sig0) <- list(vnames, vnames)
     ## --------- set up prior parameters ---------------
-    mnprior <- list(tight=1, decay=0.3)
+    mnprior <- list(tight=5, decay=.5)
     ## vprior <- list(sig=sqrt(diag(sig0)), w=0)
     vprior <- list(sig=c(rep(.01,5),.1), w=0)
     names(vprior$sig) <- dimnames(slimdata4)[[2]]
-    urprior <- list(lambda=2, mu=.5)
+    urprior <- list(lambda=5, mu=1)
     ybar <- apply(slimdata4[1:6, ], 2, mean, na.rm = TRUE)
     sigfix <- diag(vprior$sig^2)
+    ## nstat <- rep(TRUE, 6)
+    nstat <- c(rep(TRUE, 4), FALSE, FALSE)
     dimnames(sigfix) <- list(vnames,vnames)
-    prior <- varpriorN(nv, nx = 1, lags = Lags, mnprior = mnprior, vprior = vprior, urprior = urprior, ybar = ybar, sigfix=sigfix)
+    prior <- varpriorN(nv, nx = 1, lags = Lags, mnprior = mnprior, vprior = vprior, urprior = urprior, ybar = ybar, sigfix=sigfix, nstat=nstat)
     vout <- rfvarKFx(ydata = window(slimdata4, end=enddata), lags = Lags, sigfac = sigfac, Tsigbrk=Tsigbrk, prior = prior)
     lh <- -sum(vout$lh)                 #Note sign flip, for minimization
-    attr(lh,"prior") <- list(mnprior, vprior, urprior, ybar, sigfix)
+    attr(lh,"prior") <- list(mnprior=mnprior, vprior=vprior, urprior=urprior, ybar=ybar, sigfix=sigfix, nstat=nstat)
     attr(lh,"sigfac") <- sigfac
     attr(lh, "T") <- T
     attr(lh, "data") <- "slimdata4"
@@ -61,8 +63,18 @@ bvarWrap2 <- function(x, verbose=FALSE) {
     ## lh <- lh + ev - lplmd - dsig        #fixed "-.5 * dsig", 13.7.12
     ## ## dsig component here converts max'd llh into log of mgnl lh given lmd, A.
     attr(lh, "penalty") <- ev
-    if(verbose)
-        return(list(lh=lh, vout=vout, A=A, lmd=exp(-.5*lmd), llmd = lmd)) #llmd included because exp(-.5*lmd) might lose precision.
-    else
+    if(verbose) {
+        ## form in-sample residuals---------
+        u <- fcastMany(slimdata4, vout$By, vout$Bx, horiz=1:8)
+        u1std <- matrix(0, dim(u$u)[1]+Lags, dim(u$u)[3])
+        for (isig in 1:nsig) {
+            u1std[(Tsigbrk[isig] + 1):Tsigbrk[isig + 1], ] <-
+                u$u[(Tsigbrk[isig] + 1):(Tsigbrk[isig + 1]) , 1, ] %*%
+                    diag(1/sqrt(diag(crossprod(sigfac[ , , isig]))))
+            u1std <- ts(u1std, start=tsp(u$u)[1], freq=tsp(u$u)[3])
+        }
+        return(list(lh=lh, vout=vout, A=A, lmd=exp(-.5*lmd), llmd = lmd, f=u$fc, u=u$u, u1std=u1std)) #llmd included because exp(-.5*lmd) might lose precision.
+    } else {
         return(lh)
+    }
 }

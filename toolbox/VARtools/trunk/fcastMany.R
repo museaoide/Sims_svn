@@ -11,7 +11,7 @@ fcastMany <- function(ydata, By, Bx, xdata=NULL, const=TRUE, horiz) {
   nh <- length(horiz)
   hmax <- horiz[nh]
   hmin <- horiz[1]
-  fc <- array(0, c(T - lags +1, nh, nv))
+  fc <- array(0, c(T, nh, nv))
   u <- fc
   if (const) xdata <- cbind(xdata, matrix(1, T + hmax, 1))
   for (it in lags:T) {                  #it is date of latest date used in forecast
@@ -19,16 +19,15 @@ fcastMany <- function(ydata, By, Bx, xdata=NULL, const=TRUE, horiz) {
     hzu <- horiz[(it + horiz) <= T]
     nhu <- length(hzu)
     x0 <- xdata[(it - lags + 1):(it + hmax), ]
-    fc[it - lags + 1, 1:nh, ] <- fcast(y0, By, Bx, x0, const=FALSE, hmax)[ lags + horiz, ]
+    fc[it, 1:nh, ] <- fcast(y0, By, Bx, x0, const=FALSE, hmax)[ lags + horiz, ]
     ## const=FALSE for fcast because we have already filled x0 with ones.
     ## note that fcast returns initial conditions and forecast all stacked up.
-    if (it < T && nhu > 0) u[it - lags + 1, 1:nhu, ] <- ydata[it + hzu, ] - fc[it - lags + 1, 1:nhu, ]
+    if (it < T && nhu > 0) u[it, 1:nhu, ] <- ydata[it + hzu, ] - fc[it, 1:nhu, ]
     ## note that u will have zeros for dates beyond the end of the sample.
   }
   dimnames(fc) <- list(NULL, horiz, dimnames(ydata)[[2]])
   dimnames(u) <- dimnames(fc)
   tspfu <- tsp(ydata)
-  tspfu[1] <- tspfu[1] + (lags-1)/tspfu[3]
   ## Note that dates on u's and fc's are date forecasts were *made*, not dates that
   ## were being forecast. So at horiz=4, if time(u)==1972, the forecast error is for c(1973,1).
   attr(fc,"tsp") <- tspfu

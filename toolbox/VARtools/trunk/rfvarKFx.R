@@ -59,8 +59,8 @@ rfvarKFx <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, 
      for (ilag in 2:lags) X <- cbind(X, lag(ydata, -ilag))
   X <- window(X, start=start(ydata), end=end(ydata), extend=TRUE)
   X <- cbind(X, xdata)
-  dnx <- rep(dimnames(ydata)[[2]], 6)
-  dnx <- paste(dnx, rep(1:6, each=6), sep="")
+  dnx <- rep(dimnames(ydata)[[2]], lags)
+  dnx <- paste(dnx, rep(1:lags, each=6), sep="")
   dimnames(X)[[2]] <- c(dnx, "const")
   ## Everything now set up with X a mts object with same tsp as ydata, no filtering out smpl or Tsigbrk
   ##--------------------

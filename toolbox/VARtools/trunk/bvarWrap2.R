@@ -33,7 +33,7 @@ bvarWrap2 <- function(x, verbose=FALSE) {
     vprior <- list(sig=rep(.01,nv), w=0)
     names(vprior$sig) <- dimnames(dataseries)[[2]]
     ## ----------------prior on A
-    asig <- .25
+    asig <- 1
     asd <- outer(vprior$sig, 1/vprior$sig)
     allh <- -.5 * sum((A / asd)[-c(dgx, a123x)]^2)/asig^2 - sum(log(asd[-c(dgx, a123x)])) -
         .5 * (nv^2 - length(c(dgx, a123x))) * (log(2 * pi) + 2 * log(asig))

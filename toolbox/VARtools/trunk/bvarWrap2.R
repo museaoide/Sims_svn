@@ -1,26 +1,29 @@
 bvarWrap2 <- function(x, verbose=FALSE) {
     ## For returning detailed results, set verbose=TRUE
-    dataseries <- slimdata12
+    dataseries <- slimdata12f
     ## Tsigbrk <- invTime(c(1979.75, 1983.0, 2008.0, 2010.0),  dataseries)
-    Tsigbrk <- invTime(c(1979+2/3, 1983.0, 2008.0),  dataseries)
+    Tsigbrk <- invTime(c(1979+2/3, 1983.0, 1990.0, 2008.0),  dataseries)
     ## here, Tsigbrk is when new sig starts; below we shift it back to be last obs with old sig.
     Lags <- 6
     nv <- 6
-    ## enddata <- 2007.75
-    enddata <- end(dataseries)
+    enddata <- 2007.75
+    ## enddata <- end(dataseries)
     T <- dim(window(dataseries, end=enddata))[1]
     Tsigbrk <- c(0, Tsigbrk - 1)
     Tsigbrk <- c(Tsigbrk[Tsigbrk < T], T)
     nsig <- length(Tsigbrk) - 1
     A <- matrix(0, nv, nv)
     dgx <- seq(1, nv^2, by=nv+1)
-    a123x <- nv * 2 + 1:2               #identifying constraint: A[ , 3] is M policy
+    ## a123x <- nv * 2 + 1:2               #identifying constraint: A[ , 3] is M policy
+    a12exx <- c(13:14, 19:20, 25:26, 31:32)              #Another id:  y, p causally prior contemp
     A[dgx] <-  1
-    A[a123x] <- 0                       #a123x added after 13.7.23a
-    A[-c(dgx, a123x)] <- x[1:(nv^2 - nv - 2)]   
+    ## A[a123x] <- 0                       #a123x added after 13.7.23a
+    A[a12exx] <- 0
+    Alength <- nv^2 - nv - length(a12exx)
+    A[-c(dgx, a12exx)] <- x[1:Alength]   
     lmd <- matrix(0, nv, nsig)
     ## lmd[ , ] <- x[nv^2 - nv + 1:(nv*nsig)]
-    lmd[ , ] <- x[nv^2 - nv - 2 + 1:(nv*nsig)] #shorter param vector with a123x constraint
+    lmd[ , ] <- x[Alength + 1:(nv*nsig)] #shorter param vector with a123x constraint
     sigfac <- array(0, c(nv, nv, nsig))
     for (isig in 1:nsig) 
         sigfac[ , , isig] <- exp(-.5 * lmd[ , isig]) * t(A)
@@ -33,10 +36,10 @@ bvarWrap2 <- function(x, verbose=FALSE) {
     vprior <- list(sig=rep(.01,nv), w=0)
     names(vprior$sig) <- dimnames(dataseries)[[2]]
     ## ----------------prior on A
-    asig <- 1
+    asig <- 2
     asd <- outer(vprior$sig, 1/vprior$sig)
-    allh <- -.5 * sum((A / asd)[-c(dgx, a123x)]^2)/asig^2 - sum(log(asd[-c(dgx, a123x)])) -
-        .5 * (nv^2 - length(c(dgx, a123x))) * (log(2 * pi) + 2 * log(asig))
+    allh <- -.5 * sum((A / asd)[-c(dgx, a12exx)]^2)/asig^2 - sum(log(asd[-c(dgx, a12exx)])) -
+        .5 * (nv^2 - length(c(dgx, a12exx))) * (log(2 * pi) + 2 * log(asig))
     ##--------------------------
     urprior <- list(lambda=5, mu=1)
     ybar <- apply(dataseries[1:6, ], 2, mean, na.rm = TRUE)

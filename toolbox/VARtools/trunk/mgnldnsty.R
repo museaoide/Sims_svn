@@ -45,42 +45,46 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   if (!is.null(xdata) ) stopifnot( dim(xdata)[1] == T)
   Tx <- dim(xdata)[1]
   nx <- dim(xdata)[2]
-  vp <- varprior(nv,nx,lags,mnprior,vprior) # vp$: ydum,xdum,pbreaks
+  ## 2013.8 fix:  added urprior here, set lambda and mu to NULL in rfvar3 call, so
+  ## prior dummies treated correctly in normalizing the prior.
+  vp <- varprior(nv,nx,lags,mnprior,vprior, urprior=list(lambda=lambda, mu=mu))
+  ## vp$: ydum,xdum,pbreaks
   var = rfvar3(ydata=rbind(ydata, vp$ydum), lags=lags, xdata=rbind(xdata,vp$xdum), breaks=matrix(c(breaks, T, T + vp$pbreaks), ncol=1),
-    const=FALSE, lambda=lambda, mu=mu, ic=ic) # const is FALSE in this call because ones alread put into xdata
+    const=FALSE, lambda=NULL, mu=NULL, ic=ic) # const is FALSE in this call because ones alread put into xdata
   Tu <- dim(var$u)[1]
   if ( var$snglty > 0 ) error( var$snglty, " redundant columns in rhs matrix")
   w <- matrictint(crossprod(var$u),var$xxi,Tu-flat*(nv+1))-flat*.5*nv*(nv+1)*log(2*pi);
-  if(train!=0)
-    {
-      if(train <= lags)
-        {
-          cat("end of training sample <=  # of lags\n")  #
-            return
-        }
+  if(train!=0) {
+      if(train <= lags) {
+          cat("end of training sample <= # of lags\n")  #
+              return
+      }
       Tp <- train
       tbreaks <- c(breaks[breaks<train],Tp)
-    }else
-  {
-    Tp <- lags
-    ## because need initial conditions to form lambda/mu prior dummy obs
-    tbreaks <- Tp
+  } else {
+      Tp <- lags
+      ## because need initial conditions to form lambda/mu prior dummy obs
+      tbreaks <- Tp
   }
   ytrain <- ydata[1:Tp,,drop=FALSE]
   xtrain <- xdata[1:Tp,,drop=FALSE]
-  if (!nonorm)
-    { 
-      varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum), breaks=c(tbreaks, Tp+vp$pbreaks),
-                     lambda=lambda, mu=mu, const=FALSE, ic=ic)  #const is FALSE here because xdata already has a column of ones.
+  if (!nonorm) {
+      ## fixed 2013.8.14:  Looks as if dummy obs from urprior are missed here.  Should include
+      ## non-null lambda, mu in call to varprior, not in rfvar3 call.
+      ## varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum),
+      ##               breaks=c(tbreaks, Tp+vp$pbreaks), lambda=lambda, mu=mu, const=FALSE, ic=ic)
+      varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum),
+                     breaks=c(tbreaks, Tp+vp$pbreaks), lambda=NULL, mu=NULL, const=FALSE, ic=ic)
+      ## const is FALSE here because xdata already has a column of ones.
       if (varp$snglty > 0) {
-        warning("Prior improper, short ", varp$snglty, " df.  Results likely nonsense.")
+          warning("Prior improper, short ", varp$snglty, " df.  Results likely nonsense.")
       } else {
-        Tup <- dim(varp$u)[1]
-        wp <- matrictint(crossprod(varp$u),varp$xxi,Tup-flat*(nv+1)/2)-flat*.5*nv*(nv+1)*log(2*pi)
-        w=w-wp
+          Tup <- dim(varp$u)[1]
+          wp <- matrictint(crossprod(varp$u),varp$xxi,Tup-flat*(nv+1)/2)-flat*.5*nv*(nv+1)*log(2*pi)
+          w=w-wp
       }
-    } else {
+  } else {
       varp <- NULL
-    }
+  }
   return(list(w=w,var=var,varp=varp,prior=list(lambda=lambda,mu=mu,vprior=vprior,mnprior=mnprior)))
 }

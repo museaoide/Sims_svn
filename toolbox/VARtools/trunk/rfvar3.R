@@ -1,5 +1,4 @@
-rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu=2,ic=NULL)
-  {
+rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu=2,ic=NULL, sigpar=NULL) {
     ## This algorithm goes for accuracy without worrying about memory requirements.
     ## ---------------------------------------------------------------------------
     ## The standard prior it implements is NOT APPROPRIATE for seasonally unadjusted data, even
@@ -41,6 +40,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ##      repeating the initial xdata(lags+1,:) row or copying xdata(lags+1:2*lags,:) into 
     ##      xdata(1:lags,:) are reasonable subsititutes.  These values are used in forming the
     ##      persistence priors.
+    ## sigpar: list(A0, lmd, Tsigbrk) Allow SVAR with time varying shock variances.  See below.
     ## returns:
     ## By:      nvar x nvar x lags matrix of coefficients on lagged y's.  1st dimension is "equation number"
     ## Bx:      nvar x nx matrix of coefficients on x's
@@ -51,46 +51,51 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ##          number of non-zero singular values.
     ## Code written by Christopher Sims.  This version 8/13/04.
     ## 12/18/05:  added ts properties for u, better comments.
-    ##
+    ##---------------------------------------
+    ## Modified 2013.8.12 to allow use of A0, lmd, Tsigbrk.  With non-null A0, By is A+ from
+    ## A0 %*% y(t) = A+(L) %*% y(t) + exp(.5 lmd(t)) * eps(t) .  This works even with
+    ## lmd constant, but in that case running a single rf estimate (A0=I), then iterating
+    ## on (A0, lmd) alone makes more sense. With lmd varying, rf estimates change with lmd.
+    ## --------------------------------------------------------
     if (is.null(dim(ydata))) dim(ydata) <- c(length(ydata),1)
     T <-dim(ydata)[1]
     nvar<-dim(ydata)[2]
     ##nox=isempty(xdata)
     if (const) {
-      xdata <- cbind(xdata,matrix(1,T,1))
+        xdata <- cbind(xdata,matrix(1,T,1))
     }
     nox <- identical(xdata,NULL)
     if(!nox){
-      T2 <- dim(xdata)[1]
-      nx <- dim(xdata)[2]
+        T2 <- dim(xdata)[1]
+        nx <- dim(xdata)[2]
     } else {
-      T2 <- T; nx <- 0; xdata<- matrix(0,T2,0)
+        T2 <- T; nx <- 0; xdata<- matrix(0,T2,0)
     } 
     ## note that x must be same length as y, even though first part of x will not be used.
     ## This is so that the lags parameter can be changed without reshaping the xdata matrix.
     ## ------------------------
     if (!identical(T2,T)) {
-      print('Mismatch of x and y data lengths')
-      return()
+        print('Mismatch of x and y data lengths')
+        return()
     }
     if (identical(breaks,NULL))
-      nbreaks <- 0
+        nbreaks <- 0
     else {
-      ## if (is.ts(ydata)) {                # Can use Yr, month-or-quarter pairs, or real number dates.
-      ##   if (is.matrix(breaks) ) {
-      ##     breaks <- breaks[ , 1] + (breaks[ ,2] - 1) / frequency(ydata)
-      ##   } else {
-      ##     if (any(abs(breaks - round(breaks))) > 1e-8) {
-      ##       breaks <- match(breaks, time(ydata))
-      ##     }
-      ##   }                               #if not real numbers, not yr-month pairs, it's just obs number
-      ## }
-      ## Any use of tsp(ydata) has to be in external processing functions.
-      nbreaks<-length(breaks)
+        ## if (is.ts(ydata)) {                # Can use Yr, month-or-quarter pairs, or real number dates.
+        ##   if (is.matrix(breaks) ) {
+        ##     breaks <- breaks[ , 1] + (breaks[ ,2] - 1) / frequency(ydata)
+        ##   } else {
+        ##     if (any(abs(breaks - round(breaks))) > 1e-8) {
+        ##       breaks <- match(breaks, time(ydata))
+        ##     }
+        ##   }                               #if not real numbers, not yr-month pairs, it's just obs number
+        ## }
+        ## Any use of tsp(ydata) has to be in external processing functions.
+        nbreaks<-length(breaks)
     }
     breaks <- c(0,breaks,T)
     if(any(breaks[2:length(breaks)] < breaks[1:(length(breaks)-1)]))
-      stop("list of breaks must be in increasing order\n")
+        stop("list of breaks must be in increasing order\n")
     ## initialize smpl as null if initial observations are only there for lambda/mu prior.
     ## matlab code uses the fact that in matlab a:b is null if b<a, which is not true for R.
     ## if(breaks[2]>lags)
@@ -103,8 +108,8 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ## }
     smpl <- NULL
     for (nb in 2:(nbreaks + 2)) {
-      if ( breaks[nb] > breaks[nb-1] + lags )
-        smpl <- c(smpl, (breaks[nb-1] + lags + 1):breaks[nb])
+        if ( breaks[nb] > breaks[nb-1] + lags )
+            smpl <- c(smpl, (breaks[nb-1] + lags + 1):breaks[nb])
     }
     ## With logic above, one can use an mts-type ydata and omit sections of it by including sequences of breaks separated by
     ## less than lags+1.  E.g. with lags=6, monthly data, breaks=rbind(c(1979,8), c(1980,2), c(1980,8), c(1980,12)) omits
@@ -112,95 +117,125 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     Tsmpl <- length(smpl)
     X <- array(0,dim=c(Tsmpl,nvar,lags))
     for(ix in seq(along=smpl))
-      X[ix,,] <- t(ydata[smpl[ix]-(1:lags),,drop=FALSE])
+        X[ix,,] <- t(ydata[smpl[ix]-(1:lags),,drop=FALSE])
     dim(X) <- c(Tsmpl,nvar*lags)
     X <- cbind(X, xdata[smpl,,drop=FALSE])
     y <- ydata[smpl,,drop=FALSE]
     ## Everything now set up with input data for y=Xb+e 
     ## ------------------Form persistence dummies-------------------
-    if (! (is.null(lambda) & is.null(mu) ) )
-      {
-        if(is.null(ic))
-          {
+    if (! (is.null(lambda) & is.null(mu) ) ) {
+        if(is.null(ic)) {
             ybar <- apply(as.array(ydata[1:lags,,drop=FALSE]),2,mean)
             dim(ybar) <- c(1,dim(ydata)[2])
-            {if (!nox) 
-               {
-                 xbar <- apply(array(xdata[1:lags,,drop=FALSE],dim=c(lags,dim(xdata)[2])),2,mean)
-                 dim(xbar)=c(1,dim(xdata)[2])
-               } else
-                 xbar <- NULL
-             }
-          }else
-            {
-              ybar <- ic$ybar
-              xbar <- ic$xbar
+            if (!nox) {
+                xbar <- apply(array(xdata[1:lags,,drop=FALSE],dim=c(lags,dim(xdata)[2])),2,mean)
+                dim(xbar)=c(1,dim(xdata)[2])
+            } else {
+                xbar <- NULL
             }
-        if (!is.null(lambda)){
-          if (lambda<0){
-            lambda <- -lambda
-            xbar <- array(0,c(1,dim(xdata)[2]))
-          }
-          xdum <- lambda * cbind(array(rep(ybar,lags),dim=c(1,lags*length(ybar))), xbar)
-          ydum <- array(0,c(1,nvar))
-          ydum[1,] <- lambda*ybar
-          y <- rbind(y,ydum)
-          X <- rbind(X,xdum)
+        } else {
+            ybar <- ic$ybar
+            xbar <- ic$xbar
         }
-        if (!is.null(mu))
-          {
-            xdum <- cbind( array(rep(diag(as.vector(ybar),nrow=length(ybar)),lags),dim=c(dim(ybar)[2],dim(ybar)[2]*lags)),
-                          array(0,dim=c(nvar,dim(xdata)[2])))*mu;
-            ydum <- mu*diag(as.vector(ybar),nrow=length(ybar));
+        if (!is.null(lambda)){
+            if (lambda<0){
+                lambda <- -lambda
+                xbar <- array(0,c(1,dim(xdata)[2]))
+            }
+            xdum <- lambda * cbind(array(rep(ybar,lags),dim=c(1,lags*length(ybar))), xbar)
+            ydum <- array(0,c(1,nvar))
+            ydum[1,] <- lambda*ybar
+            y <- rbind(y,ydum)
+            X <- rbind(X,xdum)
+        }
+        if (!is.null(mu)) {
+            xdum <- cbind(
+                array(rep(diag(as.vector(ybar),nrow=length(ybar)),lags),
+                      dim=c(dim(ybar)[2],dim(ybar)[2]*lags)),
+                array(0,dim=c(nvar,dim(xdata)[2])))*mu
+            ydum <- mu*diag(as.vector(ybar),nrow=length(ybar))
             X <- rbind(X,xdum)
             y <- rbind(y,ydum)
-          }
-      }
-    vldvr <- svd(X)
-    dfx <- sum(vldvr$d > 100*.Machine$double.eps)
-    di <- 1./vldvr$d[1:dfx]
-    vldvr$u <- vldvr$u[, 1:dfx]
-    vldvr$v <- vldvr$v[, 1:dfx]
-    snglty <- dim(X)[2] - dfx
-    ##B <- vldvr$v %*% diag(di,nrow=length(di)) %*% t(vldvr$u) %*% y (line below is just more efficient)
-    B <- vldvr$v %*% (di * (t(vldvr$u) %*% y))
-    u <-  y-X %*% B;
+        }
+    }
+    if (!is.null(sigpar)) {
+        if (!is.null(Tsigbrk)) {
+            Tsigbrk <- invtime(Tsigbrk, ydata) #so Tsigbrk given as dates
+            nsig <- length(Tsigbrk) + 1
+        } else {
+            nsig <- 1
+        }
+        Tsigbrk <- c(0, Tsigbrk, T)
+        lmdndx <- rep(1:nsig, each=diff(Tsigbrk))
+        lmdseries <- lmd[ , lmdndx]
+        if ( Tsmpl < dim(y)[1] ) {      #dummy obs formed in rfvar3 
+            lmdp <- apply(lmdseries[ ,smpl], 1, mean)
+            lmdseries <- cbind(lmdseries[ , smpl], matrix(lmdp, nv, dim(y)[1] - Tsmpl))
+        } else {
+            lmdseries <- lmdseries[ , smpl]
+        }
+        ## i.e., use mean of lmdseries for dummy observation weights.  Note that
+        ## since lmd is logged, this is geometric mean, maybe not best. 
+        nX <- dim(X)[2]
+        ya0 <- y %*% A0
+        B <- matrix(0,  nX, nv)
+        u <- matrix(0, Tsmpl, nv)
+        xxi <- array(0, c(nX, nX, nv))
+        for (iq in 1:nv) {
+            lso <- lsfit(X, ya0, wt=exp(-lmdseries), intercept=FALSE) # (intercept already in X)
+            B[iq, ] <- lso$coefficients
+            xxi[ , , iq] <- solve(crossprod(qr.R(lso$qr)))
+            u[ , iq] <- lso$residuals
+        }
+    } else {
+        ## Instead of svd below, could invoke lsfit.  Faster?
+        vldvr <- svd(X)
+        dfx <- sum(vldvr$d > 100*.Machine$double.eps)
+        di <- 1./vldvr$d[1:dfx]
+        vldvr$u <- vldvr$u[, 1:dfx]
+        vldvr$v <- vldvr$v[, 1:dfx]
+        snglty <- dim(X)[2] - dfx
+        ##B <- vldvr$v %*% diag(di,nrow=length(di)) %*% t(vldvr$u) %*% y (line below is just more efficient)
+        B <- vldvr$v %*% (di * (t(vldvr$u) %*% y))
+        u <-  y-X %*% B
+        xxi <-  di * t(vldvr$v)
+        xxi <-  crossprod(xxi)
+    }
     if (!is.null(tsp(ydata))) u <- ts(u, start=start(ydata)+c(0,lags),freq=frequency(ydata))
-    nX <- dim(X)[2]
-    xxi <-  di * t(vldvr$v)
-    xxi <-  crossprod(xxi)
+    ## dates at end of sample are for dummy obs, meaningless.  If there are other
+    ## nontrivial breaks, the dates for u are also meaningless.
     ## dim(B) <-  c(nvar*lags+nx,nvar) # rhs variables, equations (this was redundant)
     By <-  B[1:(nvar*lags),]
     dim(By) <-  c(nvar,lags,nvar)       # variables, lags, equations
     By <-  aperm(By,c(3,1,2)) #equations, variables, lags to match impulsdt.m
     ## label all the output, if the data matrices had labels
     if(!is.null(dimnames(ydata)[2]))
-      {
-        ynames <- dimnames(ydata)[[2]]
-      }else
         {
-          ynames <- rep("",times=nvar)
-        }
+            ynames <- dimnames(ydata)[[2]]
+        }else
+            {
+                ynames <- rep("",times=nvar)
+            }
     if(!nox)
-      {
-        if(!is.null(dimnames(xdata)[[2]]))
-          {
-            xnames <- dimnames(xdata)[[2]]
-          } else {
-            xnames <- rep(" ",times=nx)
-          }
-      }
+        {
+            if(!is.null(dimnames(xdata)[[2]]))
+                {
+                    xnames <- dimnames(xdata)[[2]]
+                } else {
+                    xnames <- rep(" ",times=nx)
+                }
+        }
     dimnames(By) <- list(ynames,ynames,as.character(1:lags))
     xxinames <- c(paste(rep(ynames,lags),rep(1:lags, each=length(ynames)),sep=""),xnames)
     dimnames(xxi) <- list(xxinames,xxinames)
     if (nox)
-      Bx <-  NULL
+        Bx <-  NULL
     else
-      {
-        Bx <-  matrix(B[nvar*lags+(1:nx),],dim(B)[2],nx)
-        dimnames(Bx) <- list(ynames,xnames)
-      }
+        {
+            Bx <-  matrix(B[nvar*lags+(1:nx),],dim(B)[2],nx)
+            dimnames(Bx) <- list(ynames,xnames)
+        }
 ### logintlh <-  matrictint(u'*u,xxi,size(X,1)-nvar-1)-.5*nvar*(nvar+1)*log(2*pi);
 ### Might want to create a version without the dimnames if using this in a program.
     return(list(By=By, Bx=Bx, u=u, xxi= xxi, snglty=snglty, call=match.call())) #var.logintlh <-  logintlh
-  }
+}

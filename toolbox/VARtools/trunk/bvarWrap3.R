@@ -6,22 +6,25 @@ bvarWrap3 <- function(x, verbose=FALSE) {
     ## that with A as AR lead term, we can get LH|A,lmd via equation-by-equation
     ## weighted least squares.  This may be much faster.
     ##------------------------------
-    dataseries <- slimdata12f
+    dssymbol <- substitute(slimdata12f)
+    dataseries <- eval(slimdata12f)
     ## Tsigbrk <- invTime(c(1979.75, 1983.0, 2008.0, 2010.0),  dataseries)
     Tsigbrk <- invTime(c(1979+2/3, 1983.0, 1990.0, 2008.0),  dataseries)
     ## here, Tsigbrk is when new sig starts; below we shift it back to be last obs with old sig.
     Lags <- 6
     nv <- 6
-    enddata <- 2007.75
-    ## enddata <- end(dataseries)
-    T <- dim(window(dataseries, end=enddata))[1]
+    ##enddata <- 2007.75
+    enddata <- end(dataseries)
+    ##dataseries <- window(dataseries, end=enddata)
+    T <- dim(dataseries)[1]
     Tsigbrk <- c(0, Tsigbrk - 1)
     Tsigbrk <- c(Tsigbrk[Tsigbrk < T], T)
     nsig <- length(Tsigbrk) - 1
     A <- matrix(0, nv, nv)
     dgx <- seq(1, nv^2, by=nv+1)
-    ## a123x <- nv * 2 + 1:2               #identifying constraint: A[ , 3] is M policy
-    a12exx <- c(13:14, 19:20, 25:26, 31:32)              #Another id:  y, p causally prior contemp
+    ## a123x <- nv * 2 + 1:2               #identifying constraint: A[3 , ] is M policy
+    a12exx <- c(21, 13:14, 19:20, 25:26, 31:32)
+    ## m policy is 3rd equation. no contemp response to p, y, r10 spread.
     A[dgx] <-  1
     ## A[a123x] <- 0                       #a123x added after 13.7.23a
     A[a12exx] <- 0
@@ -36,7 +39,7 @@ bvarWrap3 <- function(x, verbose=FALSE) {
     ##     sigfac[ , , isig] <- exp(-.5 * lmd[ , isig]) * t(A)
     ## sig0 <- crossprod(sigfac[ , , 1])
     vnames <- dimnames(dataseries)[[2]]
-    dimnames(A) <- list(1:nv, vnames)
+    dimnames(A) <- list( 1:nv, vnames)
     ## dimnames(sig0) <- list(vnames, vnames)
     ## --------- set up prior parameters ---------------
     mnprior <- list(tight=5, decay=.5)
@@ -50,7 +53,6 @@ bvarWrap3 <- function(x, verbose=FALSE) {
         .5 * (nv^2 - length(c(dgx, a12exx))) * (log(2 * pi) + 2 * log(asig))
     ##--------------------------
     urprior <- list(lambda=5, mu=1)
-    ybar <- apply(dataseries[1:6, ], 2, mean, na.rm = TRUE)
     sigfix <- diag(vprior$sig^2)
     nstat <- rep(TRUE, 6)
     ## nstat <- c(rep(TRUE, 4), FALSE, FALSE)
@@ -61,16 +63,17 @@ bvarWrap3 <- function(x, verbose=FALSE) {
     ## vout <- rfvarKFx(ydata = window(dataseries, end=enddata), lags = Lags,
     ##                 sigfac = sigfac, Tsigbrk=Tsigbrk, prior = prior)
     ## -----------------
-    sigfacx <- array(0, c(nv, nv, T))
     ## for (isig in 1:nsig) sigfacx[ , , (Tsigbrk[isig] + 1):Tsigbrk[isig+1]] <- sigfac[ , , isig]
     ## vout <- rfvarKF(ydata = window(dataseries, end=enddata), lags = Lags,
     ##                 sigfac = sigfacx, prior = prior)
-     
-    lh <- -sum(vout$lh)                 #Note sign flip, for minimization
-    attr(lh,"prior") <- list(mnprior=mnprior, vprior=vprior, urprior=urprior, ybar=ybar, sigfix=sigfix, nstat=nstat)
-    attr(lh,"sigfac") <- sigfac
+    vout <- SVARhtskdmdd(dataseries, lags=Lags, xdata=NULL, const=TRUE, A0=A, lmd=lmd,
+                         Tsigbrk=Tsigbrk, urprior=list(lambda=5,mu=1),
+                         mnprior=list(tight=3,decay=.5), vprior=vprior, train=0 )
+    lh <- -sum(vout$w)                 #Note sign flip, for minimization
+    attr(lh,"prior") <- list(mnprior=mnprior, vprior=vprior, urprior=urprior, sigfix=sigfix, nstat=nstat)
+    attr(lh, "sigpar") <- list(A0=A, lmd=lmd, Tsigbrk=Tsigbrk)
     attr(lh, "T") <- T
-    attr(lh, "data") <- "dataseries"
+    attr(lh, "data") <- dssymbol
     ## prior on lambda's, to stay away from zeros.
     ## lmscale <- .002
     ## nlmd <- length(c(lmd))
@@ -96,16 +99,11 @@ bvarWrap3 <- function(x, verbose=FALSE) {
     ## ## dsig component here converts max'd llh into log of mgnl lh given lmd, A.
     attr(lh, "penalty") <- ev
     if(verbose) {
-        ## form in-sample residuals---------
-        u <- fcastMany(dataseries, vout$By, vout$Bx, horiz=1:8)
-        u1std <- matrix(0, dim(u$u)[1]+Lags, dim(u$u)[3])
-        for (isig in 1:nsig) {
-            u1std[(Tsigbrk[isig] + 1):Tsigbrk[isig + 1], ] <-
-                u$u[(Tsigbrk[isig] + 1):(Tsigbrk[isig + 1]) , 1, ] %*%
-                    diag(1/sqrt(diag(crossprod(sigfac[ , , isig]))))
-            u1std <- ts(u1std, start=tsp(u$u)[1], freq=tsp(u$u)[3])
-        }
-        return(list(lh=lh, vout=vout, A=A, lmd=exp(-.5*lmd), llmd = lmd, f=u$fc, u=u$u, u1std=u1std, asig=asig)) #llmd included because exp(-.5*lmd) might lose precision.
+        ## form stdzd residuals---------
+        ustd <- vout$var$u
+        ulevel <- vout$var$uraw
+        return(list(lh=lh, vout=vout, A=A, lmd=exp(-.5*lmd), llmd = lmd, u=ulevel,
+                    ustd=ustd, asig=asig)) #llmd included because exp(-.5*lmd) might lose precision.
     } else {
         return(lh)
     }

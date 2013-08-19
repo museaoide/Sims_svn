@@ -37,6 +37,7 @@ SVARhtskdmdd <- function(ydata,lags,xdata=NULL, const=TRUE, A0, lmd, Tsigbrk, br
 ###
 {
     if (is.null(dim(ydata)))  ydata <- matrix(ydata, ncol=1)
+    ybar <- apply(ydata[1:lags, ], 2, mean)
     T <- dim(ydata)[1]
     nv <- dim(ydata)[2]
     if (const) {
@@ -46,25 +47,32 @@ SVARhtskdmdd <- function(ydata,lags,xdata=NULL, const=TRUE, A0, lmd, Tsigbrk, br
     if (!is.null(xdata) ) stopifnot( dim(xdata)[1] == T)
     Tx <- dim(xdata)[1]
     nx <- dim(xdata)[2]
-    vp <- varprior(nv,nx,lags,mnprior,vprior, urprior=list(lambda=lambda, mu=mu)) # vp$: ydum,xdum,pbreaks
+    vp <- varprior(nv,nx,lags,mnprior,vprior, urprior=urprior, ybar=ybar) # vp$: ydum,xdum,pbreaks
     ## -------- set lmd for prior dummies --------------
     if (!is.null(dim(lmd))) {
-        lmdbar <- apply(lmd, 2, mean)
+        lmdbar <- apply(lmd, 1, mean)
     } else {
         lmdbar <- lmd
     }
-    Tsigbrk <- c(invTime(Tsigbrk, ydata), T)            #dummy obs at end
+    ## --------------------- Tsigbrk assumed to be indexes into ydata matrix, not
+    ## --------------------- dates.  Conversion from dates and adding T done in bvarWrap3().
+    ## Tsigbrk <- c(invTime(Tsigbrk, ydata), T)            #dummy obs at end
     lmd <- cbind(lmd, lmdbar)
     ##-------------------------------------------
     ## var = rfvar3(ydata=rbind(ydata, vp$ydum), lags=lags, xdata=rbind(xdata,vp$xdum), breaks=matrix(c(breaks, T, T + vp$pbreaks), ncol=1),
     ## const=FALSE, lambda=lambda, mu=mu, ic=ic) # const is FALSE in this call because ones alread put into xdata
     var = rfvar3(ydata=rbind(ydata, vp$ydum), lags=lags, xdata=rbind(xdata,vp$xdum),
-        breaks=matrix(c(breaks, T, T + vp$pbreaks), ncol=1), const=FALSE, lambda=urprior$lambda,
-        mu=urprior$mu, ic=ic, sigpar=list(A0,lmd,Tsigbrk))
+        breaks=matrix(c(breaks, T, T + vp$pbreaks), ncol=1), const=FALSE, lambda=NULL,
+        mu=NULL, ic=ic, sigpar=list(A0=A0,lmd=lmd,Tsigbrk=Tsigbrk))
     ##  const is FALSE in this call because ones alread put into xdata
     Tu <- dim(var$u)[1]
-    if ( var$snglty > 0 ) error( var$snglty, " redundant columns in rhs matrix")
-    w <- -.5 * apply(var$u^2, 2, sum)  
+    if ( any(var$snglty > 0) ) error( var$snglty, " redundant columns in rhs matrix")
+    lmdllh <- .5 * sum(var$lmdseries)
+    llh <- -.5 * sum(var$u^2) + Tu * (-nv * log(2 * pi)/2 + determinant(A0)$modulus) +
+        lmdllh
+    ## nb: determinant() returns log of abs value of determinant
+    nX <- lags * nv + 1
+    w <-  llh + .5 * sum(var$logdetxxi) + nv * nX * log(2 * pi)/2
     if(train!=0) {
         if(train <= lags)
             {
@@ -80,24 +88,32 @@ SVARhtskdmdd <- function(ydata,lags,xdata=NULL, const=TRUE, A0, lmd, Tsigbrk, br
     }
     ytrain <- ydata[1:Tp,,drop=FALSE]
     xtrain <- xdata[1:Tp,,drop=FALSE]
-    priorTsigbrk <- intersect(Tsigbrk, c(1:Tp, T))
-    priornsig <- length(Tsigbrk) + 1
-    priorlmd <- cbind(lmd[ , 1:(priornsig - 1)], lmd[ , dim(lmd)[2]])
-    if (!nonorm) { 
+    if (!nonorm) {
+        priorTsigbrk <- c(0, Tp)
+        ## It is assumed that there are no breaks in lmd in the training sample!
+        priornsig <- 2
+        priorlmd <- cbind(lmd[ , 1], lmd[ , dim(lmd)[2]])
         varp <- rfvar3(ydata=rbind(ytrain, vp$ydum), lags=lags, xdata=rbind(xtrain, vp$xdum),
                        breaks=c(tbreaks, Tp+vp$pbreaks), 
                        lambda=NULL, mu=NULL, const=FALSE, ic=ic,
                        sigpar=list(A0=A0,lmd=priorlmd, Tsigbrk=priorTsigbrk))
         ## const is FALSE here because xdata already has a column of ones.
-        if (varp$snglty > 0) {
+        if (any(varp$snglty > 0)) {
             warning("Prior improper, short ", varp$snglty, " df.  Results likely nonsense.")
         } else {
             Tup <- dim(varp$u)[1]
-            wp <- matrictint(crossprod(varp$u),varp$xxi,Tup-flat*(nv+1)/2)-flat*.5*nv*(nv+1)*log(2*pi)
-            w=w-wp
+            lmdllhp <- .5 * sum(varp$lmdseries)
+            llhp <- -.5 * sum(varp$u^2) - Tup * (nv * log(2 * pi)/2 - determinant(A0)$modulus) +
+                lmdllhp
+            normalizer <- .5 * sum(varp$logdetxxi) + nv * nX * log(2 * pi)/2
+            wp <- llhp + normalizer
+            w <- w-wp
+            llh <- llh - normalizer
+            ## llh is height of posterior density over A0, lmd, A+ at peak.  w is height of
+            ## marginal posterior for A0, lmd, with A+ integrated out.
         }
     } else {
         varp <- NULL
     }
-    return(list(w=w,var=var,varp=varp,prior=list(lambda=lambda,mu=mu,vprior=vprior,mnprior=mnprior)))
+    return(list(w=w,var=var,varp=varp,prior=list(urprior=urprior, vprior=vprior, mnprior=mnprior)))
 }

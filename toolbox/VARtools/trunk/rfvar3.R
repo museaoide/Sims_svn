@@ -59,6 +59,8 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ## --------------------------------------------------------
     if (is.null(dim(ydata))) dim(ydata) <- c(length(ydata),1)
     T <-dim(ydata)[1]
+    ## Note that if rfvar3() has been called with dummy obs's already in place, this T
+    ## includes the dummies.
     nvar<-dim(ydata)[2]
     ##nox=isempty(xdata)
     if (const) {
@@ -159,33 +161,50 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
         }
     }
     if (!is.null(sigpar)) {
+        Tsigbrk <- sigpar$Tsigbrk
+        lmd <- sigpar$lmd
+        A0 <- sigpar$A0
         if (!is.null(Tsigbrk)) {
-            Tsigbrk <- invtime(Tsigbrk, ydata) #so Tsigbrk given as dates
-            nsig <- length(Tsigbrk) + 1
+            ## Tsigbrk <- invtime(Tsigbrk, ydata) #so Tsigbrk given as dates
+            nsig <- length(Tsigbrk)
         } else {
             nsig <- 1
         }
-        Tsigbrk <- c(0, Tsigbrk, T)
-        lmdndx <- rep(1:nsig, each=diff(Tsigbrk))
+        Tsigbrk <- c(Tsigbrk, T)
+        lmdndx <- rep(1:nsig, times=diff(Tsigbrk))
         lmdseries <- lmd[ , lmdndx]
-        if ( Tsmpl < dim(y)[1] ) {      #dummy obs formed in rfvar3 
+        if ( Tsmpl < dim(y)[1] ) {      #dummy obs formed in rfvar3
+            ## Should not be combining this branch with dummy obs's from varprior()
+            ## already included in ydata.
             lmdp <- apply(lmdseries[ ,smpl], 1, mean)
-            lmdseries <- cbind(lmdseries[ , smpl], matrix(lmdp, nv, dim(y)[1] - Tsmpl))
+            lmdseries <- cbind(lmdseries[ , smpl], matrix(lmdp, nvar, dim(y)[1] - Tsmpl))
         } else {
             lmdseries <- lmdseries[ , smpl]
         }
         ## i.e., use mean of lmdseries for dummy observation weights.  Note that
         ## since lmd is logged, this is geometric mean, maybe not best. 
         nX <- dim(X)[2]
-        ya0 <- y %*% A0
-        B <- matrix(0,  nX, nv)
-        u <- matrix(0, Tsmpl, nv)
-        xxi <- array(0, c(nX, nX, nv))
-        for (iq in 1:nv) {
-            lso <- lsfit(X, ya0, wt=exp(-lmdseries), intercept=FALSE) # (intercept already in X)
-            B[iq, ] <- lso$coefficients
-            xxi[ , , iq] <- solve(crossprod(qr.R(lso$qr)))
+        ya0 <- y %*% t(A0)
+        B <- matrix(0,  nX, nvar)
+        u <- matrix(0, Tsmpl, nvar)
+        uraw <- u
+        xxi <- array(0, c(nX, nX, nvar))
+        logdetxxi <- vector("numeric", nvar)
+        snglty <- vector("numeric", nvar)
+        for (iq in 1:nvar) {
+            wt <- exp(.5 * lmdseries[iq, ])
+            ## weighting by exp(lmd/2), so log error variances are -lmd
+            Xq <-  wt * X
+            yq <- wt * ya0[ , iq]
+            lso <- lsfit(Xq, yq, intercept=FALSE)
+            ## intercept already in X. resids should be unit vce.
+            B[ , iq] <- lso$coefficients
+            Rq <- qr.R(lso$qr)
+            xxi[ , , iq] <- solve(crossprod(Rq))
             u[ , iq] <- lso$residuals
+            logdetxxi[iq] <- -2 * sum(log(abs(diag(Rq))))
+            snglty[iq] <- (logdetxxi[iq] == -Inf)
+            uraw[ , iq] <- u[ , iq]/wt
         }
     } else {
         ## Instead of svd below, could invoke lsfit.  Faster?
@@ -195,6 +214,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
         vldvr$u <- vldvr$u[, 1:dfx]
         vldvr$v <- vldvr$v[, 1:dfx]
         snglty <- dim(X)[2] - dfx
+        logdetxxi <- 2 * sum(log(abs(di)))
         ##B <- vldvr$v %*% diag(di,nrow=length(di)) %*% t(vldvr$u) %*% y (line below is just more efficient)
         B <- vldvr$v %*% (di * (t(vldvr$u) %*% y))
         u <-  y-X %*% B
@@ -237,5 +257,9 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
         }
 ### logintlh <-  matrictint(u'*u,xxi,size(X,1)-nvar-1)-.5*nvar*(nvar+1)*log(2*pi);
 ### Might want to create a version without the dimnames if using this in a program.
-    return(list(By=By, Bx=Bx, u=u, xxi= xxi, snglty=snglty, call=match.call())) #var.logintlh <-  logintlh
+    ##------------
+    ## returns some things that are not available with sigpar=NULL.  Either split to
+    ## separate programs, or create alternate return lists.
+    return(list(By=By, Bx=Bx, u=u, uraw=uraw, xxi= xxi, snglty=snglty, logdetxxi=logdetxxi,
+                lmdseries=lmdseries, call=match.call())) #var.logintlh <-  logintlh
 }

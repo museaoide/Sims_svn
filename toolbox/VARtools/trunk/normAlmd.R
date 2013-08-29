@@ -1,21 +1,30 @@
-normAlmd <- function(Aml, A, lmd) {
-    ## we assume columns of Aml have already been scaled so all(diag(crossprod(Aml)) == 1).
-    ## For this to be reliable, variances of r.f. innovations must be same
-    ## order of magnitude across variables.
-    
-    sfa <- sqrt(apply(A^2, 2, sum))
-    A <- A %*% diag(1/sfa)
-    cvmat <- abs(crossprod(Aml, A))
-    neq <- dim(A)[2]
-    ordrng <- vector("numeric", neq)
-    ordrng[1] <- which.max(cvmat[1, ])
-    for (iq in 2:neq) {
-        ndx <- which.max(cvmat[iq, -ordrng[1:(iq-1)]])
-        ordrng[iq] <- setdiff(1:neq, ordrng[1:(iq-1)])[ndx]
+normAlmd <- function(Aml, lmdml, A, lmd) {
+    nsig <- dim(lmd)[2]
+    nv <- dim(lmd)[1]
+    Alml <- array(0, c(nv, nv, nsig))
+    Al <- Alml
+    for (il in 1:nsig) {
+        Alml[ , , il] <- exp(-.5 * lmdml[ , il]) * Aml
+        Al[ , , il] <- exp(-.5 * lmd[ , il]) * A
     }
-    A <- A[ , ordrng]
-    sfa <- diag(A)
-    A <- A %*% diag(1/sfa)          # So i'th equation has unit coeff on i'th vble.
-    lmd <- sfa * lmd[ordrng, ]    # note:  equiv to sfa^2 %*% lmd[ordrng, ]
-    return(list(Anormed=A , lmdnormed=lmd, ordrng))
+    Alml <- matrix(Alml, nv)
+    Al <- matrix(Al, nv)
+    xp <- Al %*% t(Alml)
+    ## algorithm is not idempotent.  Fix.
+    ordrng <- vector("numeric", nv)
+    crit <- vector("numeric", nv)
+    ##---------- 3rd attempt--------------
+    ## Make any switch with 1 that increases trace, then any with 2, etc.
+    for (iv in 1:nv) {
+        for (iv2 in iv:nv) {
+            crit[iv2] <- xp[iv2,iv] - xp[iv,iv] + xp[iv,iv2] - xp[iv2,iv2]
+        }
+        idtr <- which.max(crit[iv:nv]) + iv - 1
+        Al[iv:nv, ] <- Al[c(idtr, (iv:nv)[-idtr]), ]
+        ordrng[iv] <- idtr
+    }
+    sf <- diag(Al)
+    Al <- (1/sf) * Al
+    lmd <- sf * lmd
+    return(list(Anormed=Al , lmdnormed=lmd, ordrng=ordrng))
 }

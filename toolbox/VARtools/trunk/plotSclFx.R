@@ -1,4 +1,4 @@
-function (x, y = NULL, plot.type = c("multiple", "single"), xy.labels, 
+plotSclFx <- function (x, y = NULL, plot.type = c("multiple", "single"), xy.labels, 
     xy.lines, panel = lines, nc, yax.flip = FALSE, mar.multi = c(0, 
         5.1, 0, if (yax.flip) 5.1 else 2.1), oma.multi = c(6, 
         0, 5, 0), axes = TRUE, ...) 

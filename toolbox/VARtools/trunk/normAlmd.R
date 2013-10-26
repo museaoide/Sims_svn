@@ -10,21 +10,31 @@ normAlmd <- function(Aml, lmdml, A, lmd) {
     Alml <- matrix(Alml, nv)
     Al <- matrix(Al, nv)
     xp <- Al %*% t(Alml)
-    ## algorithm is not idempotent.  Fix.
-    ordrng <- vector("numeric", nv)
+    ## Algorithm tries reordering up to nv times to find an invariant ordering,
+    ## then gives up and returns nv'th reordering and noloop=FALSE
+    ordrng <- 1:nv
     crit <- vector("numeric", nv)
-    ##---------- 3rd attempt--------------
-    ## Make any switch with 1 that increases trace, then any with 2, etc.
-    for (iv in 1:nv) {
-        for (iv2 in iv:nv) {
-            crit[iv2] <- xp[iv2,iv] - xp[iv,iv] + xp[iv,iv2] - xp[iv2,iv2]
+    Alold <- Al
+    noloop <- 0
+    for (ntrial in 1:nv) {
+        ## Make any switch with 1 that increases trace, then any with 2, etc.
+        for (iv in 1:nv) {
+            for (iv2 in iv:nv) {
+                crit[iv2] <- xp[iv2,iv] - xp[iv,iv] + xp[iv,iv2] - xp[iv2,iv2]
+            }
+            idtr <- which.max(crit[iv:nv])
+            ordrng[iv:nv] <- ordrng[iv:nv][c(idtr , (1:(nv-iv+1))[-idtr])]
+            Al <- Al[ordrng, ]
+            xp <- xp[ordrng, ]
         }
-        idtr <- which.max(crit[iv:nv]) + iv - 1
-        Al[iv:nv, ] <- Al[c(idtr, (iv:nv)[-idtr]), ]
-        ordrng[iv] <- idtr
+        if (isTRUE(all.equal(Al, Alold))) {
+            noloop <- ntrial
+            break
+            Alold <- Al
+        }
     }
     sf <- diag(Al)
     Al <- (1/sf) * Al
     lmd <- sf * lmd
-    return(list(Anormed=Al , lmdnormed=lmd, ordrng=ordrng))
+    return(list(Anormed=Al , lmdnormed=lmd, ordrng=ordrng, noloop=noloop))
 }

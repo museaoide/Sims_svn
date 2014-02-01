@@ -14,18 +14,18 @@ plotir <- function(resp, var, shock, type=c("multiple","single"),main="Impulse r
     ## (in the "single" case).
     ##-------------------------------
     ## Program seems to be unfinished or truncated somehow.  Incomplete repair 13.10.26.
-    pr <- resp[var,shock, , drop=FALSE]          
+    pr <- resp[var,shock, , drop=FALSE]
     ybound <- matrix(0,2,length(var))
     for (iv in 1:length(var)) ybound[ , iv] <- range(pr[iv, , ])
     if(vfirst) pr <- aperm(pr, c(2,1,3))
     nr <- dim(pr)[1]
     nc <- dim(pr)[2]
     np <- dim(pr)[3]
-    layout(matrix(1:(nr * nc),nr,nc))
+    layout(matrix(1:(nr * nc), nr, nc))
     for (ic in 1:nc) {
         if (nr > 1) {
             for (ir in 1:(nr-1))
-                plot(0:(np-1), pr[ir, ic, ], type="l", ylim=ybound[ , if(vfirst) ir else ic], frame=true)    
+                plot(0:(np-1), pr[ir, ic, ], type="l", ylim=ybound[ , if(vfirst) ir else ic], frame=TRUE)    
         }
     }
 }

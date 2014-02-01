@@ -204,7 +204,6 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
             u[ , iq] <- lso$residuals
             logdetxxi[iq] <- -2 * sum(log(abs(diag(Rq))))
             snglty[iq] <- (logdetxxi[iq] == -Inf)
-            uraw[ , iq] <- u[ , iq]/wt
         }
     } else {
         ## Instead of svd below, could invoke lsfit.  Faster?
@@ -220,6 +219,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
         u <-  y-X %*% B
         xxi <-  di * t(vldvr$v)
         xxi <-  crossprod(xxi)
+        uraw <- NULL       # so it won't be missing in the list of outputs
     }
     if (!is.null(tsp(ydata))) u <- ts(u, start=start(ydata)+c(0,lags),freq=frequency(ydata))
     ## dates at end of sample are for dummy obs, meaningless.  If there are other
@@ -260,6 +260,10 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ##------------
     ## returns some things that are not available with sigpar=NULL.  Either split to
     ## separate programs, or create alternate return lists.
-    return(list(By=By, Bx=Bx, u=u, uraw=uraw, xxi= xxi, snglty=snglty, logdetxxi=logdetxxi,
+    if(!is.null(sigpar)) {
+       return(list(By=By, Bx=Bx, u=u, uraw=uraw, xxi= xxi, snglty=snglty, logdetxxi=logdetxxi,
                 lmdseries=lmdseries, call=match.call())) #var.logintlh <-  logintlh
+    } else {
+      return(list(By=By, Bx=Bx, u=u, xxi= xxi, snglty=snglty, logdetxxi=logdetxxi, call=match.call()))
+    }
 }

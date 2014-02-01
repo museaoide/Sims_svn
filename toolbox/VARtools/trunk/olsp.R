@@ -13,7 +13,7 @@ olsp <- function(Y,X,Ydum,Xdum,sigbar=1,sigcv=1,sigidf=NULL,sigiscale=NULL,dumwt
        XXdumErr <- !identical(dim(X)[2],dim(Xdum[2]))
        YdumXdumErr <- !identical(dim(X)[1],dim(Xdum)[1])
        if(any(c(YXerr,YYdumErr,XXdumErr,YdumXdumErr)))
-         {cat("dimension mismatches: YXerr=,"YXerr," YdumXdumErr=",YdumXdumErr," YYdumErr=",YYdumErr,
+         {cat("dimension mismatches: YXerr=", YXerr," YdumXdumErr=",YdumXdumErr," YYdumErr=",YYdumErr,
                 " XXdumErr=",XXdumErr,"\n")
           return()
         }
@@ -24,5 +24,7 @@ olsp <- function(Y,X,Ydum,Xdum,sigbar=1,sigcv=1,sigidf=NULL,sigiscale=NULL,dumwt
        di <- 1./vldvr$d
        #B <- vldvr$v %*% diag(di) %*% t(vldvr$u) %*% y (line below is just somewhat more efficient)
        B <- vldvr$v * (di* (t(vldvr$u)%*% Y))
+     }
+  }
        
               

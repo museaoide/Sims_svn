@@ -42,7 +42,8 @@ kf2 <- function(y,H,shat,sig,G,M) {
     ferr <- hohifac %*% fcsterr
     lh <- c(0,0)
     lh[1] <- -.5 * crossprod(ferr)
-    lh[2] <- -.5 * sum( log(d) )
+    lh[2] <- -.5 * sum( log(d) ) - .5 * log(2 * pi)
+    ## log(2 * pi) term added 2013.12.11.  
     hohoifac <-hohifac %*% ho 
     shatnew <- crossprod(hohoifac, ferr) + G %*% shat
     signew <- omega - crossprod(hohoifac)

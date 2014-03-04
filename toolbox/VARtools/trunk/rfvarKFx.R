@@ -11,11 +11,20 @@ rfvarKFx <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, 
   ##--------------------------
   ## layout of state vector and shat:  By[iq , , ], 
   ##           concatenated with Bx[iq, ], repeated neq times, then the neq disturbances.
-  nsig <- dim(sigfac)[3]
-  stopifnot(nsig  == length(Tsigbrk) - 1)
+  ##------------------------------
+  ## Need to handle the case of no breaks and of single y.
+  ## ---- no breaks case --------
   if (is.null(dim(ydata))) dim(ydata) <- c(length(ydata),1)
   T <-dim(ydata)[1]
   nvar<-dim(ydata)[2]
+  if(is.null(Tsigbrk) || length(Tsigbrk) == 2) {
+    nsig <- 1
+    Tsigbrk <- c(0,T)
+    sigfac <- array(sigfac, c(dim(sigfac), 1))
+  } else {    
+    nsig <- dim(sigfac)[3]
+  }
+  stopifnot(nsig  == length(Tsigbrk) - 1)
   ##nox=isempty(xdata)
   if (const) {
     xc <- matrix(1,T,1)
@@ -60,7 +69,7 @@ rfvarKFx <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, 
   X <- window(X, start=start(ydata), end=end(ydata), extend=TRUE)
   X <- cbind(X, xdata)
   dnx <- rep(dimnames(ydata)[[2]], lags)
-  dnx <- paste(dnx, rep(1:lags, each=6), sep="")
+  dnx <- paste(dnx, rep(1:lags, each=nvar), sep="")
   dimnames(X)[[2]] <- c(dnx, "const")
   ## Everything now set up with X a mts object with same tsp as ydata, no filtering out smpl or Tsigbrk
   ##--------------------

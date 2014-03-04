@@ -1,4 +1,9 @@
 rfvarKF <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL, sigfac, prior) {
+  ## This version calls kfVC at each date, whether sigfac has changed or not.  rfvarKFx calls
+  ## kfVCx at each date preceding a change in the sigfac matrix, and is thus more efficient
+  ## if the only reason for doing a kf-method VAR estimate is because of non-constant sigfac.
+  ## This version can be extended to be used to make recursive multi-step forecasts.
+  ## ---------------------------------------------------------------------------------------
   ## ydata:    T x n data matrix, preferably an mts object
   ## xdata:    T x k exogenous data matrix.  Omit if only a constant is needed and const=-TRUE.
   ## breaks:   breaks in the data.  The first lags data points after a break are used

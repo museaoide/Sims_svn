@@ -20,5 +20,5 @@ SigIDdraw.R <- function(xold, lhold, bvwold, xjmpvfac) {
     lag <- dim(A)[3]
     ByBx <- cbind(matrix(bvnew$By, nv, nv * lag), bvnew$Bx)
     xnew <- c(A = A[-seq(1, nv^2, by=nv+1)], lmd = lmd)
-    return(list(xnew=xnew, lhnew=lhnew, ByBx=c(t(ByBx)), bwvnew=bwvnew)
+    return(list(xnew=xnew, lhnew=lhnew, ByBx=c(t(ByBx)), bwvnew=bwvnew))
 }

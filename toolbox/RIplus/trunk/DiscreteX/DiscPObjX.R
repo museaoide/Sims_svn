@@ -94,5 +94,5 @@ DiscPObjX <- function(param, gy, y, U, alph) {
   obj <- -obj                           #as input to minimizer
   attr(obj, "gradient") <- -c(cbind(diag(nx - 1), rep(-1, nx - 1)) %*% DPobj, DXobj) #recognizing that there are only nx-1 p parameters, with  
   info = sum(f[f>0] * log(f[f>0])) - sum(log(pnew[pnew>0])*pnew[pnew>0]) - sum(log(gy[gy>0])*gy[gy>0])
-  return(list(obj=obj, pnew=pnew, ygivenx=ygivenx, h=h, f=f, info=info, Eloss = sum(f * Umat)))
+  return(list(obj=obj, pnew=pnew, ygivenx=ygivenx, h=h, f=f, info=info, EU = sum(f * Umat)))
 }

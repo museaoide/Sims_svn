@@ -8,7 +8,7 @@ restrictVAR <- function(vout, type=c("3", "KF","SVhtskd"), rmat=NULL, yzrone=NUL
     ##-------------------------------------------
     ## type:     vout as from rfvar3 ("3") or as from rfvarKF ("KF")
     ## const:    the right hand side of rmat %*% coeff = const, not the constant in the var.
-    ## cyzr, cxar:  If using yzrone, xzrone with non-trivial constants, leave const=NULL and specify
+    ## cyzr, cxzr:  If using yzrone, xzrone with non-trivial constants, leave const=NULL and specify
     ##           constants with cyzr and cxzr
     ##------------------------------------------
     ## sc:       The Schwarz criterion rejects the restriction if the chisq value plus the sc value

@@ -18,7 +18,8 @@ restrictVAR <- function(vout, type=c("3", "KF","SVhtskd"), rmat=NULL, yzrone=NUL
     ##
     ##------------------------------------------------
     ## Note 2013-3-4:  Try eliminating scale effects by converting X'X to correlation matrix
-    if(type == "SVhtskd") {
+    if (length(type) > 1) type <- type[1]
+    if (type == "SVhtskd") {
         require("tensor")
         bvw <- vout
         vout <- bvw$vout$var

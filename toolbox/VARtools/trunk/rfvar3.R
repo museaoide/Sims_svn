@@ -44,7 +44,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ## returns:
     ## By:      nvar x nvar x lags matrix of coefficients on lagged y's.  1st dimension is "equation number"
     ## Bx:      nvar x nx matrix of coefficients on x's
-    ## u:       (T-6+ (number of dummy obs)) x nvar matrix of residuals.  If ydata is a ts object, u will be also, and will
+    ## u:       (T-lags + (number of dummy obs)) x nvar matrix of residuals.  If ydata is a ts object, u will be also, and will
     ##          be correctly dated.  u observations dated after end(ydata) are dummy observations.
     ## xxi:     X'X inverse, same for all equations.  kronecker(cov(u),xxi) is the full covariance matrix of the regression coefficients.
     ## snglty:  Usually 0.  If the rhs variable matrix is not full column rank, this is the gap between the number of columns and the

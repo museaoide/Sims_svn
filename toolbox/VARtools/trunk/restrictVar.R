@@ -66,22 +66,21 @@ restrictVAR <- function(vout, type=c("3", "KF","SVhtskd"), rmat=NULL, yzrone=NUL
         sig <- cov(vout$u)
         svdsig <- svd(sig)
         singsig <- (max(svdsig$d) > 1e10 * min(svdsig$d))
+        if(singsig) warning("Near singular sig matrix in restrictVAR")
         svdxxi <- svd(vout$xxi)
         singxxi <- (max(svdxxi$d) > 1e10 * min(svdxxi$d))
-        singv <- singsig || singxxi
-        if(!singv) {
-            ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
-            ##schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxxi$d)) * t(svdxxi$u)) %*% rv  #2013.5.9
-            ## sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), 1/sqrt(svdxxi$d)) * t(svdxxi$u)
-            ## line above seems to be a mistake, since xxi is already x'x-inverse
-            sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), sqrt(svdxxi$d) * t(svdxxi$u))
-            dgVb <- apply(sqrtVb^2, 2, sum)
-            rmatC <- rmat %*% diag(sqrt(T * dgVb))
-            sqrtVbC <- sqrtVb %*% diag(1/sqrt(T * dgVb))
-            lndetVb <- sum(log(svdsig$d)) * dim(vout$xxi)[1] + sum(log(svdxxi$d)) * dim(sig)[1]
-            lndetVbC <- lndetVb - sum(log(dgVb * T))
-        }
-    } else if (type == "KF") {             #type=="KF"
+        if(singxxi) warning("Near singular xxi matrix in restrictVAR")
+        ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
+        ##schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxxi$d)) * t(svdxxi$u)) %*% rv  #2013.5.9
+        ## sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), 1/sqrt(svdxxi$d)) * t(svdxxi$u)
+        ## line above seems to be a mistake, since xxi is already x'x-inverse
+        sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), sqrt(svdxxi$d) * t(svdxxi$u))
+        dgVb <- apply(sqrtVb^2, 2, sum)
+        rmatC <- rmat %*% diag(sqrt(T * dgVb))
+        sqrtVbC <- sqrtVb %*% diag(1/sqrt(T * dgVb))
+        lndetVb <- sum(log(svdsig$d)) * dim(vout$xxi)[1] + sum(log(svdxxi$d)) * dim(sig)[1]
+        lndetVbC <- lndetVb - sum(log(dgVb * T))
+    } else if (type == "KF") {          #type=="KF"
         svdVb <- svd(vout$Vb)
         sqrtVb <- sqrt(diag(svdVb$d)) %*% t(svdVb$u)
         dgVb <- diag(vout$Vb)

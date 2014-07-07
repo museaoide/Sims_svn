@@ -69,7 +69,7 @@ restrictVAR <- function(vout, type=c("3", "KF","SVhtskd"), rmat=NULL, yzrone=NUL
         if(singsig) warning("Near singular sig matrix in restrictVAR")
         svdxxi <- svd(vout$xxi)
         singxxi <- (max(svdxxi$d) > 1e10 * min(svdxxi$d))
-        if(singxxi) warning("Near singular xxi matrix in restrictVAR")
+        ## if(singxxi) warning("Near singular xxi matrix in restrictVAR")
         ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
         ##schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxxi$d)) * t(svdxxi$u)) %*% rv  #2013.5.9
         ## sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), 1/sqrt(svdxxi$d)) * t(svdxxi$u)
@@ -130,5 +130,5 @@ restrictVAR <- function(vout, type=c("3", "KF","SVhtskd"), rmat=NULL, yzrone=NUL
     ##svdv <- svd(rmat %*% vout$Vb %*% t(rmat))
     chstat <- (1/svdvr$d) * t(svdvr$v) %*%  gap
     chstat <- crossprod(chstat)
-    return(list(chiSquared=chstat, df=df, sc=schwarz, pval=pchisq(chstat,df), sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)), scC=schwarzC ))
+    return(list(chiSquared=chstat, df=df, sc=schwarz, pval=pchisq(chstat,df), sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)), scC=schwarzC, singxxi=singxxi, singsig=singsig ))
 }

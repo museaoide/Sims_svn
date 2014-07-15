@@ -79,7 +79,10 @@ bvarWrap3 <- function(x, verbose=FALSE) {
     ## nlmd <- length(c(lmd))
     ## lplmd <- nlmd * (log(2) -  2 * log(lmscale)) + 3 * sum(-lmd) - 3 * sum(log(1 + lmscale^(-2) * exp(-2 * lmd)))
     ## simpler exponential prior on lambdas
-    lplmd <- -sum(lmd) - sum(exp(-lmd))  #exp(-lmd) ~ exponential
+    ## lplmd <- -sum(lmd) - sum(exp(-lmd))  #exp(-lmd) ~ exponential. used for summer 2013 runs
+    lplmd <- -sum(exp(-4 * lmd)) - sum(2 * lmd) - (nv * nsig * log(16)) 
+    ## exp(-lmd) ~ gamma(2, 4). P[exp(-lmd) < .42] = .5 .  This keeps the exp(-lmd)'s away from 0.
+    ##
     ##---------- ev penalty messes up MCMC logic, so omit unless really needed. ---------
     ## ## penalize highly unstable roots
     ## ev <- eigen(sysmat(vout$By))$values

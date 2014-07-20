@@ -15,8 +15,8 @@ normAlmd <- function(Aml, lmdml, A, lmd) {
     }
     Alml <- matrix(Alml, nv)
     Al <- matrix(Al, nv)
-    xp <- abs(Al %*% t(Alml))
-    ## xp <- abs(cor(t(Al), t(Alml)))
+    xp <- Al %*% t(Alml)
+    xp <- log(abs(xp))
     ## Algorithm tries reordering up to nv times to find an invariant ordering,
     ## then gives up and returns nv'th reordering and noloop=FALSE
     ordrng <- 1:nv
@@ -27,16 +27,23 @@ normAlmd <- function(Aml, lmdml, A, lmd) {
         ## Make any switch with 1 that increases trace(xp), then any with 2, etc.
         for (iv in 1:nv) {
             for (iv2 in iv:nv) {
-                crit[iv2] <- xp[iv2,iv] - xp[iv,iv] + xp[iv,iv2] - xp[iv2,iv2]
+                crit[iv2] <- xp[iv,iv2] - xp[iv,iv] + xp[iv2,iv] - xp[iv2,iv2]
             }
             idtr <- which.max(crit[iv:nv])
             newiv <- thisOrdrng[iv:nv][idtr]
             thisOrdrng[iv:nv][idtr] <- thisOrdrng[iv]
             thisOrdrng[iv] <- newiv
-            Al <- Al[thisOrdrng, ]
-            xp <- xp[thisOrdrng, ]
+            newxpiv <- xp[iv + idtr - 1, ]
+            xp[iv + idtr -1, ] <- xp[iv, ]
+            xp[iv, ] <- newxpiv
+            ## if (idtr != 1) {
+            ##     print(paste("ntrial =", ntrial, "iv =", iv, "idtr = ", idtr))
+            ##     print(xp)
+            ## }
         }
         ordrng <- ordrng[thisOrdrng]
+        ## print(thisOrdrng)
+        ## print(ordrng)
         if (all(thisOrdrng == 1:nv)) {
             noloop <- ntrial
             break

@@ -53,7 +53,7 @@ rfvar3 <- function(ydata=NA,lags=6,xdata=NULL,const=TRUE,breaks=NULL,lambda=5,mu
     ## 12/18/05:  added ts properties for u, better comments.
     ##---------------------------------------
     ## Modified 2013.8.12 to allow use of A0, lmd, Tsigbrk.  With non-null A0, By is A+ from
-    ## A0 %*% y(t) = A+(L) %*% y(t) + exp(.5 lmd(t)) * eps(t) .  This works even with
+    ## A0 %*% y(t) = A+(L) %*% y(t) + exp(-.5 lmd(t)) * eps(t) .  This works even with
     ## lmd constant, but in that case running a single rf estimate (A0=I), then iterating
     ## on (A0, lmd) alone makes more sense. With lmd varying, rf estimates change with lmd.
     ## --------------------------------------------------------

@@ -1,7 +1,8 @@
 windowA <- function(x, start=NULL, end=NULL, frequency=NULL, deltat=NULL, agg=c("average", "sum")) {
 ## just like window(), except that takes a frequency or deltat argument and converts to a smaller
-## frequency (e.g. monthly to quarterly, quarterly to annual).  
-  xx <- window(x, start, end)
+## frequency (e.g. monthly to quarterly, quarterly to annual). start and end are at the original
+## series frequency.
+  xx <- if( !is.null(start) || !is.null(end)) window(x, start, end) else x
   tspxx <- tsp(xx)
   oldfreq <- tspxx[3]
   if (abs(oldfreq - frequency) < .01 || (is.null(frequency) && is.null(deltat)) ) {

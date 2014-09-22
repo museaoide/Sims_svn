@@ -20,10 +20,13 @@ lagts <- function(xts,lags) {
     for (il in lags) {
       xtsout <- cbind(xtsout, lag(xts, -il))
     }
+    ## group lags of the same variable
+    ndx <- matrix(1:(nv*lags), nv, lags)
+    xtsout <- xtsout[ , c(t(ndx))]
     dimnames(xtsout)[[2]][1:nv] <- vnames
-    for (il in 1:length(lags)) {
-      dimnames(xtsout)[[2]][(il*nv+1):((il+1)*nv)] <- paste(vnames, lags[il], sep="")
-    } 
+    for (iv in 2:nv) {
+      dimnames(xtsout)[[2]][(iv-1)*nv + (1:lags)] <- paste(vnames[iv], 1:lags, sep="")
+    }
   } else {
     for (iv in 1:nv) {
       if (!is.null(lags[[iv]])) {
@@ -33,7 +36,7 @@ lagts <- function(xts,lags) {
       }
     }
     namecount <- nv
-    dimnames(xtsout)[[2]][1:nv] <- dimnames(xts)[[2]]
+    dimnames(xtsout)[[2]][1:nv] <- vnames
     for (iv in 1:nv) {
       if (!is.null(lags[[iv]])) {
         lvec <- lags[[iv]]

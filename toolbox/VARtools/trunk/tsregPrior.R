@@ -62,9 +62,9 @@ tsregPrior <- function(vlist, lags=rep(0, length(vlist)), ldv=1, scale,
     X[ ,  nx+1] <- 0
     browser()
     X[nx+1, ] <- c(vmeans, 1) * scale[nv + 1]
-    erratio0 <- X %*% c(vmeans, 1)
+    erratio0 <- solve(X, c(vmeans, 1))
     erratio0 <- sum(erratio0)^2
     X <- sqrt(erratio/erratio0) * X
-    w <- determinant(crossprod(X))$modulus
-    return(list(X=X, w=w, scalefac=sqrt(erratio/erratio0), call=match.call))
+    w <- -.5 * determinant(crossprod(X))$modulus
+    return(list(X=X, w=w, scalefac=sqrt(erratio/erratio0), call=match.call()))
 }

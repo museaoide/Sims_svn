@@ -21,11 +21,11 @@ lagts <- function(xts,lags) {
       xtsout <- cbind(xtsout, lag(xts, -il))
     }
     ## group lags of the same variable
-    ndx <- matrix(1:(nv*lags), nv, lags)
+    nl <- length(lags)
+    ndx <- matrix(1:(nv  * (nl + 1)), nv, nl + 1)
     xtsout <- xtsout[ , c(t(ndx))]
-    dimnames(xtsout)[[2]][1:nv] <- vnames
-    for (iv in 2:nv) {
-      dimnames(xtsout)[[2]][(iv-1)*nv + (1:lags)] <- paste(vnames[iv], 1:lags, sep="")
+    for (iv in 1:nv) {
+      dimnames(xtsout)[[2]][(iv-1)*(nl + 1) + 1:(nl+1)] <- paste(vnames[iv], c("", as.character(lags)), sep="")
     }
   } else {
     for (iv in 1:nv) {

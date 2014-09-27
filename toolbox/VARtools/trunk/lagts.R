@@ -12,7 +12,7 @@ lagts <- function(xts,lags) {
   ## xts can also be a single time series.  lags can be just a single vector of lags, in which case
   ## all series in xts are included with the same lags.
   ##---------------------
-  xtsout <- xts
+  xtsout <- xts          #dummy initialization.  We'll erase these at the end.
   vnames <- if(is.null(dim(xts))) "y" else dimnames(xts)[[2]]
   nv <- if(!is.null(dim(xts))) dim(xts)[2] else 1
   if (!is.list(lags) || length(lags) ==1) {
@@ -20,12 +20,13 @@ lagts <- function(xts,lags) {
     for (il in lags) {
       xtsout <- cbind(xtsout, lag(xts, -il))
     }
+    xtsout <- xtsout[ , -(1:nv)]   # getting rid of dummy initialization
     ## group lags of the same variable
     nl <- length(lags)
-    ndx <- matrix(1:(nv  * (nl + 1)), nv, nl + 1)
+    ndx <- matrix(1:(nv  * nl), nv, nl)
     xtsout <- xtsout[ , c(t(ndx))]
     for (iv in 1:nv) {
-      dimnames(xtsout)[[2]][(iv-1)*(nl + 1) + 1:(nl+1)] <- paste(vnames[iv], c("", as.character(lags)), sep="")
+      dimnames(xtsout)[[2]][(iv-1)*nl + 1:nl] <- paste(vnames[iv], as.character(lags), sep="")
     }
   } else {
     for (iv in 1:nv) {
@@ -35,8 +36,8 @@ lagts <- function(xts,lags) {
         }
       }
     }
-    namecount <- nv
-    dimnames(xtsout)[[2]][1:nv] <- vnames
+    xtsout <- xtsout[ , -(1:nv)] # getting rid of dummy initialization
+    namecount <- 0
     for (iv in 1:nv) {
       if (!is.null(lags[[iv]])) {
         lvec <- lags[[iv]]

@@ -1,13 +1,17 @@
-tsregPrior <- function(vlist, lags=rep(0, length(vlist)), ldv=1, scale, 
-                       bbar=c(1,rep(0,length(unlist(lags)-1))), smooth, damp, vmeans, erratio) { 
+tsregPrior <- function(vlist, dvname="y", lags=rep(0, length(vlist)), ldv=1, scale, 
+                       bbar=NULL, smooth, damp, vmeans, erratio) { 
     ##     Creates dummy observations to implement a prior and provides the normalizing factor
     ##     to allow the likelihood with dummy observations to be treated as a posterior pdf.
     ## 
     ## Args:
-    ##    vlist:: character vector of names of the variables
+    ##    vlist:: character vector of names of the rhs variables
+    ##    dvname: name of dependent variable
     ##    lags:   how many lags of each variable.  Can be a single integer, if all variables appear
     ##            with the same number of lags, or a vector of integers, one for each variable
     ##            [Note:  Should smooth and damp also vary with iv if lags can do so?]  
+    ##            Note that this program doesn't care whether, when lags[iv]=3, this means that
+    ##            lags 1 to 3, 0 to 2, or 10 to 12 are included.  The variables are named as if
+    ##            lagss all start with lag 0, so 
     ##    ldv:    which element of vlist is appearing as a lagged dependent variable.  Default is the first. 
     ##            If there is no lagged dependent variable, ldv=0.
     ##   scale:   a vector, of the length of vlist plus 1, of reasonable guesses as to the standard deviations of 
@@ -15,7 +19,8 @@ tsregPrior <- function(vlist, lags=rep(0, length(vlist)), ldv=1, scale,
     ##            other parameters, which should be 1.0, or smaller if guesses of variable means in vmeans are
     ##            quite uncertain.
     ##   bbar:    mean of the regression coefficient vector.  Default of 1 followed by zeros is reasonable
-    ##            when ldv=1 and this is a regression with a persistent dependent variable.
+    ##            when ldv=1 and this is a regression with a persistent dependent variable.  Last element
+    ##            is prior mean of constant (usually 0).
     ##   smooth:  The rate at which the scale of dummy observations drops as we go from low to
     ##            high frequencies.  Should usually be in (0,1).  If close to zero, prior on the 
     ##            variable's effect is stronger at low than at high frequencies.  With smooth=1
@@ -26,10 +31,10 @@ tsregPrior <- function(vlist, lags=rep(0, length(vlist)), ldv=1, scale,
     ##   erratio: ratio of error variance from parameter uncertainty to error variance from the
     ##            residual for the first sample observation. Keeping this constant across models of
     ##            different size avoids a prior that implies big models should fit much better.
-    ##   vmeans:  The first row of the sample X matrix, including lags, but not a constant.  Or,
-    ##            a vector of that length with a guess for the mean of each variable in the position
-    ##            of each lagged value of that variable.  Used for setting prior on the constant.
-    ##
+    ##   vmeans:  A priori means for the variables.  They are used in forming the last dummy observation,
+    ##            connecting the constant to the other coefficients.  Could be set as sample means of initial conditions.
+    ##            Using full sample means is problematic: the contamination of prior by data may not be a big
+    ##            problem for stationary data, but could be substantially distorting for non-stationary data.
     ## Returns:   A list with components:
     ##   X:       dummy observations implementing the prior.  Note that the last column is the
     ##            "constant", which will *not* be a column of ones.  Generating the sample
@@ -60,10 +65,15 @@ tsregPrior <- function(vlist, lags=rep(0, length(vlist)), ldv=1, scale,
         js <- js + lags[iv]
     }
     X[ ,  nx+1] <- 0
-    X[nx+1, ] <- c(vmeans, 1) * scale[nv + 1]
-    erratio0 <- solve(t(X), c(vmeans, 1))
+    vmeans <- c(rep(vmeans, times=lags), 1)
+    X[nx+1, ] <- vmeans * scale[nv + 1]
+    erratio0 <- solve(t(X), vmeans)
     erratio0 <- sum(erratio0)^2
-    X <- sqrt(erratio/erratio0) * X
+    X <- sqrt(erratio0/erratio) * X
     w <- -.5 * determinant(crossprod(X))$modulus
-    return(list(X=X, w=w, scalefac=sqrt(erratio/erratio0), call=match.call()))
+    if (is.null(bbar)) bbar <- c(1, rep(0,nx))
+    y <- X %*% bbar
+    y <- matrix(y, ncol=1, dimnames=list(NULL, dvname))
+    dimnames(X)[[2]] <- c(rep(vlist, times=lags), "const")           # no indication of lags in names
+    return(list(y=y, X=X, w=w, scalefac=sqrt(erratio/erratio0), call=match.call()))
 }

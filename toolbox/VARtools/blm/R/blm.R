@@ -50,7 +50,9 @@ blm <- function(x, y, xp, yp, dfp=1, scalepv) {
   lsout <- lm.fit(X, Y)
   postdf <- (N-k)/2 + dfp
   postssr <- sum(lsout$residuals^2)
-  lmdd <- lgamma(postdf) - lgamma(dfp) + dfp * log(scalepv) - postdf * log(.5 * postssr) - (postdf + 1) * log(2 * pi) + .5 * determinant(crossprod(xp))$modulus
+  lmdd <- lgamma(postdf) - lgamma(dfp) + dfp * log(scalepv) - postdf * log(.5 * postssr + scalepv)
+                                - (postdf - dfp) * log(2 * pi) + .5 * determinant(crossprod(xp))$modulus
+                                - .5 * determinant(crossprod(X))$modulus
   vcv <- solve(crossprod(qr.R(lsout$qr))) * postssr/(2 * postdf)
   sdcoeff <- sqrt(diag(vcv))
   return(list(lsout=lsout, postdf=postdf, postssr=postssr, lmdd=lmdd, vcv=vcv, sdcoeff=sdcoeff))

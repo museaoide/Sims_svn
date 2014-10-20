@@ -47,7 +47,12 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   nx <- dim(xdata)[2]
   ## 2013.8 fix:  added urprior here, set lambda and mu to NULL in rfvar3 call, so
   ## prior dummies treated correctly in normalizing the prior.
-  vp <- varprior(nv,nx,lags,mnprior,vprior, urprior=list(lambda=lambda, mu=mu))
+  if (is.null(ic)) {
+    ybar <- apply(ydata[1:lags, ], 2, mean)
+  } else {
+    ybar <- ic
+  }
+  vp <- varprior(nv,nx,lags,mnprior,vprior, urprior=list(lambda=lambda, mu=mu), ybar=ybar)
   ## vp$: ydum,xdum,pbreaks
   var = rfvar3(ydata=rbind(ydata, vp$ydum), lags=lags, xdata=rbind(xdata,vp$xdum), breaks=matrix(c(breaks, T, T + vp$pbreaks), ncol=1),
     const=FALSE, lambda=NULL, mu=NULL, ic=ic) # const is FALSE in this call because ones alread put into xdata

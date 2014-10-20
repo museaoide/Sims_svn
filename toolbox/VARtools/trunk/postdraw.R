@@ -5,7 +5,7 @@ postdraw <- function(vout,n,nosigprior=FALSE){
 ## n:		Number of draws
 ## nosigprior:	If true, don't use the Jeffreys-motivated improper prior.
 ##-----------------------------------------
-## smat:        t(chol(sigma draw)).  Use directly as smat in impulsdtrf.
+## smat:        chol(sigma draw).  Transpose to use as smat in impulsdtrf.
 ## By,Bx:       coefficient draws
 ## 11/25/09 Bugnote:  If is.null(vout$Bx) (no constant, no exog vbles), code below
 ## doesn't work.  Need to fix.

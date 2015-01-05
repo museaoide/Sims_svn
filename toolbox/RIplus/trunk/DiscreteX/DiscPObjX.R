@@ -1,4 +1,4 @@
-DiscPObjX <- function(param, gy, y, U, alph) {
+DiscPObjX <- function(param, gy, y, U, alph, ...) {
   ## DiscPObj, but with useful extras returned, for use in analyzing results,
   ## not in csminwel.
   ## param:  First nx-1 are marginal probabilities on x points,
@@ -24,7 +24,7 @@ DiscPObjX <- function(param, gy, y, U, alph) {
   mm <- function(z) { matrix(z, nx, ny, byrow=TRUE) }
   sy <- function(z) {apply( z, MAR=1, FUN=sum)}
   entel <- function(z) ifelse(z > 0, z * log(z), 0)
-  Umat <- outer(c(x), c(y), FUN=U)
+  Umat <- outer(c(x), c(y), FUN=U, ...)
   ## peaU <- p %*% exp(alph * Umat)
   eaU <- exp(alph * Umat)
   dimnames(eaU) <- list(weight=NULL, y=NULL)

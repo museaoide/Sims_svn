@@ -1,4 +1,4 @@
-DiscPObj <- function(param, gy, y, U, alph) {
+DiscPObj <- function(param, gy, y, U, alph, ...) {
   ## param:  First nx-1 are marginal probabilities on x points,
   ##         remainder are the positions of the discrete x points.
   ## gy:     The marginal probabilities on y
@@ -22,7 +22,7 @@ DiscPObj <- function(param, gy, y, U, alph) {
   mm <- function(z) { matrix(z, nx, ny, byrow=TRUE) }
   sy <- function(z) {apply( z, MAR=1, FUN=sum)}
   entel <- function(z) ifelse(z > 0, z * log(z), 0)
-  Umat <- outer(c(x), c(y), FUN=U)
+  Umat <- outer(c(x), c(y), FUN=U, ...)
   ## peaU <- p %*% exp(alph * Umat)
   eaU <- exp(alph * Umat)
   dimnames(eaU) <- list(weight=NULL, y=NULL)

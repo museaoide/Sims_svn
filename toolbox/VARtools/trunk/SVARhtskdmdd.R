@@ -14,8 +14,15 @@ SVARhtskdmdd <- function(ydata,lags,xdata=NULL, const=TRUE, A0, lmd, Tsigbrk, br
 ###               as new initial conditions, not data points for the fit.
 ### lambda:       weight on the co-persistence prior dummy observation.  (5 is reasonable)
 ###               lambda>0 => x variables included; lambda<0 => x variables excluded;
-### mnprior       see vprior() comments
-### urprior:      
+### mnprior$tight:Overall tightness of Minnesota prior. 1/tight ~ own lag std dev
+### mnprior$decay:Standard deviations of lags shrink as lag^(-decay)
+### vprior$sig:   Vector of prior modes for square roots of diagonal elements of r.f. covariance matrix
+### vprior$w:     Weight on prior on vcv.  1 corresponds to "one dummy observation" weight
+###                   vprior$sig is needed
+###                   to scale the Minnesota prior, even if the prior on sigma is not used itself.
+###                   Set vprior$w=0 to achieve this.
+###                   mnprior and vprior.w can each be set to NULL, thereby eliminating the corresponding
+###                   dummy observations.
 ### train:        If non-zero, this is the point in the sample at which the
 ###               "training sample" ends.  Prior x likelihood to this point is weighted to
 ###               integrate to 1, and therefore is treated as if it were itself the prior.

@@ -15,11 +15,11 @@ DiscPObjX <- function(param, gy, y, U, alph, ...) {
   ## 18.1.10, verified results vs. numerical gradients on nx=4 problem
   ##
   require("tensor")
-  nx <- (length(param)+1)/2
   ny <- length(gy)
+  nx <- (length(param) + 1) / 2
   p <- param[1:(nx - 1)]
   p <- matrix(c(p, 1 - sum(p)), 1,nx, dimnames=list(NULL, p=NULL))
-  x <- matrix(param[nx:(2 * nx - 1)], 1, nx, dimnames=list(NULL, x=NULL))
+  x <- matrix(param[nx - 1 + (1:nx)], 1, nx, dimnames=list(NULL, x=NULL))
   if ( any(p < 0) ) return(1e20)
   mm <- function(z) { matrix(z, nx, ny, byrow=TRUE) }
   sy <- function(z) {apply( z, MAR=1, FUN=sum)}

@@ -24,11 +24,11 @@ restrictVAR <- function(vout, type=c("3", "KF","SVhtskd"), rmat=NULL, yzrone=NUL
         bvw <- vout
         vout <- bvw$vout$var
     }
-    ncf <- dim(vout$By)[2] * dim(vout$By)[3] + dim(vout$Bx)[2]
     neq <- dim(vout$By)[1]
     ny <- dim(vout$By)[2]
     lags <- dim(vout$By)[3]
     nx <- dim(vout$Bx)[2]
+    ncf <- ny * lags + nx
     if (is.null(rmat)) {
         rmat <- matrix(0, 0, ncf *neq)
     }
@@ -60,7 +60,6 @@ restrictVAR <- function(vout, type=c("3", "KF","SVhtskd"), rmat=NULL, yzrone=NUL
     }
     ## Note that t(rv) spans the same space as rmat, so the restrictiosn are crossprod(v,coeffs)=gamma
     ## rv <- svdr$v    #2013.5.9
-    if (length(type) > 1) type <- type[1]
     T <- if (type == "3" || type == "SVhtskd") dim(vout$u)[1] else dim(vout$fcsterr)[1]
     if (type == "3") {
         sig <- cov(vout$u)

@@ -13,7 +13,7 @@ SigInitLH <- function(y0, By, Bx, T, Omega, mu0, Sig0, Tfac=1, ct=FALSE) {
   scp <- schur(siout$P)
   scvd <- schur(siout$v)
   if (any(abs(Im(diag(scvd$T))) > sqrt(.Machine$double.eps))) warning("Big imaginary components of v")
-  if (any(abs(scvd$T) < 0)) warning("v not psd")
+  if (any(Re(diag(scvd$T)) < 0)) warning("v not psd")
   ldet <- sum(log(abs(diag(scp$T))))
   ldet <- ldet + .5*sum(log(diag(Re(scvd$T)))) #scvd$T should have positive real diag, except for numerical fuzz.
   llh <- -.5 * t(Conj(w0)) %*% solve(siout$vdiag,  w0) - ldet - .5*log(2*pi)*n

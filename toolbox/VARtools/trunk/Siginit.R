@@ -77,13 +77,13 @@ SigInit <- function(A, Omega, T, mu0=1, Sig0, Tfac=1, ct=FALSE, ssndx=1) {
   if(nmid == 0) {
     wta <- NULL
   } else {
-  if (ct) {
-    wt <- wtfcn((Re(diag(sca$D[midx, midx, drop=FALSE])) - div[1]) / (div[2] - div[1]))
-  } else {
-    wt <- wtfcn((abs(diag(sca$D[midx,midx, drop=FALSE])) - div[1]) / (div[2] - div[1]))
+    if (ct) {
+      wt <- wtfcn((Re(diag(sca$D[midx, midx, drop=FALSE])) - div[1]) / (div[2] - div[1]))
+    } else {
+      wt <- wtfcn((abs(diag(sca$D[midx,midx, drop=FALSE])) - div[1]) / (div[2] - div[1]))
+    }
+    wta <- c(sqrt(pmin(wt,0)))                # c() to strip dimension attribute
   }
-  wta <- c(sqrt(pmin(wt,0)))                # c() to strip dimension attribute
-}
   wta <- c(rep(1,nlowmid - nmid), wta, rep(0, n - nlowmid))
   wtb <- sqrt(pmax(1-wta,0))
   ## muout <- sca$P %*% (wtb^2 * sca$Pinv %*% mu0)

@@ -17,7 +17,10 @@ DiscPObjXmv <- function(param, gy, y, U, alph, ...) {
   p <- param[2:nx]
   p <- matrix(c(p, 1 - sum(p)), 1, nx, dim=list(NULL, p=NULL))
   x <- matrix(param[nx + (1:(nx*mx))], nx, mx, dimnames=list(NULL, x=NULL))
-  if ( any(p < 0) ) return(1e20)
+  if ( any(p < 0) ) {
+    print(paste("p < 0.  min", min(p)))
+    p <- pmax(p,0)
+  }
   mm <- function(z) { matrix(z, nx, ny, byrow=TRUE) }
   sy <- function(z) {apply( z, MAR=1, FUN=sum)}
   entel <- function(z) ifelse(z > 0, -z * log(z), 0)
@@ -42,9 +45,10 @@ DiscPObjXmv <- function(param, gy, y, U, alph, ...) {
   fplus <- f[ipplus, ,drop=FALSE]
   pplus <- pnew[ipplus]
   roweight <- sy(eaUh)[ipplus]
-  ygivenx <- c(1/roweight) * eaUh[ipplus, ,drop=FALSE]
-  obj <- sum(f  * Umat ) - (1/alph) * pplus %*% sy(entel(ygivenx)) # + (1/alpha) * sum(gy * log(gy)) (doesn't change with param)
+  ygivenx <- matrix(0, nx, ny)
+  ygivenx[ipplus, ] <- c(1/roweight) * eaUh[ipplus, ,drop=FALSE]
+  obj <- sum(f  * Umat ) - (1/alph) * pnew %*% sy(entel(ygivenx)) # + (1/alpha) * sum(gy * log(gy)) (doesn't change with param)
   ## obj <- -obj                           #as input to minimizer
-  info = sum(f[f>0] * log(f[f>0])) - sum(log(pnew[pnew > 0])*pnew[pnew > 0]) - sum(log(gy[gy>0])*gy[gy>0])
+  info = -sum(entel(f)) + sum(entel(pnew)) + sum(entel(gy))
   return(list(obj=obj, pnew=pnew, ygivenx=ygivenx, h=h, f=f, info=info, EU = sum(f * Umat)))
 }

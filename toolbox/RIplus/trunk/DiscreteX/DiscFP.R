@@ -12,7 +12,7 @@ DiscFP <- function(param, gy, y, U, xfcn, alph, nit=10, crit=1e-7, ...) {
     pold <- c(pold, 1 - sum(pold))
     pnew <- Dout$pnew
     ## xnew <- Dout$ygivenx %*% y #-------xnew solves E[Dxu %*% y = 0] This is for UmvTrack
-    xnew <- xfcn(Dout$ygivenx, y, U)
+    xnew <- xfcn(Dout$ygivenx, y)
     if ( length(pnew) != length(pold)) print(itct)
     screp <- sum(abs(c(pnew - pold, xnew - param[-(1:nx)])))
     param <- c(nx, pnew[-nx], xnew)

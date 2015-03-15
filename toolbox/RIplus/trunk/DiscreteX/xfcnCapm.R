@@ -1,6 +1,6 @@
 xfcnCapm <- function(ygivenx, y) {
-  gamma <- .0  # penalty on leverage 
-  require(tensor)
+  gamma <- .001  # penalty on leverage 
+  ## require(tensor)
   ybar <- ygivenx %*% y
   nx <- dim(ygivenx)[1]
   ny <- dim(y)[1]

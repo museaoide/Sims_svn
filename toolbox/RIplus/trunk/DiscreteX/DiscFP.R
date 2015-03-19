@@ -17,9 +17,13 @@ DiscFP <- function(param, gy, y, U, xfcn, alph, nit=10, crit=1e-7, ...) {
     if ( length(pnew) != length(pold)) print(itct)
     screp <- sum(abs(c(pnew - pold, xnew - param[-(1:nx)])))
     param <- c(nx, pnew[-nx], xnew)
-    print(Dout$obj)
-    print(Dout$pnew)
-    print(xnew)
+    if (itct %% 100 == 0) {
+      print(itct)
+      print(screp)
+      print(Dout$obj)
+      print(Dout$pnew)
+      print(xnew)
+    }
   }
   return(list(Dout=Dout, x=xnew, itct=itct, screp=screp))
 }

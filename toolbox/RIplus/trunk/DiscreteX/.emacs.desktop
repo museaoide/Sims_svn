@@ -1,0 +1,150 @@
+;; -*- mode: emacs-lisp; coding: emacs-mule; -*-
+;; --------------------------------------------------------------------------
+;; Desktop File for Emacs
+;; --------------------------------------------------------------------------
+;; Created Sat Mar 21 23:41:07 2015
+;; Desktop file format version 206
+;; Emacs version 24.3.1
+
+;; Global section:
+(setq desktop-missing-file-warning nil)
+(setq tags-file-name nil)
+(setq tags-table-list nil)
+(setq search-ring '("sess"))
+(setq regexp-search-ring nil)
+(setq register-alist '((48 . "\n\n")))
+(setq file-name-history '("~/R/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/plotReturnCdfs.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/Ucapm.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/pxFromCsout.R" "~/R/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/toolbox/csolve/trunk/csolveNew.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/DiscPObjXmvA.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R" "~/R/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX" "~/R/toolbox/RIplus/trunk/DiscreteX"))
+
+;; Buffer section -- buffers listed in same order as in buffer list:
+(desktop-create-buffer 206
+  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/plotReturnCdfs.R"
+  "plotReturnCdfs.R"
+  'ess-mode
+  '(eldoc-mode)
+  458
+  '(339 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/pxFromCsout.R"
+  "pxFromCsout.R"
+  'ess-mode
+  '(eldoc-mode)
+  206
+  '(27 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/DiscPObjXmv.R"
+  "DiscPObjXmv.R"
+  'ess-mode
+  '(eldoc-mode)
+  1516
+  '(2023 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/cdfwtd.R"
+  "cdfwtd.R"
+  'ess-mode
+  '(eldoc-mode)
+  104
+  '(104 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/Ucapm.R"
+  "Ucapm.R"
+  'ess-mode
+  '(eldoc-mode)
+  1
+  '(nil nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/DiscZ.R"
+  "DiscZ.R"
+  'ess-mode
+  '(eldoc-mode)
+  274
+  '(1029 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix) (overwrite-mode)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/toolbox/csolve/trunk/csolveNew.R"
+  "csolveNew.R"
+  'ess-mode
+  '(eldoc-mode)
+  490
+  '(490 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  nil
+  "DiscreteX"
+  'dired-mode
+  nil
+  1177
+  '(2466 nil)
+  t
+  '("/home/chris/R/toolbox/RIplus/trunk/DiscreteX/")
+  nil)
+
+(desktop-create-buffer 206
+  "/home/chris/.emacs.d/auto-save-list/.saves-7181-casx1~"
+  ".saves-7181-casx1~"
+  'fundamental-mode
+  nil
+  769
+  '(769 nil)
+  t
+  nil
+  '((buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R"
+  "xfcnCapm.R"
+  'ess-mode
+  '(eldoc-mode)
+  2
+  '(538 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-emacs-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/DiscFP.R"
+  "DiscFP.R"
+  'ess-mode
+  '(eldoc-mode smerge-mode)
+  949
+  '(949 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  nil
+  "*info*"
+  'Info-mode
+  nil
+  1612
+  '(1 nil)
+  t
+  '("/usr/share/info/emacs-24/efaq" "Top" nil)
+  '((tab-width . 8) (buffer-file-coding-system . utf-8-unix) (case-fold-search . t)))
+

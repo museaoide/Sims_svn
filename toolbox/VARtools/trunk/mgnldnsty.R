@@ -48,7 +48,7 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   ## 2013.8 fix:  added urprior here, set lambda and mu to NULL in rfvar3 call, so
   ## prior dummies treated correctly in normalizing the prior.
   if (is.null(ic)) {
-    ybar <- apply(ydata[1:lags, ], 2, mean)
+    ybar <- apply(ydata[1:lags, , drop=FALSE], 2, mean)
   } else {
     ybar <- ic
   }
@@ -91,5 +91,5 @@ mgnldnsty <- function(ydata,lags,xdata=NULL, const=TRUE, breaks=NULL,lambda=5,mu
   } else {
       varp <- NULL
   }
-  return(list(w=w,var=var,varp=varp,prior=list(lambda=lambda,mu=mu,vprior=vprior,mnprior=mnprior)))
+  return(list(w=w,var=var,varp=varp,prior=list(lambda=lambda,mu=mu,vprior=vprior,mnprior=mnprior), call=match.call()))
 }

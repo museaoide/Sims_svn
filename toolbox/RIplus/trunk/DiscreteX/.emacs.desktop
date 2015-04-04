@@ -2,7 +2,7 @@
 ;; --------------------------------------------------------------------------
 ;; Desktop File for Emacs
 ;; --------------------------------------------------------------------------
-;; Created Sat Mar 21 23:41:07 2015
+;; Created Fri Apr  3 18:14:22 2015
 ;; Desktop file format version 206
 ;; Emacs version 24.3.1
 
@@ -12,56 +12,67 @@
 (setq tags-table-list nil)
 (setq search-ring '("sess"))
 (setq regexp-search-ring nil)
-(setq register-alist '((48 . "\n\n")))
-(setq file-name-history '("~/R/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/plotReturnCdfs.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/Ucapm.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/pxFromCsout.R" "~/R/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/toolbox/csolve/trunk/csolveNew.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/DiscPObjXmvA.R" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R" "~/R/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/toolbox/RIplus/trunk/DiscreteX" "~/R/toolbox/RIplus/trunk/DiscreteX"))
+(setq register-alist '((48 . "            ## line below is for capm version\n")))
+(setq file-name-history '("~/R/RIplus/trunk/DiscreteX/" "/home/chris/R/RIplus/trunk/DiscreteX/U2p.R" "/home/chris/R/RIplus/trunk/DiscreteX/xfcn2p.R" "/home/chris/R/RIplus/trunk/DiscreteX/DiscZ.R" "/home/chris/R/RIplus/trunk/DiscreteX/DiscZ2p.R" "~/R/RIplus/trunk/DiscreteX/" "/home/chris/R/RIplus/trunk/DiscreteX/plotReturnCdfs.R" "/home/chris/R/RIplus/trunk/DiscreteX/Ucapm.R" "/home/chris/R/RIplus/trunk/DiscreteX/pxFromCsout.R" "~/R/RIplus/trunk/DiscreteX/" "/home/chris/R/toolbox/csolve/trunk/csolveNew.R" "/home/chris/R/RIplus/trunk/DiscreteX" "/home/chris/R/RIplus/trunk/DiscreteX/xfcnCapm.R" "/home/chris/R/RIplus/trunk/DiscreteX/DiscPObjXmvA.R" "/home/chris/R/RIplus/trunk/DiscreteX/xfcnCapm.R" "~/R/RIplus/trunk/DiscreteX/" "/home/chris/R/RIplus/trunk/DiscreteX" "~/R/RIplus/trunk/DiscreteX"))
 
 ;; Buffer section -- buffers listed in same order as in buffer list:
 (desktop-create-buffer 206
-  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/plotReturnCdfs.R"
-  "plotReturnCdfs.R"
+  "/home/chris/R/RIplus/trunk/DiscreteX/DiscFP.R"
+  "DiscFP.R"
   'ess-mode
-  '(eldoc-mode)
-  458
-  '(339 nil)
+  '(eldoc-mode smerge-mode)
+  633
+  '(949 nil)
   nil
   nil
-  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
 
 (desktop-create-buffer 206
-  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/pxFromCsout.R"
-  "pxFromCsout.R"
+  "/home/chris/R/RIplus/trunk/DiscreteX/DiscZ.R"
+  "DiscZ.R"
   'ess-mode
   '(eldoc-mode)
-  206
-  '(27 nil)
+  1324
+  '(1558 nil)
   nil
   nil
-  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
 
 (desktop-create-buffer 206
-  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/DiscPObjXmv.R"
+  "/home/chris/R/RIplus/trunk/DiscreteX/xfcn2p.R"
+  "xfcn2p.R"
+  'ess-mode
+  '(eldoc-mode)
+  268
+  '(299 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-emacs-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/RIplus/trunk/DiscreteX/DiscPObjXmv.R"
   "DiscPObjXmv.R"
   'ess-mode
   '(eldoc-mode)
-  1516
+  375
   '(2023 nil)
   nil
   nil
   '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
 
 (desktop-create-buffer 206
-  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/cdfwtd.R"
-  "cdfwtd.R"
+  "/home/chris/R/RIplus/trunk/DiscreteX/U2p.R"
+  "U2p.R"
   'ess-mode
   '(eldoc-mode)
-  104
-  '(104 nil)
+  209
+  '(209 nil)
   nil
   nil
-  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
 
 (desktop-create-buffer 206
-  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/Ucapm.R"
+  "/home/chris/R/RIplus/trunk/DiscreteX/Ucapm.R"
   "Ucapm.R"
   'ess-mode
   '(eldoc-mode)
@@ -72,23 +83,34 @@
   '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
 
 (desktop-create-buffer 206
-  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/DiscZ.R"
-  "DiscZ.R"
+  "/home/chris/R/RIplus/trunk/DiscreteX/plotReturnCdfs.R"
+  "plotReturnCdfs.R"
   'ess-mode
   '(eldoc-mode)
-  274
-  '(1029 nil)
+  458
+  '(339 nil)
   nil
   nil
-  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix) (overwrite-mode)))
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
 
 (desktop-create-buffer 206
-  "/home/chris/R/toolbox/csolve/trunk/csolveNew.R"
-  "csolveNew.R"
+  "/home/chris/R/RIplus/trunk/DiscreteX/pxFromCsout.R"
+  "pxFromCsout.R"
   'ess-mode
   '(eldoc-mode)
-  490
-  '(490 nil)
+  206
+  '(27 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/RIplus/trunk/DiscreteX/cdfwtd.R"
+  "cdfwtd.R"
+  'ess-mode
+  '(eldoc-mode)
+  104
+  '(104 nil)
   nil
   nil
   '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
@@ -101,41 +123,8 @@
   1177
   '(2466 nil)
   t
-  '("/home/chris/R/toolbox/RIplus/trunk/DiscreteX/")
+  '("/home/chris/R/RIplus/trunk/DiscreteX/")
   nil)
-
-(desktop-create-buffer 206
-  "/home/chris/.emacs.d/auto-save-list/.saves-7181-casx1~"
-  ".saves-7181-casx1~"
-  'fundamental-mode
-  nil
-  769
-  '(769 nil)
-  t
-  nil
-  '((buffer-file-coding-system . undecided-unix)))
-
-(desktop-create-buffer 206
-  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R"
-  "xfcnCapm.R"
-  'ess-mode
-  '(eldoc-mode)
-  2
-  '(538 nil)
-  nil
-  nil
-  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-emacs-unix)))
-
-(desktop-create-buffer 206
-  "/home/chris/R/toolbox/RIplus/trunk/DiscreteX/DiscFP.R"
-  "DiscFP.R"
-  'ess-mode
-  '(eldoc-mode smerge-mode)
-  949
-  '(949 nil)
-  nil
-  nil
-  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
 
 (desktop-create-buffer 206
   nil

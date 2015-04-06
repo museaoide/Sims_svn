@@ -1,6 +1,6 @@
 DiscZ <- function(x, nx, gy, y, U, xfcn, alph, ...) {
     ##
-    ## xfcn:   A function of ygive nx (cond'l prob matrix), y and U returning optimal x
+    ## xfcn:   A function of ygivenx (cond'l prob matrix), y and U returning optimal x
     ## There is a special version for CapM, because need to impose that rows of x sum to one in that model
     ## Must be able to evaluate with x a matrix, with each col an arg
     require(abind)
@@ -19,7 +19,7 @@ DiscZ <- function(x, nx, gy, y, U, xfcn, alph, ...) {
     ## sxold <- array(sxold, c(nx , 1, nargcol))
     ## xold <- abind(xold, sxold, along=2)
     ## else
-    xold <- array(x, c(nx, ny, nargcol))
+    xold <- array(x[nx:(nx * ny - 1), ], c(nx, ny, nargcol))
     pnew <- matrix(0, nx, nargcol)
     xnew <- array(0, c(nx, ny, nargcol))
     screp <- matrix(1e20, dim(x)[1], nargcol)
@@ -32,9 +32,9 @@ DiscZ <- function(x, nx, gy, y, U, xfcn, alph, ...) {
             ## xnew <- Dout$ygivenx %*% y #-------xnew solves E[Dxu %*% y = 0] This is for UmvTrack
             xnew[ , , icol] <- xfcn(Dout$ygivenx, y)
             ## if !capm
-            screp[ , icol] <- c((pnew[-nx , icol] - pold[-nx , icol]), xnew - xold)
+            screp[ , icol] <- c((pnew[-nx , icol] - pold[-nx , icol]), xnew[ , , icol] - xold[ , , icol])
             ## else
-            ## screp[ , icol] <- c((pnew[-nx , icol] - pold[-nx , icol]), (xnew - xold)[ ,1:(ny-1),] )
+            ## screp[ , icol] <- c((pnew[-nx , icol] - pold[-nx , icol]), (xnew - xold)[ ,1:(ny-1), icol] )
             ## fi
             ##otherwise leave the 1e20 values in place in that column
         }

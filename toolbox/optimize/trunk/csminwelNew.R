@@ -37,7 +37,7 @@ csminwelNew <- function(fcn,x0,H0,...,grad=NULL,crit=1e-7,nit,Verbose=TRUE,Long=
       g <- gbadg$g
       badg <- gbadg$badg
     } else {
-      badg <- false
+      badg <- FALSE
       ## This is dangerous if you use a saved g file and it
       ## turns out to have been "bad".  We used to set badg to TRUE if
       ## grad contained any zeros.

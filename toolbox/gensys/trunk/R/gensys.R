@@ -11,12 +11,24 @@ gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
     ## If div is omitted from argument list, a div>1 is calculated.
     ## eu(1)=1 for existence, eu(2)=1 for uniqueness.  eu=[-2,-2] for coincident zeros.
     ## By Christopher A. Sims 2/24/2004, from earlier matlab code of same author.
+    require("QZ")
     eu <- c(0,0)
     realsmall <- 1e-7
     fixdiv <- (div>0)
     n <- dim(g0)[1]
     nshock <- if (is.matrix(psi)) dim(psi)[2] else if (is.null(psi)) 0 else 1
-    qzl <- qz(g0,g1)
+    qzl <- qz(g0 + 0+0i, g1 + 0+0i)
+    ## The 0+0i terms are necessary to make the arguments of qz complex.  The
+    ## QZ package qz() returns the real generalized Schur, with 2x2 real blocks
+    ## on the diagonal corresponding to complex roots, when its arguments
+    ## are real, but the full complex QZ for complex arguments.
+    ## Lines below have also been adjusted to use the qz() from the QZ package
+    ## The original cas qz wrapper delivers a list with elements a, b, q, z, gev
+    ## and rc.  These correspond to a=S, b=T, q=Q, z=Z, 
+    ## matrix(c(ALPHA,BETA), ncol=2) = gev, and INFO=rc.
+    ##-------- Translation from QZ package to qz ----------------
+    qzl <- with(qzl, list(a=S, b=T, q=Q, z=Z, gev=matrix(c(ALPHA,BETA),ncol=2), rc=INFO))
+    ##-----------------------------------------------------------
     zxz <- any((abs(diag(qzl$a))<realsmall) & (abs(diag(qzl$b))<realsmall))
     if (zxz) {
       "Coincident zeros.  Indeterminacy and/or nonexistence.\n"

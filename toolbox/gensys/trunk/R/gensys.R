@@ -1,16 +1,45 @@
+#' gensys
+#'
+#' Solves multivariate linear rational expectations models
+#'
+#' @param g0,g1,c0,psi,pi matrices that form the system to be solved
+#' @param div Roots as large as or larger than this in absolute value are
+#' suppressed in the solution.  The \code{div=-1} default value allows
+#' roots with unit absolute value and excludes those larger.
+#' 
+#' @details
+#' System given as
+#'     \deqn{g0 y(t) = g1 y(t-1) + c0 + psi z(t) +
+#'          pi eta(t)}{g0 %*% y(t) = g1 %*% y(t-1) + c0 +
+#'             psi %*% z(t) + pi %*% eta(t)},
+#' with \code{z} an exogenous variable process and \code{eta} being
+#' endogenously determined one-step-ahead expectational errors.
+#'
+#' @return
+#' A list with elements
+#' \value{
+#'   \item{G1, C, impact, ywt, fmat, fwt, loose} matrices forming the solution
+#'      system
+#'   \item{eu} vector of length 2, with values one for TRUE, answering the
+#'      questions Existence? and Uniqueness"
+#'   \item{gev} Ratio of second column to first column of this matrix is the
+#'      set of generalized eigenvalues of the system.
+#'   }
+#' Returned system is
+#'       \deqn{y(t) = G1  y(t-1) + C + impact  z(t) +
+#'           ywt \sum_{s=1}1^\infty fmat^s  fwt z(t+s)
+#'              + loose eta(t)}{y(t)=G1 %*% y(t-1) + C + impact %*% z(t) +
+#'           ywt %*% inv(I - fmat %*% inv(L)) %*% fmat %*% fwt %*% z(t+1)
+#'              + loose %*% eta }
+#' If z(t) is i.i.d., the term involving \code{ywt, fmat} and \code{fwt}
+#' drops out.  If the solution is unique (eu[2]==1) there is no "loose" term.
+#' Otherwise loose characterizes the dimensions along which there is
+#' non-uniqueness.
+#' 
+#' eu(1)=1 for existence, eu(2)=1 for uniqueness.  eu=[-2,-2] for coincident zeros.
+#' By Christopher A. Sims 2/24/2004, from earlier matlab code of same author.
 gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1)
   {
-    ##System given as
-    ##        g0*y(t)=g1*y(t-1)+c0+psi*z(t)+pi*eta(t),
-    ##with z an exogenous variable process and eta being endogenously determined
-    ##one-step-ahead expectational errors.  Returned system is
-    ##       y(t)=G1*y(t-1)+C+impact*z(t)+ywt*inv(I-fmat*inv(L))*fmat*fwt*z(t+1) + loose*eta .
-    ## If z(t) is i.i.d., the term involving fmat and fwt drops out.
-    ## If the solution is unique (eu[2]==1) there is no "loose" term.  Otherwise
-    ## loose characterizes the dimensions along which there is non-uniqueness.
-    ## If div is omitted from argument list, a div>1 is calculated.
-    ## eu(1)=1 for existence, eu(2)=1 for uniqueness.  eu=[-2,-2] for coincident zeros.
-    ## By Christopher A. Sims 2/24/2004, from earlier matlab code of same author.
     require("QZ")
     eu <- c(0,0)
     realsmall <- 1e-7

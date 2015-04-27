@@ -54,7 +54,7 @@ qzdivct <- function(stake,qzlist) {
         xdown0[k:(k+1)] <- xdown0[(k+1):k]
         xdown[k:(k+1)] <- xdown[(k+1):k]
         gev <- root[k:(k+1), ]
-        print(rbind(cbind(gevOld, gevOld[ , 2]/gevOld[, 1]), cbind(gev, gev[, 2]/gev[, 1])))
+        # print(rbind(cbind(gevOld, gevOld[ , 2]/gevOld[, 1]), cbind(gev, gev[, 2]/gev[, 1])))
       }
     }
   }

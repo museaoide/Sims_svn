@@ -1,13 +1,21 @@
+#' qzdiv
+#' 
+#' Takes a list containing matrices a, b, orthonormal
+#' matrices q,z, and rearranges them so that all cases of
+#' \code{abs(b(i,i) / a(i,i)) > stake} are in lower right corner, while
+#' preserving U.T. and orthonormal properties and \code{q %*% a %*% z'} and
+#' \code{q %*% b %*% z'}. 
+#'
+#' @param stake the real number about which the roots are sorted
+#' @param qzlist the qz transform list.  If the \code{qz} from the QZ package
+#'   is used its output has to be translated as at the start of \code{gensys}
+#'   before being passed to this program.
+#' @param flip If flip is TRUE, then cases with abs(b(i,i)/a(i,i)) < stake are in lower right.
+#'
+#' @return The input list, re-ordered.
+#' @seealso \link{gensys}, \link{QZ::qz}
 qzdiv <- function (stake,qzlist, flip=FALSE)  {
   ##
-  ## Takes U.T. matrices a, b, orthonormal matrices q,z, rearranges them
-  ## so that all cases of abs(b(i,i)/a(i,i))>stake are in lower right 
-  ## corner, while preserving U.T. and orthonormal properties and qaz' and
-  ## qbz'.  
-  ##
-  ## if(flip), then cases with abs(b(i,i)/a(i,i)) < stake are in lower right
-  ## by Christopher A. Sims, 2/22/2004, based on earlier matlab code finished
-  ## 7/27/00
   a <- qzlist$a
   b <- qzlist$b
   q <- qzlist$q

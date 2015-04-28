@@ -1,13 +1,20 @@
+#' derivVec
+#'
+#' Application of \code{deriv()} to a vector
+#' 
+#' @param ex  a vector of expressions, or an \code{eqsys} object
+#' @param x    a character vector of variable names w.r.t. which the expressions
+#'             will be differentiated.  If \code{ex} is an \code{eqsys} object,
+#'             the default is for \code{x} to be the \code{vlist} attribute of
+#'             \code{ex}.  
+#' @param param  a vector of named parameter values that will be constant in repeated calls to fret (the returned function)
+#' @param xchk     Range check function.  It returns \code{FALSE} if given an x vector that is outside the domain of definition of \code{ex}.
+#'-------------------
+#' @return fret,   a function that when evaluated at a numerical \code{x}, 
+#'           returns the vector of expression values, but also, as \code{attr(value, "grad")}, the gradient matrix
+#'           It uses the fixed \code{param} values set in the call to \code{derivVec}.
+#' 
 derivVec <- function(ex, x=attr(ex,"vlist"), param=vector("numeric",0), xchk=function(z){TRUE}) {
-  ##    ex:    a vector of expressions, or an eqsys object
-  ##     x:    a character vector of variable names w.r.t. which the expressions will be differentiated
-  ##           If ex is an eqsys object, the default is for x to be the vlist attribute of ex.  
-  ## param:    a named vector of parameter values that will be constant in repeated calls to fret (the returned function)
-  ## xchk:     Range check function.  It returns FALSE if given an x vector that is outside the domain of definition of ex.
-  ##-------------------
-  ##  fret:    returned value; a function that when evaluated at a numerical x, 
-  ##           returns the vector of expression values, but also, as attr(value, "grad"), the gradient matrix
-  ##           It uses the fixed param values set in the call to derivVec.
   nq <- length(ex)
   nv <- length(x)
   param <- param #to put param into this namespace, so it does not need to be in every call.

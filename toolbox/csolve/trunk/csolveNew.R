@@ -1,30 +1,47 @@
+#' csolve
+#'
+#' Solves a nonlinear equation system
+#' 
+#' @param FUN  A function with vector argument \code{x} or (when numerical
+#'             derivatives are used) with matrix argument \code{x}.
+#'             The number of rows in x matches the number of rows in the return
+#'             value.  For numerical derivatives, the number of columns in \code{x} is
+#'             the number of distinct argument vectors at which \code{FUN} is evaluated.
+#' @param x  initial value for FUN's argument.
+#' @param gradfun The function called to evaluate the gradient matrix.  If this
+#'           is NULL (the default), a numerical gradient is used instead.  If
+#'           it is identical to \code{FUN}, then \code{FUN} returns a value \code{v}
+#'           with \code{attr(v,"grad")} the gradient matrix.
+#' @param crit   If the sum of absolute values that \code{FUN} returns is less than this,
+#'           the equation is solved.
+#' @param itmax  The solver stops when this number of iterations is reached, with \code{rc=4}
+#' @param ...   in this position the user can place any number of additional arguments, all
+#'           of which are passed on to \code{FUN} and \codee{gradfun} (when it is non-empty) as a list of 
+#'           arguments following \code{x}.
+#' -------------------------------------------------------------------
+#'           Arguments below this usually can be left at defaults.
+#' @param verbose  If FALSE, the amount of output during iterations is cut to zero.
+#' @param long   Set to TRUE to suppress printout of \code{x} and \code{f} at each iteration.
+#'               (No effect if verbose=FALSE)
+#'           Useful when x and FUN are long vectors.
+#' @param alpha Tolerance on rate of descent.  The algorithm may produce search
+#'              directions nearly orthogonal to the gradient, and hence nearly
+#'              zero directional derivative.  Smaller alpha allows closer
+#'              approach to orthogonality.
+#' @param delta  difference interval in (cheap, forward-difference) numerical
+#'               derivative.  Ignored if gradfun non-NULL.
+#'
+#' @return \describe{
+#'             \item{x} solution vector
+#'             \item{f} function value vector at solution
+#'             \item{itcount} how many iterations did it take
+#'             \item{retcode}    0 means normal solution, 1 and 3 mean no
+#'                           solution despite extremely fine adjustments
+#'                          in step length (very likely a numerical problem,
+#'                        or a discontinuity). 4 means \code{itmax} termination.
+#'          }
+#' @export
 csolve <- function(FUN,x,...,gradfun=NULL,crit=1e-7,itmax=20,verbose=TRUE, vverbose=FALSE, alpha=1e-3,delta=1e-6,long=FALSE) {
-### FUN:      A function with vector argument x or (when numerical derivatives are used) with matrix argument x.
-###           the number of rows in x matches the number of rows in the return value.  For numerical derivatives,
-###           the number of columns in x is the number of distinct argument vectors at which FUN is evaluated.
-###           **************************************
-### x:        initial value for FUN's argument.
-### gradfun:  the function called to evaluate the gradient matrix.  If this
-###           is NULL (the default), a numerical gradient is used instead.  If it is identical to
-###              FUN, then FUN returns a value v with attr(v,"grad") the gradient matrix.
-### crit:     if the sum of absolute values that FUN returns is less than this,
-###           the equation is solved.
-### itmax:    the solver stops when this number of iterations is reached, with rc=4
-### ...:      in this position the user can place any number of additional arguments, all
-###           of which are passed on to FUN and gradfun (when it is non-empty) as a list of 
-###           arguments following x.
-### -------------------------------------------------------------------
-###           Arguments below this usually can be left at defaults.
-### verbose:  If set to FALSE, the amount of output during iterations is cut to zero.
-### long:     Set to TRUE to suppress printout of x and f at each iteration. (No effect if verbose=FALSE)
-###           Useful when x and FUN are long vectors.
-### alpha:    Tolerance on rate of descent.  The algorithm may produce search directions nearly
-###           orthogonal to the gradient, and hence nearly zero directional derivative.  Smaller
-###           alpha allows closer approach to orthogonality.
-### delta:    difference interval in (cheap, forward-difference) numerical derivative.  Ignored if gradfun non-NULL.
-### rc:       0 means normal solution, 1 and 3 mean no solution despite extremely fine adjustments
-###           in step length (very likely a numerical problem, or a discontinuity). 4 means itmax
-###           termination.
 ### -------------------------------------------------------------------
 ### modified 12/23/05 to allow everything to be complex-valued.  Modifications only lightly tested.
 ###------------ analyticg --------------

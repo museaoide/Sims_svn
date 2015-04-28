@@ -1,4 +1,6 @@
 #' qzdiv
+#'
+#' Sort the roots in a qz decomposition around a value
 #' 
 #' Takes a list containing matrices a, b, orthonormal
 #' matrices q,z, and rearranges them so that all cases of
@@ -7,13 +9,15 @@
 #' \code{q %*% b %*% z'}. 
 #'
 #' @param stake the real number about which the roots are sorted
-#' @param qzlist the qz transform list.  If the \code{qz} from the QZ package
-#'   is used its output has to be translated as at the start of \code{gensys}
-#'   before being passed to this program.
-#' @param flip If flip is TRUE, then cases with abs(b(i,i)/a(i,i)) < stake are in lower right.
+#' @param qzlist the qz transform list.  The \code{qz} from the QZ package
+#'   uses different names in its output list, which have to be translated
+#'   as at the start of \code{gensys} before being passed to this program.
+#' @param flip If flip is TRUE, then cases with abs(b(i,i)/a(i,i)) < stake
+#' are in lower right.
 #'
-#' @return The input list, re-ordered.
-#' @seealso \link{gensys}, \link{QZ::qz}
+#' @return The input list, with all matrices re-ordered.
+#' @seealso \code{\link{gensys}}, \code{\link{QZ::qz}}, \code{\link{qzswitch}}
+#' @export 
 qzdiv <- function (stake,qzlist, flip=FALSE)  {
   ##
   a <- qzlist$a

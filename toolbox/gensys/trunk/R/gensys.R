@@ -15,16 +15,6 @@
 #' with \code{z} an exogenous variable process and \code{eta} being
 #' endogenously determined one-step-ahead expectational errors.
 #'
-#' If the QZ package is loaded and its \code(qz()) not overwritten, its
-#' version of \code{qz()} is used. If another
-#' version of \code{qz} is loaded, that is used.  Otherwise the QZ package
-#' is loaded (if it is installed).  The gensys package, when loaded with
-#' \code{library()}, loads a local version, not the QZ package version.
-#' The local version requires that LAPACK be available, and will use a local
-#' optimized LAPACK if available.  It may not compile on non-Linux computers.
-#' The QZ version also uses LAPACK, and is available as a binary for Windows
-#' and Mac.  Possibly runs slower on Linux machines with optimized BLAS.
-#' 
 #' @return
 #' A list with elements
 #' \describe{
@@ -45,24 +35,18 @@
 #' drops out.  If the solution is unique (eu[2]==1) there is no "loose" term.
 #' Otherwise loose characterizes the dimensions along which there is
 #' non-uniqueness.
+#' @export
+#' @import QZ
 #' 
 gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1) {
-    if(!exists(qz, mode="function")) {
-        require("QZ")
-        QZqz <- TRUE
-    } else {
-          QZqz <- names(formals(qz))[[1]] == "A"
-      }
     eu <- c(0,0)
     realsmall <- 1e-7
     fixdiv <- (div>0)
     n <- dim(g0)[1]
     nshock <- if (is.matrix(psi)) dim(psi)[2] else if (is.null(psi)) 0 else 1
-    if(QZqz) {
-        g0 <- g0 + 0+0i
-        g1 <- g1 + 0+0i
-    }
-    qzl <- qz(g0, g1)
+    g0 <- g0 + 0+0i
+    g1 <- g1 + 0+0i
+    qzl <- QZ::qz(g0, g1)
     ## The 0+0i terms are necessary to make the arguments of qz complex.  The
     ## QZ package qz() returns the real generalized Schur, with 2x2 real blocks
     ## on the diagonal corresponding to complex roots, when its arguments
@@ -70,11 +54,9 @@ gensys <- function(g0, g1, c0=matrix(0,dim(g0)[1],1), psi, pi, div=-1) {
     ## Lines below have also been adjusted to use the qz() from the QZ package
     ## The original cas qz wrapper delivers a list with elements a, b, q, z, gev
     ## and rc.  These correspond to a=S, b=T, q=Q, z=Z, 
-    ## matrix(c(ALPHA,BETA), ncol=2) = gev, and INFO=rc.
-    ##-------- Translation from QZ package qz out put to local qz ----------------
-    if (QZqz) {    
-       qzl <- with(qzl, list(a=S, b=T, q=Q, z=Z, gev=matrix(c(ALPHA,BETA),ncol=2), rc=INFO))
-   }
+    ## gev=matrix(c(ALPHA,BETA), ncol=2), and rc=INFO.
+    ##-------- Translation from QZ package qz output to local qz ----------------
+    qzl <- with(qzl, list(a=S, b=T, q=Q, z=Z, gev=matrix(c(ALPHA,BETA),ncol=2), rc=INFO))
     ##-----------------------------------------------------------
     zxz <- any((abs(diag(qzl$a))<realsmall) & (abs(diag(qzl$b))<realsmall))
     if (zxz) {

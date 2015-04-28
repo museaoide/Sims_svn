@@ -1,13 +1,22 @@
+#' qzswitch
+#'
+#' Takes U.T. matrices a, b, orthonormal matrices q,z, interchanges 
+#' diagonal elements i and i+1 of both a and b, while maintaining 
+#' qaz' and qbz' unchanged.  If diagonal elements of a and b 
+#' are zero at matching positions, the returned a will have zeros at both 
+#' positions on the diagonal.  This is natural behavior if this routine is used 
+#' to drive all zeros on the diagonal of a to the lower right, but in this case 
+#' the qz transformation is not unique and it is not possible simply to switch 
+#' the positions of the diagonal elements of both a and b.
+#' 
+#' @param i the position on the diagonal to be switched with the one below
+#' @param qzlist the list of matrices from \code{qz}, translated to the local
+#'   list names as at the top of \code{gensys}.
+#' @return a list like the input, but with i and i+1 positions switched.
+#' @export
+#' @sealso \code{\link{qzdiv}, \code{\link{qz}, \code{\link{gensys}}
 qzswitch <- function(i=1,qzlist)
   {
-    ## Takes U.T. matrices a, b, orthonormal matrices q,z, interchanges 
-    ## diagonal elements i and i+1 of both a and b, while maintaining 
-    ## qaz' and qbz' unchanged.  If diagonal elements of a and b 
-    ## are zero at matching positions, the returned a will have zeros at both 
-    ## positions on the diagonal.  This is natural behavior if this routine is used 
-    ## to drive all zeros on the diagonal of a to the lower right, but in this case 
-    ## the qz transformation is not unique and it is not possible simply to switch 
-    ## the positions of the diagonal elements of both a and b. 
     realsmall <- 1e-7; 
     ##realsmall<-1e-3;
     a <- qzlist$a
@@ -15,7 +24,8 @@ qzswitch <- function(i=1,qzlist)
     q <- qzlist$q
     z <- qzlist$z
     gev <- qzlist$gev
-    q <- t(Conj(q))                     #This is needed because the code was originally for matlab, where it is q'az' that
+    q <- t(Conj(q))                     #This is needed because the code was
+                                        #originally for matlab, where it is q'az' that
                                         # is preserved.
     A <- a[i,i]; d <- b[i,i]; B <- a[i,(i+1)]; e <- b[i,(i+1)]
     g <- a[i+1,i+1]; f <- b[i+1,i+1]

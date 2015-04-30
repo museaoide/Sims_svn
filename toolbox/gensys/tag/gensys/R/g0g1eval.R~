@@ -2,33 +2,29 @@
 #'
 #' Evaluates linearized system matrices at given parameters.
 #' 
-#'   \code{x}, \code{xl}, and \code{param} must all be vectors with named
-#'   components, or lists.  When \code{x} is something like \code{flmss$xss},
-#'   where \code{flmss} is a returned value from \code{ssSolve}, the default
-#'   assignment for \code{param} works.
-#'
-#' @param dexpr   derivative expression vector, as produced by \code{g0g1d}
-#' @param    x     vector of named values (not names) of \code{x}
-#' @param   xl     vector of named values of \code{xl} 
-#' @param shock    a vector of named values of exogenous shocks (all assumed
+#'  @param dexpr   derivative expression vector, as produced by g0g1d
+#'  @param    x     vector of named values (not names) of x
+#'  @param   xl     vector of named values of xl 
+#'  @param shock    a vector of named values of exogenous shocks (all assumed
 #'     centered at 0)
-#' @param experr logical vector, TRUE for equations with expectational errors
-#' @param param  vector of values of parameters (all other symbols) in
+#'  @param experr logical vector, TRUE for equations with expectational errors
+#'  @param param  vector of values of parameters (all other symbols) in
 #'     the expressions.
-#' 
-#'
+#' @
+#' @details
+#' x, xl, and param must all be vectors with named components, or lists.
+#' When x is something like flmss$xss, where flmss is a returned value from
+#' sssolve, the default assignment for param works.
 #' @return
 #'   A list for use as inputs to \code{gensys()}, with elements
-#'   \describe{
-#'   \item{\code{g0}}{left-hand side coefficient matrix}
-#'   \item{\code{g1}}{right-hand side coefficient matrix}
-#'   \item{\code{Psi}}{matrix of coefficients on exogenous shocks}
-#'   \item{\code{Pi}}{matrix of coefficients on endogenous expectation errors}
-#'   \item{\code{param}}{parameter vector (same as input \code{param})}
-#'   }
-#'
-#' @export
-#' 
+#' \value{
+#'   \item g0 left-hand side coefficient matrix
+#'   \item g1 right-hand side coefficient matrix
+#'   \item Psi matrix of coefficients on exogenous shocks
+#'   \item Pi matrix of coefficients on endogenous expectation errors
+#'   \item param parameter vector (same as input param)
+#' }
+#'   
 g0g1eval <- function(dexpr, x, xl=as.vector(x), shock=attr(dexpr, "shock"), experr=attr(dexpr, "forward"), param=attr(x,"param")) {
     ##             
     if (is.null(names(x))) { names(x) <- dimnames(x)[[1]]}

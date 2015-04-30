@@ -1,18 +1,13 @@
 #' qzswitch
 #'
-#' reorder adjacent eigenvalues in a qz decomposition
-#' 
-#' Takes U.T. matrices \code{a, b}, orthonormal matrices \code{q,z},
-#' interchanges diagonal elements \code{i} and \code{i+1} of both
-#' \code{a} and \code{b}, while maintaining \code{q %*% a %*% t(z)}
-#' and \code{q %*% b %*% t(z)}
-#' unchanged.  If diagonal elements of \code{a} and \code{b} 
-#' are zero at matching positions, the returned \code{a} will have zeros at both 
+#' Takes U.T. matrices a, b, orthonormal matrices q,z, interchanges 
+#' diagonal elements i and i+1 of both a and b, while maintaining 
+#' qaz' and qbz' unchanged.  If diagonal elements of a and b 
+#' are zero at matching positions, the returned a will have zeros at both 
 #' positions on the diagonal.  This is natural behavior if this routine is used 
-#' to drive all zeros on the diagonal of \code{a} to the lower right, but in
-#' this case  the qz transformation is not unique and it is not possible simply
-#' to switch the positions of the diagonal elements of both \code{a}
-#' and \code{b}.
+#' to drive all zeros on the diagonal of a to the lower right, but in this case 
+#' the qz transformation is not unique and it is not possible simply to switch 
+#' the positions of the diagonal elements of both a and b.
 #' 
 #' @param i the position on the diagonal to be switched with the one below
 #' @param qzlist the list of matrices from \code{qz}, translated to the local

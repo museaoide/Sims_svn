@@ -1,11 +1,3 @@
-#' read.eqsys
-#'
-#' Reads an equation system from a file or other connection
-#'
-#' @param file Usually a quoted file name, but for a small system
-#'    could be a text connection
-#' @return an \code{eqsys} object
-#' 
 read.eqsys <- function(file) {
   data <- readLines(con=file)
   ## remove comment lines

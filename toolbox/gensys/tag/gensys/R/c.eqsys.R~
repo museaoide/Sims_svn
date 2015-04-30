@@ -1,12 +1,5 @@
-#' c.eqsys
-#' 
-#' Combine eqsys objects
-#'
-#' Stacks up the equations and merges the lists of variables, parameters and shocks
-#' @param ... eqsys objects to be combined
-#' @return the new, combined eqsys object
-#' @export
-c.eqsys <- function(...) {
+c.eqsys <- function(...,recursive=FALSE) {
+  ## still need to remove duplicates in vlist, param, shock
   args <- list(...)
   forward <- vector("logical")
   vlist <- vector("character")

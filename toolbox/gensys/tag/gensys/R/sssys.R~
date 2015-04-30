@@ -1,7 +1,5 @@
 #' sssys
 #'
-#' make steady state \code{eqsys} object from a dynamic one
-#' 
 #' Transform an \code{eqsys} dyanmic system to a static system for use
 #' in finding the steady state, usually with \code{ssSolve()}.
 #' 
@@ -11,8 +9,6 @@
 #'   should not be another variable name when the terminal l is removed.)
 #' @return A new system with all lagged variable names
 #'   replaced by current variable names.
-#'
-#' @export
 #' 
 sssys <- function(eq) {
   nq <- length(eq)

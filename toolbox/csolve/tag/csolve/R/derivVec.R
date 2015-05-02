@@ -7,12 +7,18 @@
 #'             will be differentiated.  If \code{ex} is an \code{eqsys} object,
 #'             the default is for \code{x} to be the \code{vlist} attribute of
 #'             \code{ex}.  
-#' @param param  a vector of named parameter values that will be constant in repeated calls to fret (the returned function)
-#' @param xchk     Range check function.  It returns \code{FALSE} if given an x vector that is outside the domain of definition of \code{ex}.
+#' @param param  a vector of named parameter values that will be constant in
+#'               repeated calls to \code{fret} (the returned function)
+#' @param xchk    Range check function.  It returns \code{FALSE} if given an
+#'                \code{x} vector that is outside the domain of definition of
+#'                \code{ex}.
 #'-------------------
-#' @return fret,   a function that when evaluated at a numerical \code{x}, 
-#'           returns the vector of expression values, but also, as \code{attr(value, "grad")}, the gradient matrix
-#'           It uses the fixed \code{param} values set in the call to \code{derivVec}.
+#' @return \code{fret}, a function that when evaluated at a numerical \code{x}, 
+#'           returns the vector of expression values, but also, as
+#'           \code{attr(value, "grad")}, the gradient matrix
+#'           It uses the fixed \code{param} values set in the call to
+#'           \code{derivVec}.
+#' @export
 #' 
 derivVec <- function(ex, x=attr(ex,"vlist"), param=vector("numeric",0), xchk=function(z){TRUE}) {
   nq <- length(ex)

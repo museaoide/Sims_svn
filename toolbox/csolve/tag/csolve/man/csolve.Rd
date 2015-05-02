@@ -21,7 +21,8 @@ the number of distinct argument vectors at which \code{FUN} is evaluated.}
           of which are passed on to \code{FUN} and \code{gradfun} (when it is
            non-empty) as a list of arguments following \code{x}.
 
--------------------------------------------------------------------
+	   -------------------------------------------------------------------
+	   
           Arguments below this usually can be left at defaults.}
 
 \item{gradfun}{The function called to evaluate the gradient matrix.  If this

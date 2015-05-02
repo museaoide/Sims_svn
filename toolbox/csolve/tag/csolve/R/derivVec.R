@@ -19,6 +19,7 @@
 #'           It uses the fixed \code{param} values set in the call to
 #'           \code{derivVec}.
 #' @export
+#' @export
 #' 
 derivVec <- function(ex, x=attr(ex,"vlist"), param=vector("numeric",0), xchk=function(z){TRUE}) {
   nq <- length(ex)

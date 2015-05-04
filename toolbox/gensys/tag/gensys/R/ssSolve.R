@@ -20,6 +20,7 @@
 #'    \item{\code{fss}}{the function, constructed from ex, that returns zero
 #'       when its argument is a steady state value}
 #' }
+#' @import csolve
 #' @export
 ssSolve <- function(ex, x0, param, crit=1e-7, itmax=20, verbose=TRUE, alpha=1e-3, delta=1e-6, long=FALSE) {
   ex2 <- sssys(ex)

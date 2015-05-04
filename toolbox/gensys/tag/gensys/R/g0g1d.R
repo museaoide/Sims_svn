@@ -20,9 +20,10 @@
 #' \code{g0g1eval}, along with the steady state value (from \code{ssSolve()})
 #' and parameter settings to use in doing the evaluation.
 #'
+#' @export
 g0g1d <- function(ex, x=attr(ex,"vlist"), xl=paste(x,"l",sep=""), shock=attr(ex, "shock")) {
   nf <- length(ex)
-  if(shock == "NONE") shock <- ""
+  if(shock[1] == "NONE") shock <- vector("character",0)
   g0g1out <- vector("expression",length(ex))
   for(ix in 1:nf){
     g0g1out[[ix]] <- deriv(ex[ix],c(x,xl,shock))

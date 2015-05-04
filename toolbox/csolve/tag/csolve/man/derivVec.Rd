@@ -15,15 +15,20 @@ will be differentiated.  If \code{ex} is an \code{eqsys} object,
 the default is for \code{x} to be the \code{vlist} attribute of
 \code{ex}.}
 
-\item{param}{a vector of named parameter values that will be constant in repeated calls to fret (the returned function)}
+\item{param}{a vector of named parameter values that will be constant in
+repeated calls to \code{fret} (the returned function)}
 
-\item{xchk}{Range check function.  It returns \code{FALSE} if given an x vector that is outside the domain of definition of \code{ex}.
+\item{xchk}{Range check function.  It returns \code{FALSE} if given an
+               \code{x} vector that is outside the domain of definition of
+               \code{ex}.
 -------------------}
 }
 \value{
-fret,   a function that when evaluated at a numerical \code{x},
-          returns the vector of expression values, but also, as \code{attr(value, "grad")}, the gradient matrix
-          It uses the fixed \code{param} values set in the call to \code{derivVec}.
+\code{fret}, a function that when evaluated at a numerical \code{x},
+          returns the vector of expression values, but also, as
+          \code{attr(value, "grad")}, the gradient matrix
+          It uses the fixed \code{param} values set in the call to
+          \code{derivVec}.
 }
 \description{
 Application of \code{deriv()} to a vector

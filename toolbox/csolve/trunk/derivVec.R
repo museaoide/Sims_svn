@@ -13,7 +13,7 @@
 #'                \code{x} vector that is outside the domain of definition of
 #'                \code{ex}.
 #'-------------------
-#' @return fret,   a function that when evaluated at a numerical \code{x}, 
+#' @return \code{fret}, a function that when evaluated at a numerical \code{x}, 
 #'           returns the vector of expression values, but also, as
 #'           \code{attr(value, "grad")}, the gradient matrix
 #'           It uses the fixed \code{param} values set in the call to

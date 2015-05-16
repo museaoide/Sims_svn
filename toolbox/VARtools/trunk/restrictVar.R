@@ -53,16 +53,17 @@ restrictVAR <- function(fitdata, type=c("mdd", "SVmdd"), rmat=NULL,
                         yzrone=NULL, xzrone=NULL,const=NULL, cyzr=NULL,
                         cxzr=NULL) {
     if (length(type) > 1) type <- type[1]
-##     if (type == "SVmdd") {
-## ##      require("tensor")  #not needed if has been packaged, because of @import
-##         bvw <- vout
-##         vout <- bvw$vout$var
-##     }
-    vout <- fitdata$var
-    neq <- dim(vout$By)[1]
-    ny <- dim(vout$By)[2]
-    lags <- dim(vout$By)[3]
-    nx <- dim(vout$Bx)[2]
+    if (type == "SVmdd") {
+        ##  require("tensor")  #not needed if packaged, because of @import
+        bvw <- fitdata
+        vout2 <- list(post=bvw$vout$var, prior=bvw$vout$varp)
+    } else {                            ##mdd
+        vout2 <- list(post=fitdata$var, prior=fitdata$varp)
+    }
+    neq <- dim(vout2[[1]]$By)[1]
+    ny <- dim(vout2[[1]]$By)[2]
+    lags <- dim(vout2[[1]]$By)[3]
+    nx <- dim(vout2[[1]]$Bx)[2]
     ncf <- ny * lags + nx
     if (is.null(rmat)) {
         rmat <- matrix(0, 0, ncf *neq)
@@ -73,7 +74,8 @@ restrictVAR <- function(fitdata, type=c("mdd", "SVmdd"), rmat=NULL,
         if (is.null( cyzr)) cyzr <- array(0, dim(yzrone))
         for (ir in 1:nrstr ) {
             newrow <- rep(0, neq * ncf)
-            newrow[(byz[ir,1] - 1) * ncf + (byz[ir, 3] -1) * ny + byz[ir, 2]] <- 1
+            newrow[(byz[ir,1] - 1) * ncf + (byz[ir, 3] -1) * ny +
+                       byz[ir, 2]] <- 1
             rmat <- rbind(rmat,newrow)
         }
         const <- c(const, cyzr[byz])
@@ -90,77 +92,93 @@ restrictVAR <- function(fitdata, type=c("mdd", "SVmdd"), rmat=NULL,
         const <- c(const, cxzr[bxz])
     }
     svdr <- svd(rmat)
-    if (max(abs(svdr$d)) > 1e10 * min(abs(svdr$d))){
+    if (max(abs(svdr$d)) > 1e10 * min(abs(svdr$d))) {
         error("restrictions not full rank")
     }
-    T <- dim(vout$u)[1]
-    if (type == "mdd")
-        sig <- cov(vout$u)
-        svdsig <- svd(sig)
-        singsig <- (max(svdsig$d) > 1e10 * min(svdsig$d))
-        if(singsig) warning("Near singular sig matrix in restrictVAR")
-        svdxxi <- svd(vout$xxi)
-        singxxi <- (max(svdxxi$d) > 1e10 * min(svdxxi$d))
-        if(singxxi) warning("Near singular xxi matrix in restrictVAR")
-        ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
-        ##schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxxi$d)) * t(svdxxi$u)) %*% rv  #2013.5.9
-        ## sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), 1/sqrt(svdxxi$d)) * t(svdxxi$u)
-        ## line above seems to be a mistake, since xxi is already x'x-inverse
-        sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), sqrt(svdxxi$d) * t(svdxxi$u))
-        dgVb <- apply(sqrtVb^2, 2, sum)
-        rmatC <- rmat %*% diag(sqrt(T * dgVb))
-        sqrtVbC <- sqrtVb %*% diag(1/sqrt(T * dgVb))
-        lndetVb <- sum(log(svdsig$d)) * dim(vout$xxi)[1] + sum(log(svdxxi$d)) * dim(sig)[1]
-        lndetVbC <- lndetVb - sum(log(dgVb * T))
-    ## } else if (type == "KF") {          #type=="KF"
-    ## svdVb <- svd(vout$Vb)
-    ## sqrtVb <- sqrt(diag(svdVb$d)) %*% t(svdVb$u)
-    ## dgVb <- diag(vout$Vb)
-    ## rmatC <- rmat %*% diag(sqrt(T * dgVb))
-    ## sqrtVbC <- sqrtVb %*% diag(1/sqrt(T * dgVb))
-    ## lndetVb <- sum(log(svdVb$d))
-    ## lndetVbC <- lndetVb - sum(log(dgVb * T))
-    ## ## schwarz <- rmat %*% svdVb$u %*% diag(1/sqrt(svdVb$d)) #below is more efficient version for large Vb
-    ## ## schwarz <- (1/sqrt(svdVb$d)) * (t(svdVb$u) %*% rv)
-    } else {            # (type == "SVmdd")
-        neq <- dim(vout$By)[1]
-        nX <- dim(vout$xxi)[1]
-        Vb <- matrix(0, nX * neq, nX * neq)
-        for (iq in 1:neq) {
-            Vb[nX * (iq-1) + 1:nX, nX * (iq-1) + 1:nX] <- vout$xxi[ , , iq]
+    result <- list(r1=NULL, r2=NULL)
+    for (ivo in 1:2) {
+        vout <- vout2[[ivo]]
+        T <- dim(vout$u)[1]
+        if (type == "mdd") {
+            sig <- cov(vout$u)
+            svdsig <- svd(sig)
+            singsig <- (max(svdsig$d) > 1e10 * min(svdsig$d))
+            if(singsig) warning("Near singular sig matrix in restrictVAR")
+            svdxxi <- svd(vout$xxi)
+            singxxi <- (max(svdxxi$d) > 1e10 * min(svdxxi$d))
+            if(singxxi) warning("Near singular xxi matrix in restrictVAR")
+            ## schwarz <- rmat %*% kronecker(svdsig$u %*% diag(1/sqrt(svdsig$d)), svdxxi$u %*% diag(1/sqrt(svdxxi$d)))
+            ##schwarz <- kronecker((1/sqrt(svdsig$d)) * t(svdsig$u), (1/sqrt(svdxxi$d)) * t(svdxxi$u)) %*% rv  #2013.5.9
+            ## sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), 1/sqrt(svdxxi$d)) * t(svdxxi$u)
+            ## line above seems to be a mistake, since xxi is already x'x-inverse
+            sqrtVb <- kronecker(sqrt(svdsig$d) * t(svdsig$u), sqrt(svdxxi$d) *
+                                    t(svdxxi$u))
+            dgVb <- apply(sqrtVb^2, 2, sum)
+            rmatC <- rmat %*% diag(sqrt(T * dgVb))
+            sqrtVbC <- sqrtVb %*% diag(1/sqrt(T * dgVb))
+            lndetVb <- sum(log(svdsig$d)) * dim(vout$xxi)[1] + sum(log(svdxxi$d)) *
+                dim(sig)[1]
+            lndetVbC <- lndetVb - sum(log(dgVb * T))
+            ## } else if (type == "KF") {          #type=="KF"
+            ## svdVb <- svd(vout$Vb)
+            ## sqrtVb <- sqrt(diag(svdVb$d)) %*% t(svdVb$u)
+            ## dgVb <- diag(vout$Vb)
+            ## rmatC <- rmat %*% diag(sqrt(T * dgVb))
+            ## sqrtVbC <- sqrtVb %*% diag(1/sqrt(T * dgVb))
+            ## lndetVb <- sum(log(svdVb$d))
+            ## lndetVbC <- lndetVb - sum(log(dgVb * T))
+            ## ## schwarz <- rmat %*% svdVb$u %*% diag(1/sqrt(svdVb$d)) #below is more efficient version for large Vb
+            ## ## schwarz <- (1/sqrt(svdVb$d)) * (t(svdVb$u) %*% rv)
+        } else {            # (type == "SVmdd")
+            neq <- dim(vout$By)[1]
+            ##-----------------------
+            ## temp fix to use Karthik's output
+            vout$xxi <- solve(vout$xx)
+            ##-------------------
+            nX <- dim(vout$xxi)[1]
+            Vb <- matrix(0, nX * neq, nX * neq)
+            for (iq in 1:neq) {
+                Vb[nX * (iq-1) + 1:nX, nX * (iq-1) + 1:nX] <- vout$xxi[ , , iq]
+            }
+            A0i <- solve(bvw$A)
+            Vb <- kronecker(A0i, diag(nX)) %*% Vb %*% kronecker(t(A0i), diag(nX))
+            svdVb <- svd(Vb)
+            sqrtVb <- sqrt(diag(svdVb$d)) %*% t(svdVb$u)
+            dgVb <- diag(Vb)
+            rmatC <- rmat %*% diag(sqrt(T * dgVb))
+            sqrtVbC <- sqrtVb %*% diag(1/sqrt(T *dgVb))
+            lndetVb <- sum(log(svdVb$d))
+            lndetVbC <- lndetVb - sum(log(dgVb * T))
         }
-        A0i <- solve(bvw$A)
-        Vb <- kronecker(A0i, diag(nX)) %*% Vb %*% kronecker(t(A0i), diag(nX))
-        svdVb <- svd(Vb)
-        sqrtVb <- sqrt(diag(svdVb$d)) %*% t(svdVb$u)
-        dgVb <- diag(Vb)
-        rmatC <- rmat %*% diag(sqrt(T * dgVb))
-        sqrtVbC <- sqrtVb %*% diag(1/sqrt(T *dgVb))
-        lndetVb <- sum(log(svdVb$d))
-        lndetVbC <- lndetVb - sum(log(dgVb * T))
+        svdvr <- svd(sqrtVb %*% t(rmat))
+        svdvrC <- svd(sqrtVbC %*% t(rmatC)) #result == line above?
+        vdim1 <- dim(svdvr$u)[1]
+        svdvrp <- svd(diag(vdim1) - svdvr$u %*% t(svdvr$u), nu=vdim1 - dim(rmat)[1])
+        svdvrpC <- svd(diag(vdim1) - svdvrC$u %*% t(svdvrC$u), nu=vdim1 -
+                           dim(rmat)[1])
+        svdvrpuv <- svd(crossprod(svdvrp$u, t(sqrtVb))) 
+        svdvrpuvC <- svd(crossprod(svdvrpC$u, t(sqrtVbC))) 
+        lndetUR <- sum(log(svdvrpuv$d))
+        lndetURC <- sum(log(svdvrpuvC$d))
+        df <- dim(rmat)[1]
+        ## schwarz <- -2 * sum(log(diag(chol(crossprod(schwarz)))))   +  df * log(2 * pi)
+        schwarz <- lndetVb - 2 * lndetUR + df * log(2 * pi)
+        schwarzC <- lndetVbC - 2 * lndetURC + df * log(2 * pi)
+        if(is.null(const)) const <- rep(0, dim(rmat)[1])
+        if(type == "SVmdd") {
+            vout$By <- tensor(A0i, vout$By, 2, 1)
+            vout$Bx <- A0i %*% vout$Bx
+        }
+        stackedcf <- c(t(cbind(matrix(vout$By, nrow=neq), vout$Bx)))
+        gap <- rmat %*% stackedcf - const
+        ##svdv <- svd(rmat %*% vout$Vb %*% t(rmat))
+        chstat <- (1/svdvr$d) * t(svdvr$v) %*%  gap
+        chstat <- crossprod(chstat)
+        result[[ivo]] <-
+            list(chiSquared=chstat, df=df, sc=schwarz,
+                          pval=pchisq(chstat,df),
+                          sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)),
+                          scC=schwarzC, singxxi=singxxi, singsig=singsig )
     }
-    svdvr <- svd(sqrtVb %*% t(rmat))
-    svdvrC <- svd(sqrtVbC %*% t(rmatC)) #result == line above?
-    vdim1 <- dim(svdvr$u)[1]
-    svdvrp <- svd(diag(vdim1) - svdvr$u %*% t(svdvr$u), nu=vdim1 - dim(rmat)[1])
-    svdvrpC <- svd(diag(vdim1) - svdvrC$u %*% t(svdvrC$u), nu=vdim1 - dim(rmat)[1])
-    svdvrpuv <- svd(crossprod(svdvrp$u, t(sqrtVb))) 
-    svdvrpuvC <- svd(crossprod(svdvrpC$u, t(sqrtVbC))) 
-    lndetUR <- sum(log(svdvrpuv$d))
-    lndetURC <- sum(log(svdvrpuvC$d))
-    df <- dim(rmat)[1]
-    ## schwarz <- -2 * sum(log(diag(chol(crossprod(schwarz)))))   +  df * log(2 * pi)
-    schwarz <- lndetVb - 2 * lndetUR + df * log(2 * pi)
-    schwarzC <- lndetVbC - 2 * lndetURC + df * log(2 * pi)
-    if(is.null(const)) const <- rep(0, dim(rmat)[1])
-    if(type == "SVhtskd") {
-        vout$By <- tensor(A0i, vout$By, 2, 1)
-        vout$Bx <- A0i %*% vout$Bx
-    }
-    stackedcf <- c(t(cbind(matrix(vout$By, nrow=neq), vout$Bx)))
-    gap <- rmat %*% stackedcf - const
-    ##svdv <- svd(rmat %*% vout$Vb %*% t(rmat))
-    chstat <- (1/svdvr$d) * t(svdvr$v) %*%  gap
-    chstat <- crossprod(chstat)
-    return(list(chiSquared=chstat, df=df, sc=schwarz, pval=pchisq(chstat,df), sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)), scC=schwarzC, singxxi=singxxi, singsig=singsig ))
+  return(result)       
 }

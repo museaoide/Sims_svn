@@ -8,7 +8,7 @@
 #'   is treated as effectively zero.
 #' @param itmax maximum number of iterations of the nonlinear solver.  The
 #'   default 20 is usually enough, but up to 400 is also usually fast.
-#' @param Should the iterations of the solver be printed out in full?
+#' @param verbose Should the iterations of the solver be printed out in full?
 #' @param alpha,delta See the documentation for \code{csolve()}
 #' @param long If \code{verbose}, do not include full printout of
 #'   function and parameter value vectors.
@@ -20,6 +20,7 @@
 #'    \item{\code{fss}}{the function, constructed from ex, that returns zero
 #'       when its argument is a steady state value}
 #' }
+#' @import csolve
 #' @export
 ssSolve <- function(ex, x0, param, crit=1e-7, itmax=20, verbose=TRUE, alpha=1e-3, delta=1e-6, long=FALSE) {
   ex2 <- sssys(ex)

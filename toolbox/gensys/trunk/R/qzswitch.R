@@ -4,8 +4,8 @@
 #' 
 #' Takes U.T. matrices \code{a, b}, orthonormal matrices \code{q,z},
 #' interchanges diagonal elements \code{i} and \code{i+1} of both
-#' \code{a} and \code{b}, while maintaining \code{q %*% a %*% t(z)}
-#' and \code{q %*% b %*% t(z)}
+#' \code{a} and \code{b}, while maintaining \code{q \%*\% a \%*\% t(z)}
+#' and \code{q \%*\% b \%*\% t(z)}
 #' unchanged.  If diagonal elements of \code{a} and \code{b} 
 #' are zero at matching positions, the returned \code{a} will have zeros at both 
 #' positions on the diagonal.  This is natural behavior if this routine is used 
@@ -19,7 +19,7 @@
 #'   list names as at the top of \code{gensys}.
 #' @return a list like the input, but with i and i+1 positions switched.
 #' @export
-#' @sealso \code{\link{qzdiv}, \code{\link{qz}, \code{\link{gensys}}
+#' @seealso \code{\link{qzdiv}}, \code{\link{qz}}, \code{\link{gensys}}
 qzswitch <- function(i=1,qzlist)
   {
     realsmall <- 1e-7; 

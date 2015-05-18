@@ -5,6 +5,7 @@
 #' @param file Usually a quoted file name, but for a small system
 #'    could be a text connection
 #' @return an \code{eqsys} object
+#' @export
 #' 
 read.eqsys <- function(file) {
   data <- readLines(con=file)

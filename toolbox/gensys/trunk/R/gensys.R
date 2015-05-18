@@ -10,27 +10,28 @@
 #' @details
 #' System given as
 #'     \deqn{g0 y(t) = g1 y(t-1) + c0 + psi z(t) +
-#'          pi eta(t)}{g0 %*% y(t) = g1 %*% y(t-1) + c0 +
-#'             psi %*% z(t) + pi %*% eta(t)},
+#'          pi eta(t)}{g0 \%*\% y(t) = g1 \%*\% y(t-1) + c0 +
+#'             psi \%*\% z(t) + pi \%*\% eta(t)},
 #' with \code{z} an exogenous variable process and \code{eta} being
 #' endogenously determined one-step-ahead expectational errors.
 #'
 #' @return
 #' A list with elements
 #' \describe{
-#'   \item{G1, C, impact, ywt, fmat, fwt, loose} matrices forming the solution
-#'      system
-#'   \item{eu} eu(1)=1 for existence, eu(2)=1 for uniqueness.  eu=[-2,-2] for
-#'      coincident zeros, implying an incomplete system.
-#'   \item{gev} Ratio of second column to first column of this matrix is the
-#'      set of generalized eigenvalues of the system.
+#'   \item{\code{G1, C, impact, ywt, fmat, fwt, loose}}{matrices forming the solution
+#'      system}
+#'   \item{\code{eu}}{\code{eu(1)=1} for existence, \code{eu(2)=1} for
+#'          uniqueness.  \code{eu=[-2,-2]} for coincident zeros, implying an
+#'          incomplete system.}
+#'   \item{gev}{Ratio of second column to first column of this matrix is the
+#'      set of generalized eigenvalues of the system.}
 #'   }
 #' Returned system is
 #'       \deqn{y(t) = G1  y(t-1) + C + impact  z(t) +
 #'           ywt \sum_{s=1}^\infty fmat^s  fwt z(t+s)
-#'              + loose eta(t)}{y(t)=G1 %*% y(t-1) + C + impact %*% z(t) +
-#'           ywt %*% inv(I - fmat %*% inv(L)) %*% fmat %*% fwt %*% z(t+1)
-#'              + loose %*% eta }
+#'              + loose eta(t)}{y(t)=G1 \%*\% y(t-1) + C + impact \%*\% z(t) +
+#'           ywt \%*\% inv(I - fmat \%*\% inv(L)) \%*\% fmat \%*\% fwt \%*\% z(t+1)
+#'              + loose \%*\% eta }
 #' If \code{z(t)} is i.i.d., the term involving \code{ywt, fmat} and \code{fwt}
 #' drops out.  If the solution is unique (eu[2]==1) there is no "loose" term.
 #' Otherwise loose characterizes the dimensions along which there is

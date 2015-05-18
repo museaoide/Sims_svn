@@ -7,7 +7,8 @@
 #' the restricted space.  This makes sense if the restriction is approximating
 #' a restriction to a small neighborhood of the restricted space.
 #' For the case of \code{SVARhtskdmdd} output as input to this function, the
-#' results are conditional on the modal \code{A0} and \code{lmd}. For the
+#' results are conditional on the modal \code{A0} and \code{lmd}, which must
+#' be included in the \code{fitdata} argument. For the
 #' case of \code{mgnldensity()} output, the results condition on the modal
 #' residual covariance matrix, as if it were known.  
 #' Restrictions can be specified as rows of rmat, with coefficients applied to
@@ -95,7 +96,7 @@ restrictVAR <- function(fitdata, type=c("mdd", "SVmdd"), rmat=NULL,
     if (max(abs(svdr$d)) > 1e10 * min(abs(svdr$d))) {
         error("restrictions not full rank")
     }
-    result <- list(r1=NULL, r2=NULL)
+    result <- list(post=NULL, prior=NULL)
     for (ivo in 1:2) {
         vout <- vout2[[ivo]]
         T <- dim(vout$u)[1]
@@ -133,7 +134,10 @@ restrictVAR <- function(fitdata, type=c("mdd", "SVmdd"), rmat=NULL,
             neq <- dim(vout$By)[1]
             ##-----------------------
             ## temp fix to use Karthik's output
-            vout$xxi <- solve(vout$xx)
+            if(with(vout, exists("xx"))) {
+                vout$xxi <- array(0, dim(vout$xx))
+                for (iq in 1:neq) vout$xxi[ , , iq] <- solve(as.matrix(vout$xx[ , , iq]))
+            }
             ##-------------------
             nX <- dim(vout$xxi)[1]
             Vb <- matrix(0, nX * neq, nX * neq)
@@ -144,26 +148,28 @@ restrictVAR <- function(fitdata, type=c("mdd", "SVmdd"), rmat=NULL,
             Vb <- kronecker(A0i, diag(nX)) %*% Vb %*% kronecker(t(A0i), diag(nX))
             svdVb <- svd(Vb)
             sqrtVb <- sqrt(diag(svdVb$d)) %*% t(svdVb$u)
-            dgVb <- diag(Vb)
-            rmatC <- rmat %*% diag(sqrt(T * dgVb))
-            sqrtVbC <- sqrtVb %*% diag(1/sqrt(T *dgVb))
-            lndetVb <- sum(log(svdVb$d))
-            lndetVbC <- lndetVb - sum(log(dgVb * T))
+            ## dgVb <- diag(Vb)
+            ## rmatC <- rmat %*% diag(sqrt(T * dgVb))
+            ## sqrtVbC <- sqrtVb %*% diag(1/sqrt(T *dgVb))
+            ## lndetVb <- sum(log(svdVb$d))
+            ## lndetVbC <- lndetVb - sum(log(dgVb * T))
         }
         svdvr <- svd(sqrtVb %*% t(rmat))
-        svdvrC <- svd(sqrtVbC %*% t(rmatC)) #result == line above?
-        vdim1 <- dim(svdvr$u)[1]
-        svdvrp <- svd(diag(vdim1) - svdvr$u %*% t(svdvr$u), nu=vdim1 - dim(rmat)[1])
-        svdvrpC <- svd(diag(vdim1) - svdvrC$u %*% t(svdvrC$u), nu=vdim1 -
-                           dim(rmat)[1])
-        svdvrpuv <- svd(crossprod(svdvrp$u, t(sqrtVb))) 
-        svdvrpuvC <- svd(crossprod(svdvrpC$u, t(sqrtVbC))) 
-        lndetUR <- sum(log(svdvrpuv$d))
-        lndetURC <- sum(log(svdvrpuvC$d))
+        ## svdvrC <- svd(sqrtVbC %*% t(rmatC)) #result == line above?
+        ## vdim1 <- dim(svdvr$u)[1]
+        ## svdvrp <- svd(diag(vdim1) - svdvr$u %*% t(svdvr$u), nu=vdim1 - dim(rmat)[1])
+        ## svdvrpC <- svd(diag(vdim1) - svdvrC$u %*% t(svdvrC$u), nu=vdim1 -
+        ##                   dim(rmat)[1])
+        ## svdvrpuv <- svd(crossprod(svdvrp$u, t(sqrtVb))) 
+        ## svdvrpuvC <- svd(crossprod(svdvrpC$u, t(sqrtVbC))) 
+        ## lndetUR <- sum(log(svdvrpuv$d))
+        ## lndetURC <- sum(log(svdvrpuvC$d))
         df <- dim(rmat)[1]
         ## schwarz <- -2 * sum(log(diag(chol(crossprod(schwarz)))))   +  df * log(2 * pi)
-        schwarz <- lndetVb - 2 * lndetUR + df * log(2 * pi)
-        schwarzC <- lndetVbC - 2 * lndetURC + df * log(2 * pi)
+        ## schwarz <- lndetVb - 2 * lndetUR + df * log(2 * pi)
+        ## schwarzC <- lndetVbC - 2 * lndetURC + df * log(2 * pi)
+        schwarX <- diag(1/sqrt(svdVb$d)) %*% t(svdVb$v) %*% svdr$v
+        schwarX <- -2 * sum(log(abs(svd(schwarX, nu=0)$d)))
         if(is.null(const)) const <- rep(0, dim(rmat)[1])
         if(type == "SVmdd") {
             vout$By <- tensor(A0i, vout$By, 2, 1)
@@ -175,10 +181,13 @@ restrictVAR <- function(fitdata, type=c("mdd", "SVmdd"), rmat=NULL,
         chstat <- (1/svdvr$d) * t(svdvr$v) %*%  gap
         chstat <- crossprod(chstat)
         result[[ivo]] <-
-            list(chiSquared=chstat, df=df, sc=schwarz,
+            list(chiSquared=chstat, df=df,   #sc=schwarz, 
                           pval=pchisq(chstat,df),
-                          sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)),
-                          scC=schwarzC, singxxi=singxxi, singsig=singsig )
+                          ## sc2 = schwarz - (ncf*neq-df)*log(1 - df/(neq*ncf)),
+                          ## scC=schwarzC,
+                 schwarX=schwarX )
     }
+  result[[3]] <- list(or = result[[1]]$chiSquared - result[[2]]$chiSquared + result[[1]]$schwarX -
+                          result[[2]]$schwarX)
   return(result)       
 }

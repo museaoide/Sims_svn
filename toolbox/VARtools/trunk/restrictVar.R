@@ -162,7 +162,7 @@ restrictVAR <- function(fitdata, type=c("mdd", "SVmdd"), rmat=NULL,
         ##                   dim(rmat)[1])
         ## svdvrpuv <- svd(crossprod(svdvrp$u, t(sqrtVb))) 
         ## svdvrpuvC <- svd(crossprod(svdvrpC$u, t(sqrtVbC))) 
-        ## lndetUR <- sum(log(svdvrpuv$d))
+        ## lndetUR <- (sum(log(svdvrpuv$d))
         ## lndetURC <- sum(log(svdvrpuvC$d))
         df <- dim(rmat)[1]
         ## schwarz <- -2 * sum(log(diag(chol(crossprod(schwarz)))))   +  df * log(2 * pi)
@@ -172,7 +172,12 @@ restrictVAR <- function(fitdata, type=c("mdd", "SVmdd"), rmat=NULL,
         schwarX <- -2 * sum(log(abs(svd(schwarX, nu=0)$d)))
         if(is.null(const)) const <- rep(0, dim(rmat)[1])
         if(type == "SVmdd") {
-            vout$By <- tensor(A0i, vout$By, 2, 1)
+            if (exists("tensor")) {
+                vout$By <- tensor(A0i, vout$By, 2, 1)
+            } else {                    #workaround
+                vby <- A0i %*% matrix(vout$By, nrow=dim(vout$By)[1])
+                vout$By <- array(vby, dim(vout$By))
+            }
             vout$Bx <- A0i %*% vout$Bx
         }
         stackedcf <- c(t(cbind(matrix(vout$By, nrow=neq), vout$Bx)))

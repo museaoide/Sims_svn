@@ -12,7 +12,7 @@ bvarWrap5 <- function(x, verbose=FALSE) {
     Tsigbrk <- invTime(c(1979+2/3, 1983.0, 1990.0, 2008.0, 2010.0),  dataseries)
     ## Tsigbrk <- invTime(c(1979+2/3, 1983.0, 1990.0, 2008.0),  dataseries)
     ## here, Tsigbrk is when new sig starts; below we shift it back to be last obs with old sig.
-    Lags <- 10
+    Lags <- 2
     nv <- 8
     ##enddata <- 2007.75
     enddata <- end(dataseries)

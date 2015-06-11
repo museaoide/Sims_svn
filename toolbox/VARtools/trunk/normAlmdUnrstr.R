@@ -1,18 +1,14 @@
-normAlmd <- function(Aml, lmdml, A, lmd) {
+normAlmdUnrstr <- function(Aml, lmdml, A, lmd) {
     if(is.null(dim(lmd))) lmd <- matrix(lmd, length(lmd), 1)
     if(is.null(dim(lmdml))) lmdml <- matrix(lmdml, length(lmdml), 1)   
     nsig <- dim(lmd)[2]
     nv <- dim(lmd)[1]
-    Alml <- array(0, c(nv, nv, nsig))
-    Al <- Alml
-    for (il in 1:nsig) {
-        Alml[ , , il] <- exp(-.5 * lmdml[ , il]) * Aml
-        Al[ , , il] <- exp(-.5 * lmd[ , il]) * A
-    }
-    Alml <- matrix(Alml, nv)
-    Al <- matrix(Al, nv)
-    xp <- Al %*% t(Alml)
-    xp <- log(abs(xp))
+    Alml <- cbind(Aml, lmdml[ , -1])
+    Al <- cbind(A, lmd[ , -1])
+    ss0 <- apply(Al^2, 1, sum)
+    ssml <- apply(Alml^2, sum)
+    xd <- outer(ss0, ssml, "+") - 2 * Al %*% t(Alml)
+    xd <- log(abs(xp))
     ## Algorithm tries reordering up to nv times to find an invariant ordering,
     ## then gives up and returns nv'th reordering and noloop=FALSE
     ordrng <- 1:nv
@@ -23,15 +19,15 @@ normAlmd <- function(Aml, lmdml, A, lmd) {
         ## Make any switch with 1 that increases trace(xp), then any with 2, etc.
         for (iv in 1:nv) {
             for (iv2 in iv:nv) {
-                crit[iv2] <- xp[iv,iv2] - xp[iv,iv] + xp[iv2,iv] - xp[iv2,iv2]
+                crit[iv2] <- xd[iv,iv2] - xd[iv,iv] + xd[iv2,iv] - xd[iv2,iv2]
             }
-            idtr <- which.max(crit[iv:nv])
+            idtr <- which.min(crit[iv:nv])
             newiv <- thisOrdrng[iv:nv][idtr]
             thisOrdrng[iv:nv][idtr] <- thisOrdrng[iv]
             thisOrdrng[iv] <- newiv
-            newxpiv <- xp[iv + idtr - 1, ]
-            xp[iv + idtr -1, ] <- xp[iv, ]
-            xp[iv, ] <- newxpiv
+            newxdiv <- xd[iv + idtr - 1, ]
+            xd[iv + idtr -1, ] <- xd[iv, ]
+            xd[iv, ] <- newxpiv
             ## if (idtr != 1) {
             ##     print(paste("ntrial =", ntrial, "iv =", iv, "idtr = ", idtr))
             ##     print(xp)
@@ -46,8 +42,6 @@ normAlmd <- function(Aml, lmdml, A, lmd) {
         }
     }
     A <- A[ordrng, ]
-    sf <- diag(A)
-    A <- (1/sf) * A
-    lmd <- lmd[ordrng, ] - 2 *c(log(abs(sf)))
+    lmd <- lmd[ordrng, ]
     return(list(Anormed=A , lmdnormed=lmd, ordrng=ordrng, noloop=noloop))
 }

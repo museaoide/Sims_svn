@@ -15,7 +15,7 @@ DiscPObjXmv <- function(param, gy, y, U, alph, ...) {
   nx <- param[1]
   mx <- (length(param) - nx)/nx
   p <- param[2:nx]
-  p <- matrix(c(p, 1 - sum(p)), 1, nx, dim=list(NULL, p=NULL))
+  p <- matrix(c(p, 1 - sum(p)), 1, nx, dimnames=list(NULL, p=NULL))
   x <- matrix(param[nx + (1:(nx*mx))], nx, mx, dimnames=list(NULL, x=NULL))
   if ( any(p < 0) ) {
     print(paste("p < 0.  min", min(p)))
@@ -35,9 +35,12 @@ DiscPObjXmv <- function(param, gy, y, U, alph, ...) {
   dimnames(eaU) <- list(weight=NULL, y=NULL)
   peaU <- tensor(p, eaU, 2,1)
   #if (any(peaU < 1e-290 * gy)) return(1e20)
-  h <-  gy / peaU
+  h <- vector("numeric", length(y))
+  h[peaU > 0]  <-  gy[peaU > 0] / peaU[peaU > 0]
+  h[peaU <= 0] <- 0
   eaUh <- eaU * mm(c(h))
   f <- c(p) * eaUh
+  f <- f / sum(f)                       #takes care of small numerical errors
   pnew <- sy(f)
   ipplus <- pnew > 0
   ixp <- (1:nx)[ipplus]
@@ -48,8 +51,9 @@ DiscPObjXmv <- function(param, gy, y, U, alph, ...) {
   ygivenx <- matrix(0, nx, ny)
   ygivenx[ipplus, ] <- c(1/roweight) * eaUh[ipplus, ,drop=FALSE]
   yent <- sum(entel(gy))
-  obj <- sum(f  * Umat ) + (1/alph) * pnew %*% sy(entel(ygivenx))  - (1/alph) * yent 
+  EU <- sum((f  * Umat)[Umat != -Inf] )
+  obj <-  EU + (1/alph) * p %*% sy(entel(ygivenx))  - (1/alph) * yent 
   ## obj <- -obj                           #as input to minimizer
-  info = -sum(entel(f)) + sum(entel(pnew)) + yent
-  return(list(obj=obj, pnew=pnew, ygivenx=ygivenx, h=h, f=f, info=info, EU = sum(f * Umat)))
+  info = -sum(entel(f)) + sum(entel(p)) + yent
+  return(list(obj=obj, pnew=pnew, ygivenx=ygivenx, h=h, f=f, info=info, EU = EU))
 }

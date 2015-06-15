@@ -2,7 +2,7 @@
 ;; --------------------------------------------------------------------------
 ;; Desktop File for Emacs
 ;; --------------------------------------------------------------------------
-;; Created Wed Apr  8 23:29:04 2015
+;; Created Mon Jun 15 14:00:47 2015
 ;; Desktop file format version 206
 ;; Emacs version 24.3.1
 
@@ -10,19 +10,140 @@
 (setq desktop-missing-file-warning nil)
 (setq tags-file-name nil)
 (setq tags-table-list nil)
-(setq search-ring '("sess"))
+(setq search-ring '("matp" "plot(" "print(" "sess"))
 (setq regexp-search-ring nil)
-(setq register-alist '((48 . "Dout$pnew")))
-(setq file-name-history '("~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/svnPrinceton/toolbox/csolve/trunk/csolveNew.R" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/U2p.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcn2p.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscZ.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscZ2p.R" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/plotReturnCdfs.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/Ucapm.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/pxFromCsout.R" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/toolbox/csolve/trunk/csolveNew.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscPObjXmvA.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX"))
+(setq register-alist '((48 . "Selection: fpout2rm8a2 <- DiscFP(c(8, rep(1/8,7), 1:8 + .5), gram2, yram, Uram, xfcnram, nit=1000, crit=1e-5)0")))
+(setq file-name-history '("~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/U1dlq.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/U1dlq.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcn1dlq.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/UmvnTrack.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcnlq.R" "/home/chris/R/svnPrinceton/toolbox/optimize/trunk/numgrad.R" "/home/chris/R/svnPrinceton/toolbox/optimize/trunk/csminit.R" "/home/chris/R/svnPrinceton/toolbox/optimize/trunk/csminwelNew.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcnram.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/Uram.R" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/svnPrinceton/toolbox/csolve/trunk/csolveNew.R" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/U2p.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcn2p.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscZ.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscZ2p.R" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/plotReturnCdfs.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/Ucapm.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/pxFromCsout.R" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/" "/home/chris/R/toolbox/csolve/trunk/csolveNew.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscPObjXmvA.R" "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcnCapm.R" "~/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/"))
 
 ;; Buffer section -- buffers listed in same order as in buffer list:
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcnram.R"
+  "xfcnram.R"
+  'ess-mode
+  '(eldoc-mode)
+  758
+  '(667 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscFP.R"
+  "DiscFP.R"
+  'ess-mode
+  '(eldoc-mode smerge-mode)
+  2139
+  '(1218 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/U1dlq.R"
+  "U1dlq.R"
+  'ess-mode
+  '(eldoc-mode)
+  50
+  '(50 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscPObjXmv.R"
+  "DiscPObjXmv.R"
+  'ess-mode
+  '(eldoc-mode)
+  1962
+  '(1433 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcn1dlq.R"
+  "xfcn1dlq.R"
+  'ess-mode
+  '(eldoc-mode)
+  100
+  '(nil nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/UmvnTrack.R"
+  "UmvnTrack.R"
+  'ess-mode
+  '(eldoc-mode)
+  1
+  '(nil nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/optimize/trunk/numgrad.R"
+  "numgrad.R"
+  'ess-mode
+  '(eldoc-mode)
+  353
+  '(353 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/optimize/trunk/csminit.R"
+  "csminit.R"
+  'ess-mode
+  '(eldoc-mode)
+  1
+  '(nil nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/optimize/trunk/csminwelNew.R"
+  "csminwelNew.R"
+  'ess-mode
+  '(eldoc-mode)
+  1
+  '(nil nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/Uram.R"
+  "Uram.R"
+  'ess-mode
+  '(eldoc-mode)
+  127
+  '(126 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
+
+(desktop-create-buffer 206
+  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcn2p.R"
+  "xfcn2p.R"
+  'ess-mode
+  '(eldoc-mode)
+  185
+  '(185 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-emacs-unix)))
+
 (desktop-create-buffer 206
   "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscZ.R"
   "DiscZ.R"
   'ess-mode
   '(eldoc-mode)
   2022
-  '(2022 t)
+  '(2022 nil)
   nil
   nil
   '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
@@ -50,39 +171,6 @@
   '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
 
 (desktop-create-buffer 206
-  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/xfcn2p.R"
-  "xfcn2p.R"
-  'ess-mode
-  '(eldoc-mode)
-  185
-  '(185 nil)
-  nil
-  nil
-  '((indent-tabs-mode) (buffer-file-coding-system . utf-8-emacs-unix)))
-
-(desktop-create-buffer 206
-  "/home/chris/R/svnPrinceton/toolbox/csolve/trunk/csolveNew.R"
-  "csolveNew.R"
-  'ess-mode
-  '(eldoc-mode)
-  1735
-  '(nil nil)
-  nil
-  nil
-  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
-
-(desktop-create-buffer 206
-  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscPObjXmv.R"
-  "DiscPObjXmv.R"
-  'ess-mode
-  '(eldoc-mode)
-  122
-  '(2023 nil)
-  nil
-  nil
-  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
-
-(desktop-create-buffer 206
   "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/U2p.R"
   "U2p.R"
   'ess-mode
@@ -92,17 +180,6 @@
   nil
   nil
   '((indent-tabs-mode) (buffer-file-coding-system . utf-8-unix)))
-
-(desktop-create-buffer 206
-  "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/DiscFP.R"
-  "DiscFP.R"
-  'ess-mode
-  '(eldoc-mode smerge-mode)
-  774
-  '(949 nil)
-  nil
-  nil
-  '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
 
 (desktop-create-buffer 206
   "/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/plotReturnCdfs.R"
@@ -125,17 +202,6 @@
   nil
   nil
   '((indent-tabs-mode) (buffer-file-coding-system . undecided-unix)))
-
-(desktop-create-buffer 206
-  nil
-  "DiscreteX"
-  'dired-mode
-  nil
-  1177
-  '(2466 nil)
-  t
-  '("/home/chris/R/svnPrinceton/toolbox/RIplus/trunk/DiscreteX/")
-  nil)
 
 (desktop-create-buffer 206
   nil

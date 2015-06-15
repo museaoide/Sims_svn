@@ -52,8 +52,8 @@ DiscPObjXmv <- function(param, gy, y, U, alph, ...) {
   ygivenx[ipplus, ] <- c(1/roweight) * eaUh[ipplus, ,drop=FALSE]
   yent <- sum(entel(gy))
   EU <- sum((f  * Umat)[Umat != -Inf] )
-  obj <-  EU + (1/alph) * p %*% sy(entel(ygivenx))  - (1/alph) * yent 
+  obj <-  EU + (1/alph) * pnew %*% sy(entel(ygivenx))  - (1/alph) * yent 
   ## obj <- -obj                           #as input to minimizer
-  info = -sum(entel(f)) + sum(entel(p)) + yent
+  info = -sum(entel(f)) + sum(entel(pnew)) + yent
   return(list(obj=obj, pnew=pnew, ygivenx=ygivenx, h=h, f=f, info=info, EU = EU))
 }

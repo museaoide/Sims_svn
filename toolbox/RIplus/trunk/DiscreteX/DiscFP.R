@@ -43,10 +43,10 @@ DiscFP <- function(param, gy, y, U, xfcn, alph, nit=10, crit=1e-7, ...) {
     if (itct %% 100 < 2) {
       print(itct)
       print(screp)
-      print(Dout$obj)
+      print(Dout$obj, digits=10)
       print(Dout$pnew)
       print(xnew)
     }
   }
-  return(list(Dout=Dout, x=xnew, itct=itct, screp=screp))
+  return(list(Dout=Dout, x=xnew, itct=itct, screp=screp, call=match.call()))
 }

@@ -35,7 +35,7 @@ DiscPObjXmv <- function(param, gy, y, U, alph, ...) {
   dimnames(eaU) <- list(weight=NULL, y=NULL)
   peaU <- tensor(p, eaU, 2,1)
   #if (any(peaU < 1e-290 * gy)) return(1e20)
-  h <- vector("numeric", length(y))
+  h <- vector("numeric", dim(y)[1])
   h[peaU > 0]  <-  gy[peaU > 0] / peaU[peaU > 0]
   h[peaU <= 0] <- 0
   eaUh <- eaU * mm(c(h))
